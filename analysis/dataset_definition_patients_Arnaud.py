@@ -1871,6 +1871,31 @@ include_patient_overall_eligible = (include_patient_otitis_media|include_patient
                                   |include_patient_sore_throat|include_patient_insect_bites
                                   |include_patient_shingles|include_patient_impetigo|include_patient_uuti)
 dataset.include_patient_overall_eligible = include_patient_overall_eligible
+#P4
+
+measure_base_population = (
+    dataset.alive
+    & dataset.registered_start
+    & dataset.registered_index
+    & (dataset.age <= 120)
+)
+pf_eligible_population = (
+    dataset.include_patient_overall_eligible
+    & measure_base_population
+)
+
+dataset.pf_eligible_population = pf_eligible_population
+
+#
+pop= (
+    dataset.alive
+    & dataset.registered_start
+    & dataset.registered_index
+    & (dataset.age <= 120)
+)
+dataset.pop = pop
+
+
 ######################################################## 
 '''A&E variables'''
 #3.Numerators
