@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-title: "Pharmacy First — Practice-level data- Medication Analysis"
+title: "Pharmacy First — Practice-level data — Medication Analysis"
 author: "Arnaud Iradukunda"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
@@ -29,17 +29,11 @@ knitr::opts_chunk$set(
   fig.height = 6
 )
 ```
-
 # 2. Data and intervention dates
-
 ```{r data}
-# I will read it using differnent path in OS
-#practice_level_data <- read_csv(
-#"C:/Users/arnau/Downloads/practice_level_data (8).csv"
-#)
 
 practice_level_data <- read_csv(
-  here("output", "practice_level_data.csv.gz")
+  here("output", "practice_level_data_by_practice_only.csv")
 )
 
 GP_connect <- as.Date("2025-10-01")
@@ -47,7 +41,8 @@ PF_start   <- as.Date("2024-02-01")
 
 practice_level_data <- practice_level_data %>%
   clean_names() %>%  # This comes from the janitor package and standardises column names (no spaces).
-  mutate(interval_start = as.Date(interval_start))
+  mutate(interval_start = as.Date(interval_start)
+         ) 
 
 head(practice_level_data)
 names(practice_level_data)
@@ -127,7 +122,7 @@ monthly <- practice_level_data %>%
   arrange(interval_start, Setting, condition)
 names(monthly)
 ```
-# Monthly_long ( this pivot eligible pop into long-format)
+# 4. Monthly_long ( this pivot eligible pop into long-format)
 ```{r monthly_long}
 library(dplyr)
 library(tidyr)
@@ -167,16 +162,16 @@ table(monthly_long$condition)
 table(monthly_long$eligible_population)
 ```
 
-## 6. Descriptive analysis
-## 6.1 Medication numerator over time
+## 5. Descriptive analysis
+## 5.1 Medication numerator over time
 
 ```{r}
 table(monthly_long$condition)
 ```
 
 
-```{r descriptive-numerator}
-descr_numerator <- monthly_long %>%            # Here i can also use monthly long
+```{r descriptive}
+descr_numerator <- monthly_long %>%              # Here i can also use monthly long
   filter(condition %in% conditions) %>%
   select(
     interval_start,
@@ -244,7 +239,7 @@ graph_A1_numerator
 
 ## 6.2 Medication rate over time
 
-```{r descriptive-num}
+```{r descriptive-numerator}
 descr_rate <- monthly_long %>%
   filter(condition %in% conditions) %>%
   select(
@@ -375,9 +370,15 @@ descr_pairs <- practice_level_data %>%
 table(descr_pairs$condition)
 ```
 ## Graph
-```{r graph-uti-and-control}
+```{r graph-uticontrol}
 graph_A3_uti <- descr_pairs %>%
-  filter(condition %in%c("UTI","Vulvovaginal candidiasis")) %>%
+  filter(
+    condition %in%
+      c(
+        "UTI",
+        "Vulvovaginal candidiasis"
+      )
+  ) %>%
   ggplot(
     aes(
       x = interval_start,
@@ -410,9 +411,10 @@ graph_A3_uti <- descr_pairs %>%
     ),
     legend.position = "bottom"
   )
-  
+
 graph_A3_uti
 ```
+
 ## 7.2 Sore throat vs acute bronchitis
 
 ```{r graph-sorethroat-control}
@@ -456,6 +458,7 @@ graph_A3_sorethroat <- descr_pairs %>%
     ),
     legend.position = "bottom"
   )
+
 graph_A3_sorethroat
 ```
 
@@ -578,7 +581,7 @@ graph_B3_uti
 ```
 
 ## 8.2 Sore throat vs acute bronchitis rate
-```{r graph-sorethroat-control}
+```{r graph-sorethroatcontrol}
 graph_B3_sorethroat <- descr_pairs_rate %>%
   filter(
     condition %in%
@@ -624,7 +627,7 @@ graph_B3_sorethroat
 ```
 
 ## 8.3 Insect bite vs allergic conjunctivitis rate
-```{r graph-insectbite-control}
+```{r graph-insectbitecontrol}
 graph_B3_insectbite <- descr_pairs_rate %>%
   filter(
     condition %in%
@@ -751,143 +754,43 @@ print(
     arrange(interval_start)
 )
 # Export into csv
-#write_csv(practice_level_data_itsa,"practice_level_data_itsa.csv")
-write_csv(
-  practice_level_data_itsa,
-  "practice_level_data_itsa.csv"
-)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 8.1 Prepare ITSA dataset
-# Eligible population
-```{r}
-names(practice_level_data)[
-  names(practice_level_data) == "populationeligible_uuti"
-] <- "populationeligible_uti"
-
-itsa_gp_eligible <- practice_level_data %>%
-  select(
-    practice,
-    interval_start,
-    starts_with("populationeligible_")
-  )%>%
-  distinct()
-
-# Eligible population to long format
-itsa_gp_eligible_long <- itsa_gp_eligible %>%
-  pivot_longer(
-    cols = starts_with("populationeligible_"),
-    names_to = "condition",
-    names_prefix = "populationeligible_",
-    values_to = "eligible_population"
-  )
-# GP medication
-itsa_gp_medication <- practice_level_data %>%
-  select(
-    practice,
-    interval_start,
-    starts_with("gp_medication_")
-  )%>%
-  distinct()
-# GP medication to long format
-itsa_gp_medication_long <- itsa_gp_medication %>%
-  pivot_longer(
-    cols = starts_with("gp_medication_"),
-    names_to = "condition",
-    names_prefix = "gp_medication_",
-    values_to = "medication_count"
-  )
-# Both (eligible population and GP medication)
-itsa_gp_data_long <- itsa_gp_eligible_long %>%
-  left_join(
-    itsa_gp_medication_long,
-    by = c("practice", "interval_start", "condition")
-  )
+#write_csv(practice_level_data_itsa,"practice_level_da
 ```
 ## II.GEE models:
-## II.1.GP UTI medication prescribing
-```{r gee_uti_data}
 
+#All Data
+```{r All_Data}
+practice_level_data_itsa
+```
+
+## II.1.GP UTI medication prescribing
+
+```{r gee_uti_data}
 # 1. Load packages
 library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(geepack)
 library(broom)
-
-#2.  Data preparation
-gee_data <- practice_level_data %>%
-  clean_names() %>%
-  mutate(
-    interval_start = as.Date(interval_start),
-
-    # Time in months from February 2022
-    # Feb 2022 = 0
-    time = (year(interval_start) - 2024) * 12 +
-           month(interval_start) - 6,
-
-    # Pharmacy First implementation:
-    # 1 February 2024
-    post_pf = as.integer(
-      interval_start >= as.Date("2024-10-01")
-    ),
-
-    # Months since Pharmacy First implementation
-    time_after_pf = if_else(
-      post_pf == 1,
-      time - 4,
-      0
-    )
-  )
-```
-#gee_uti_data
-```{r gee_uti_data}
-gee_uti_data <- gee_data %>%
+gee_uti_data <- practice_level_data_itsa %>%
   select(
     practice,
     interval_start,
-    populationeligible_uti,
-    gp_medication_uti,
-    time,
-    post_pf,
-    time_after_pf
+    population,
+    populationeligible_uuti,
+    gp_medication_uti,T,
+    X,
+    XT
   )
+gee_uti_data
 ```
 
-#3. Data checks
+##3. Data checks
 ```{r data-check}
-
 glimpse(gee_uti_data)
 summary(gee_uti_data$gp_medication_uti)
-summary(gee_uti_data$populationeligible_uti)
-table(gee_uti_data$post_pf)
+summary(gee_uti_data$populationeligible_uuti)
+table(gee_uti_data$X)
 range(gee_uti_data$interval_start, na.rm = TRUE)
 ```
 # 4.Missing and invalid values
@@ -896,29 +799,81 @@ range(gee_uti_data$interval_start, na.rm = TRUE)
   summarise(
     n_rows = n(),
     n_practices = n_distinct(practice),
+    n_na = sum(is.na(gp_medication_uti)),
+    n_nan = sum(is.nan(gp_medication_uti)),
+    n_inf = sum(is.infinite(gp_medication_uti)),
+    min = min(gp_medication_uti, na.rm = TRUE),
+    max = max(gp_medication_uti, na.rm = TRUE),
     missing_outcome = sum(is.na(gp_medication_uti)),
     missing_population = sum(is.na(population)),
+    missing_eligible_population = sum(is.na(populationeligible_uuti)),
     zero_population = sum(population <= 0, na.rm = TRUE),
+    zero_eligible_population = sum(populationeligible_uuti <= 0, na.rm = TRUE),
     missing_date = sum(is.na(interval_start))
   )
 ```
-# 5. Fit the GEE model
+## 5. Fit the GEE model
+```{r }
+class(gee_uti_data$population)
+names(gee_uti_data$population)
+```
+
+##gee_uti_model
+
 ```{r gee_uti_model}
 gee_uti_model <- geeglm(
-  gp_medication_uti ~ time + post_pf + time_after_pf,
+  gp_medication_uti ~ T + X + XT,
   family = poisson(link = "log"),
-  offset = log(population),
+  offset = log(population), # I used pop because the eligible pop contains zero
   id = practice,
   corstr = "ar1",
   data = gee_uti_data
 )
 ```
-# 6. Model summary
+
+## 6. Model summary
 ```{r model_summary}
 summary(gee_uti_model)
 ```
 
+##7.Fitted values from the GEE model
+
+```{r plot-gee-uti-post-trend}
+gee_uti_plot <- gee_uti_data %>%
+  mutate(
+    fitted_rate = predict( gee_uti_model,type = "response"),fitted_count = fitted_rate 
+    )
+  ggplot(gee_uti_plot,aes(x = interval_start)) +
+   # Observed monthly medications
+  geom_point(aes(y = gp_medication_uti), size = 1.5, alpha = 0.6
+    ) +
+  # Observed line
+  geom_line(aes(y = gp_medication_uti),linewidth = 0.6, alpha = 0.5) +
+  # GEE fitted trend
+  geom_line(aes(y = fitted_count),linewidth = 1) +
+  # GP Connect intervention
+  geom_vline(xintercept = as.numeric(GP_connect),linetype = "dotted",linewidth = 0.8) +
+  scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 months") +
+  labs(
+    title = "GP medications for UTI",
+    subtitle = "Observed values and GEE fitted trend",
+    x = NULL,
+    y = "Number of medications"
+  ) +
+  
+  theme_minimal(base_size = 11) +
+  
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+```
+
+
 # 7. Incidence-rate ratios (IRRs)
+
 ```{r irr}
 irr_results <- broom::tidy(
   gee_uti_model,
@@ -931,7 +886,7 @@ irr_results
 # 8. Extract the main Pharmacy First effects
 ```{r pf_effects}
 pf_effects <- irr_results %>%
-  filter(term %in% c("post_pf", "time_after_pf")) %>%
+  filter(term %in% c( "T","X", "XT")) %>%
   select(
     term,
     estimate,
@@ -963,7 +918,7 @@ pf_effects %>%
 ```
 # 10. Observed monthly GP UTI medication rate
 ```{r observed_rate}
-monthly_uti <- gee_uti %>%
+monthly_uti <- gee_uti_data %>%
   group_by(interval_start) %>%
   summarise(
     gp_medication_uti = sum(
@@ -985,30 +940,18 @@ monthly_uti <- gee_uti %>%
 ```
 # 11. Visualise observed prescribing rate
 ```{r observed_rate_plot}
-ggplot(
-  monthly_uti,
-  aes(
-    x = interval_start,
-    y = rate_per_1000
-  )
-) +
-
-  geom_line(linewidth = 0.8) +
-
-  geom_point(size = 1.5) +
-
-  # Pharmacy First implementation
-  geom_vline(
-    xintercept = as.numeric(
-      as.Date("2024-02-01")
-    ),
+ggplot( monthly_uti, aes(x = interval_start, y = rate_per_1000)) +
+   geom_line(linewidth = 0.8) +
+   geom_point(size = 1.5) +
+   # Pharmacy First implementation
+  geom_vline( xintercept = as.numeric(as.Date("2025-10-01")),
     linetype = "dashed",
-    linewidth = 0.8
-  ) +
-
+    linewidth = 0.8 
+    ) +
+  scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 months") +
   annotate(
     "text",
-    x = as.Date("2024-02-01"),
+    x = as.Date("2025-10-01"),
     y = Inf,
     label = "Pharmacy First",
     vjust = 1.5,
@@ -1021,19 +964,17 @@ ggplot(
     x = "Month",
     y = "GP UTI medication prescriptions per 1,000 population"
   ) +
-
   theme_minimal() +
-
   theme(
     plot.title = element_text(face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 ```
-#
-# 12.Fitted/predicted trend from the GEE model
+
+## 12.Fitted/predicted trend from the GEE model
 ```{r predicted_trend}
-gee_uti <- gee_uti %>%
+gee_uti <- gee_uti_data %>%
   mutate(
     predicted_rate_per_1000 =
       predict(
@@ -1043,155 +984,314 @@ gee_uti <- gee_uti %>%
       population * 1000
   )
 ```
-# 13. Plot: observed and model-predicted rates
-```{r observed_and_predicted_plot}
-predicted_monthly <- gee_uti %>%
-  group_by(interval_start) %>%
+
+#II.Controlled ITSA
+```{r }
+
+names(practice_level_data)
+```
+
+#data-uti_and_control
+
+```{r data-uti_and_control}
+practice_level_uti_and_control_long <- practice_level_data %>%
+  select(
+    practice,
+    interval_start,
+    population,
+    populationeligible_uuti,
+    gp_medication_uti,
+    gp_medication_vulvovaginalcandidiasis_control
+     )%>%
+  pivot_longer(
+    cols = c(
+      gp_medication_uti,
+      gp_medication_vulvovaginalcandidiasis_control
+    ),
+    names_to = "condition",
+    values_to = "medication_count"
+  ) %>%
+  mutate( interval_start = as.Date(interval_start)) %>%
+  arrange(practice,interval_start) %>%
+  group_by(practice,condition) %>% # :By both practice.condition because each       practice now has two rows per month:
+                                    #         —one for UTI and one for control
+                                    #         —T will increase twice per month. 
+  mutate(
+    # Time starts at 1 for each practice
+    T = row_number()-1,
+    # Intervention start
+    X = as.integer(interval_start >= intervention_date),
+    # Time point of intervention
+    first_post_T = T[interval_start == intervention_date][1],
+    # Change in slope after  intervention
+    XT = pmax(T - first_post_T, 0 ) * X ) %>%
+    # Multiple-group ITS interaction terms
+    # Z = 1 for UTI, 0 for control
+    mutate( Z = as.integer(condition == "gp_medication_uti"),
+    ZT  = Z * T,
+    ZX  = Z * X,
+    ZXT = Z * XT
+    ) %>%
+    ungroup() %>%
+  select(-first_post_T)
+print(
+  practice_level_uti_and_control_long %>%
+    select(practice,condition,interval_start,T,X,XT,Z,ZT,ZX, ZXT)
+)
+```
+
+#ITSA controlled model
+#gee_uti_model
+
+```{r gee_uti_controlled_model}
+gee_uti_controlled_model <- geeglm(
+  medication_count ~ T + X + XT + ZT + ZX + ZXT ,
+  family = poisson(link = "log"),
+  offset = log(population), # I used pop because the eligible pop contains zero
+  id = practice,
+  corstr = "ar1",
+  data = practice_level_uti_and_control_long
+)
+summary(gee_uti_controlled_model)
+exp(gee_uti_controlled_model$coefficients)
+```
+
+#2.Coefficient table with exponentiated rate ratios + CIs
+
+```{r Coefficient_table}
+
+broom::tidy(gee_uti_controlled_model, exponentiate = TRUE, conf.int = TRUE)
+
+```
+
+
+#2. Post-intervention trend comparisons
+
+
+```{r Post-intervention-trend-comparison}
+
+lincom <- function(model, terms, level = 0.95) {
+  b <- coef(model)
+  V <- vcov(model)
+  cv <- setNames(rep(0, length(b)), names(b))
+  cv[terms] <- 1
+
+  est <- sum(cv * b)
+  se  <- sqrt(t(cv) %*% V %*% cv)[1, 1]
+  z   <- est / se
+  p   <- 2 * pnorm(-abs(z))
+  ci  <- est + c(-1, 1) * qnorm(1 - (1 - level) / 2) * se
+
+  data.frame(Estimate = est, SE = se, z = z, `Pr(>|z|)` = p,
+             CI.lower = ci[1], CI.upper = ci[2],
+             RateRatio = exp(est), RR.lower = exp(ci[1]), RR.upper = exp(ci[2]),
+             check.names = FALSE)
+}
+
+trend_results <- rbind(
+  Treatment    = lincom(gee_uti_controlled_model, c("T", "ZT", "XT", "ZXT")),
+  Control      = lincom(gee_uti_controlled_model, c("T", "XT")),
+  Difference = lincom(gee_uti_controlled_model, c("ZT", "ZXT"))
+)
+trend_results
+```
+
+#post_estimation_trends-plot
+
+```{r post_estimation_trends-plot}
+
+library(dplyr)
+library(ggplot2)
+
+plot_data <- practice_level_uti_and_control_long %>%
+  mutate(fitted_rate = predict(gee_uti_controlled_model, type = "response") / population) %>%
+  group_by(interval_start, Z) %>%
   summarise(
-    observed_rate =
-      sum(gp_medication_uti, na.rm = TRUE) /
-      sum(population, na.rm = TRUE) * 1000,
-
-    predicted_rate =
-      sum(
-        predicted_rate_per_1000 * population,
-        na.rm = TRUE
-      ) /
-      sum(population, na.rm = TRUE),
-
+    actual_rate    = sum(medication_count) / sum(population),
+    predicted_rate = weighted.mean(fitted_rate, population),
     .groups = "drop"
-  )
+  ) %>%
+  mutate(group_label = if_else(Z == 1, "Treatment", "Control"))
 
+intervention_date <- as.Date("2025-10-01")  #
 
-ggplot(
-  predicted_monthly,
-  aes(x = interval_start)
-) +
-
-  geom_line(
-    aes(y = observed_rate),
-    linewidth = 0.8
-  ) +
-
-  geom_line(
-    aes(y = predicted_rate),
-    linewidth = 1,
-    linetype = "dashed"
-  ) +
-
-  geom_vline(
-    xintercept = as.numeric(
-      as.Date("2024-02-01")
-    ),
-    linetype = "dotted",
-    linewidth = 0.8
-  ) +
-
-  annotate(
-    "text",
-    x = as.Date("2024-02-01"),
-    y = Inf,
-    label = "Pharmacy First",
-    vjust = 1.5,
-    hjust = -0.05
-  ) +
-
+ggplot(plot_data, aes(x = interval_start, colour = group_label, group = group_label)) +
+  geom_point(aes(y = actual_rate, shape = group_label), size = 2) +
+  geom_line(aes(y = predicted_rate, linetype = group_label)) +
+  geom_vline(xintercept = as.numeric(intervention_date), linetype = "dotted") +
+  scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 months") +
+  scale_shape_manual(values = c(Treatment = 16, Control = 1)) +
+  scale_linetype_manual(values = c(Treatment = "solid", Control = "dashed")) +
   labs(
-    title = "GP UTI antimicrobial prescribing",
-    subtitle = "Observed and GEE-modelled monthly prescribing rates",
-    x = "Month",
-    y = "Prescriptions per 1,000 population"
+    title = "Urinary tract infections (Treatment) vs. Vulvovaginalis-candidiasis (Control)",
+    subtitle = paste("GP connect starts:", format(intervention_date, "%Y-%m-%d")),
+    x = "Month", y = "Rate (medications per population)",
+    colour = "Group", shape = "Group", linetype = "Group"
   ) +
+  #theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-  theme_minimal() +
-
-  theme(
-    plot.title = element_text(face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
 ```
-# 14.Intervention segments
-```{r intervention_segments}
-plot<-ggplot(
-  monthly_uti,
-  aes(
-    x = interval_start,
-    y = rate_per_1000
-  )
-) +
-
-  geom_line(linewidth = 0.8) +
-
-  geom_point(size = 1.3) +
-
-  geom_vline(
-    xintercept = as.numeric(
-      as.Date("2024-02-01")
-    ),
-    linetype = "dashed",
-    linewidth = 0.8
-  ) +
-
-  annotate(
-    "text",
-    x = as.Date("2024-02-01"),
-    y = max(
-      monthly_uti$rate_per_1000,
-      na.rm = TRUE
-    ),
-    label = "Pharmacy First\n1 February 2024",
-    hjust = -0.05,
-    vjust = 1
-  ) +
-
-  labs(
-    title = "Interrupted time series of GP UTI prescribing",
-    x = "Month",
-    y = "GP UTI medication rate per 1,000 population"
-  ) +
-
-  theme_minimal()
-plot
   
+
+
+
+
+##3.Model-checking 
+
+```{r Model-checking }
+
+library(geepack)
+library(dplyr)
+# ---- 0.  candidate model (baseline for reference) ----------------------------
+fit_ar1 <- geeglm(
+  medication_count ~ T + X + XT + ZT + ZX + ZXT,
+  family  = poisson(link = "log"),
+  offset  = log(population),
+  id      = practice,
+  waves   = T,          # replace with your actual time index column
+  corstr  = "ar1",
+  data    = practice_level_uti_and_control_long
+)
+
+# ------------------------------------------------------------------------------
+# 1. QIC — compare working correlation structures
+#    (GEE has no likelihood, so no AIC/BIC — use QIC instead)
+# ------------------------------------------------------------------------------
+
+fit_indep <- geeglm(
+  medication_count ~ T + X + XT + ZT + ZX + ZXT,
+  family = poisson(link = "log"),
+  offset = log(population),
+  id = practice, waves = T,
+  corstr = "independence",
+  data = practice_level_uti_and_control_long
+)
+
+fit_exch <- geeglm(
+  medication_count ~ T + X + XT + ZT + ZX + ZXT,
+  family = poisson(link = "log"),
+  offset = log(population),
+  id = practice, waves = T,
+  corstr = "exchangeable",
+  data = practice_level_uti_and_control_long
+)
+
+QIC(fit_ar1)
+QIC(fit_exch)
+QIC(fit_indep)
+
+# Tabulate side by side
+qic_table <- tibble(
+  structure = c("ar1", "exchangeable", "independence"),
+  QIC       = c(QIC(fit_ar1)["QIC"], QIC(fit_exch)["QIC"], QIC(fit_indep)["QIC"])
+)
+qic_table %>% arrange(QIC)
+# Lower QIC = better trade-off of fit vs. complexity. Pick that structure.
 ```
 
-### Interpretation 
-
-The model is:
-
-$$
-\log(\mu_{it}) =
-\beta_0
-+\beta_1Time_t
-+\beta_2PostPF_t
-+\beta_3TimeAfterPF_t
-+\log(Population_{it})
-$$
-
-where:
-
-* **β₀** = baseline GP UTI medication prescribing rate
-* **β₁** = pre-Pharmacy First monthly trend
-* **β₂** = **immediate level change** after Pharmacy First
-* **β₃** = **change in slope** after Pharmacy First
-
-Because this is a Poisson model with a log link, the exponentiated coefficients are **rate ratios**.
-
-For example:
+# ------------------------------------------------------------------------------
+#2. Estimated within-cluster correlation (alpha)
+# ------------------------------------------------------------------------------
 
 ```{r }
-exp(coef(gee_uti_model)["post_pf"])
+summary(fit_ar1)$corr        # the estimated correlation parameter(s)
+# For ar1, one alpha = lag-1 correlation. Near 0 -> independence would suffice.
 ```
 
-gives the immediate rate ratio.
-
-And:
+# ------------------------------------------------------------------------------
+# 3. Dispersion / overdispersion check
+#-------------------------------------------------------------------------------
 
 ```{r }
-exp(coef(gee_uti_model)["time_after_pf"])
+summary(fit_ar1)$dispersion
 ```
 
-gives the multiplicative change in the prescribing rate for each additional month after Pharmacy First.
+# Manual Pearson-based check (rule of thumb: >1.5-2 = meaningful overdispersion)
+```{r }
+pearson_resid <- residuals(fit_ar1, type = "pearson")
+n_params <- length(coef(fit_ar1))
+n_obs    <- length(pearson_resid)
+dispersion_manual <- sum(pearson_resid^2) / (n_obs - n_params)
+dispersion_manual
+```
+
+# ------------------------------------------------------------------------------
+# 4. Residual diagnostics
+#-------------------------------------------------------------------------------
+```{r Residual diagnostics}
+df_diag <- practice_level_uti_and_control_long %>%
+  mutate(
+    pearson_resid = residuals(fit_ar1, type = "pearson"),
+    fitted_vals   = fitted(fit_ar1)
+  )
+
+# Residuals vs fitted (look for trend/funnel = misspecified mean or variance)
+plot(df_diag$fitted_vals, df_diag$pearson_resid,
+     xlab = "Fitted values", ylab = "Pearson residuals",
+     main = "Residuals vs Fitted")
+abline(h = 0, col = "red", lty = 2)
+
+# Residuals vs time 
+plot(df_diag$T, df_diag$pearson_resid,
+     xlab = "Time", ylab = "Pearson residuals",
+     main = "Residuals vs Time")
+abline(h = 0, col = "red", lty = 2)
+
+# Residuals by practice (spot clusters with systematically poor fit)
+library(ggplot2)
+ggplot(df_diag, aes(x = T , y = pearson_resid, group = practice)) +
+  geom_line(alpha = 0.2) +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "Pearson residuals over time by practice")
+
+```
+
+#-------------------------------------------------------------------------------
+# 6. Sensitivity check: 
+#         do effect estimates change much across correlation structure choices?
+#-------------------------------------------------------------------------------
+
+```{r bind_rows}
+
+bind_rows(
+  tidy(fit_ar1,   exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "ar1"),
+  tidy(fit_exch,  exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "exchangeable"),
+  tidy(fit_indep, exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "independence")
+) %>%
+  filter(term != "(Intercept)") %>%
+  ggplot(aes(x = term, y = estimate, color = structure)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
+                   position = position_dodge(width = 0.5)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  coord_flip() +
+  labs(y = "Rate ratio (95% CI)", x = NULL,
+       title = "Sensitivity of estimates to working correlation structure")
+
+```
 
 
+#bind_rows_1
+
+
+```{r bind_rows_1}
+
+bind_rows(
+  tidy(fit_ar1,   conf.int = TRUE) %>% mutate(structure = "ar1"),
+  tidy(fit_exch,  conf.int = TRUE) %>% mutate(structure = "exchangeable"),
+  tidy(fit_indep, conf.int = TRUE) %>% mutate(structure = "independence")
+) %>%
+  mutate(estimate = exp(estimate),
+         conf.low  = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  filter(term != "(Intercept)") %>%
+  ggplot(aes(x = term, y = estimate, color = structure)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
+                   position = position_dodge(width = 0.5)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  coord_flip() +
+  labs(y = "Rate ratio (95% CI)", x = NULL,
+       title = "Sensitivity of estimates to working correlation structure")
+
+```
 

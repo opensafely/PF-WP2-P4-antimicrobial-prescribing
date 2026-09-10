@@ -661,6 +661,7 @@ actions:
     - combine_monthly_patient_gz 
     - generate_measures_Arnaud
     - generate_patient_measures_for_practices
+    - process_measures_to_practice_dataset_by_practice_only
     outputs:
      moderately_sensitive:
       html: output/results_3_descriptive_on_practice_level_data.html
