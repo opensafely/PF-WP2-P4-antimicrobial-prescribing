@@ -191,29 +191,13 @@ table(descr_numerator$Setting)
 # Graph 1: Medication counts
 ```{r graph_A1, fig.width=10, fig.height=20, fig.cap="Figure 1. Medication counts by condition and setting (GP vs Pharmacy First)."}
 graph_A1_numerator <- ggplot(
-  descr_numerator,
-  aes(
-    x = interval_start,
-    y = medication_count,
-    colour = Setting
-  )
-) +
+  descr_numerator,aes(x = interval_start, y = medication_count,colour = Setting)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.5) +
-  geom_vline(
-    xintercept = as.numeric(GP_connect),
-    linetype = "dashed",
-    colour = "black"
-  ) +
-  facet_wrap(
-    ~ condition,
-    scales = "free_y",
-    ncol = 1
-  ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  geom_vline(xintercept = as.numeric(GP_connect),linetype = "dashed",colour = "black") +
+  facet_wrap(~ condition,scales = "free_y",ncol = 1) +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   scale_colour_manual(
     values = c(
       "GP" = "steelblue",
@@ -267,30 +251,13 @@ descr_rate <- monthly_long %>%
 
 #graph 2: Medication rate
 ```{r graph_A2_rate, fig.width=10, fig.height=20, fig.cap="Figure 2. Medication rate per 1,000 population by condition and setting."}
-graph_A2_rate <- ggplot(
-  descr_rate,
-  aes(
-    x = interval_start,
-    y = rate_per_1000,
-    colour = Setting
-  )
-) +
+graph_A2_rate <- ggplot(descr_rate,aes(x = interval_start,y = rate_per_1000,colour = Setting)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.5) +
-  geom_vline(
-    xintercept = as.numeric(GP_connect),
-    linetype = "dashed",
-    colour = "black"
-  ) +
-  facet_wrap(
-    ~ condition,
-    scales = "free_y",
-    ncol = 1
-  ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  geom_vline( xintercept = as.numeric(GP_connect),linetype = "dashed",colour = "black") +
+  facet_wrap( ~ condition,scales = "free_y",ncol = 1) +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   scale_colour_manual(
     values = c(
       "GP" = "steelblue",
@@ -399,23 +366,12 @@ graph_A3_uti <- descr_pairs %>%
         "Vulvovaginal candidiasis"
       )
   ) %>%
-  ggplot(
-    aes(
-      x = interval_start,
-      y = count,
-      colour = condition
-    )
-  ) +
+  ggplot(aes(x = interval_start,y = count,colour = condition)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.5) +
-  geom_vline(
-    xintercept = as.numeric(GP_connect),
-    linetype = "dotted"
-  ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  geom_vline( xintercept = as.numeric(GP_connect),linetype = "dotted") +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   labs(
     title = "GP medications for UTI and Vulvovaginal candidiasis",
     subtitle = "Dotted line = GP Connect",
@@ -456,23 +412,12 @@ graph_A3_sorethroat <- descr_pairs %>%
         "Acute bronchitis"
       )
   ) %>%
-  ggplot(
-    aes(
-      x = interval_start,
-      y = count,
-      colour = condition
-    )
-  ) +
+  ggplot(aes(x = interval_start,y = count,colour = condition)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.5) +
-  geom_vline(
-    xintercept = as.numeric(GP_connect),
-    linetype = "dotted"
-  ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  geom_vline(xintercept = as.numeric(GP_connect),linetype = "dotted") +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   labs(
     title = "GP medications for sore throat and acute bronchitis",
     subtitle = "Dotted line = GP Connect",
@@ -526,10 +471,8 @@ graph_A3_insectbite <- descr_pairs %>%
     xintercept = as.numeric(GP_connect),
     linetype = "dotted"
   ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   labs(
     title = "GP medications for insect bite and allergic conjunctivitis",
     subtitle = "Dotted line = GP Connect",
@@ -607,10 +550,8 @@ graph_B3_uti <- descr_pairs_rate %>%
     xintercept = as.numeric(GP_connect),
     linetype = "dotted"
   ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   labs(
     title = "GP medications for UTI and Vulvovaginal candidiasis",
     subtitle = "Dotted line = GP Connect",
@@ -663,10 +604,8 @@ graph_B3_sorethroat <- descr_pairs_rate %>%
     xintercept = as.numeric(GP_connect),
     linetype = "dotted"
   ) +
-  scale_x_date(
-    date_labels = "%b %y",
-    date_breaks = "1 month"
-  ) +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
+  #facet_wrap(~ condition) +
   labs(
     title = "GP medications for sore throat and acute bronchitis",
     subtitle = "Dotted line = GP Connect",
@@ -706,13 +645,7 @@ graph_B3_insectbite <- descr_pairs_rate %>%
         "Conjunctivitisallergic_control"
       )
   ) %>%
-  ggplot(
-    aes(
-      x = interval_start,
-      y = rate_per_1000,
-      colour = condition
-    )
-  ) +
+  ggplot(aes(x = interval_start,y = rate_per_1000,colour = condition)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.5) +
   geom_vline(
@@ -1040,7 +973,7 @@ observed_rate_plot <- ggplot( monthly_uti, aes(x = interval_start, y = rate_per_
     linetype = "dashed",
     linewidth = 0.8 
     ) +
-  scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 months") +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   annotate(
     "text",
     x = as.Date("2025-10-01"),
@@ -1222,7 +1155,7 @@ post_estimation_trend_plot <- ggplot(plot_data, aes(x = interval_start, colour =
   geom_point(aes(y = actual_rate, shape = group_label), size = 2) +
   geom_line(aes(y = predicted_rate, linetype = group_label)) +
   geom_vline(xintercept = as.numeric(intervention_date), linetype = "dotted") +
-  scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 months") +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   scale_shape_manual(values = c(Treatment = 16, Control = 1)) +
   scale_linetype_manual(values = c(Treatment = "solid", Control = "dashed")) +
   labs(
