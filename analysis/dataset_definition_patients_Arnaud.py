@@ -1895,7 +1895,7 @@ pop= (
 )
 dataset.pop = pop
 
-
+"""
 ######################################################## 
 '''A&E variables'''
 #3.Numerators
@@ -1964,7 +1964,7 @@ dataset.appointment_seen = appointments.where(
 ).count_for_patient()
 
 ########################################################
-
+"""
 show(dataset) # DEBUG: show the patients in the base population
 
 ########################################################
