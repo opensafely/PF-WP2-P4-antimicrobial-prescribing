@@ -665,6 +665,22 @@ actions:
     outputs:
      moderately_sensitive:
       html: output/results_3_descriptive_on_practice_level_data.html
+      fig1: output/results_3_Fig1_medication_counts_by_condition.png
+      fig2: output/results_3_Fig2_medication_rate_by_condition.png
+      fig3: output/results_3_Fig3_uti_vs_vulvovaginal_candidiasis.png
+      fig4: output/results_3_Fig4_sorethroat_vs_acutebronchitis.png
+      fig5: output/results_3_Fig5_insectbite_vs_allergicconjunctivitis.png
+      fig6: output/results_3_Fig6_rate_uti_vs_vulvovaginal_candidiasis.png
+      fig7: output/results_3_Fig7_rate_sorethroat_vs_acutebronchitis.png
+      fig8: output/results_3_Fig8_rate_insectbite_vs_allergicconjunctivitis.png
+      fig9: output/results_3_Fig9_gee_uti_observed_vs_fitted.png
+      fig10: output/results_3_Fig10_gp_uti_prescribing_rate.png
+      fig11: output/results_3_Fig11_post_estimation_trends.png
+      fig12: output/results_3_Fig12_residuals_vs_fitted.png
+      fig13: output/results_3_Fig13_residuals_vs_time.png
+      fig14: output/results_3_Fig14_residuals_by_practice.png
+      fig15: output/results_3_Fig15_sensitivity_correlation_structure_rr.png
+      fig16: output/results_3_Fig16_sensitivity_correlation_structure_rr_manual.png
   #################################################################
   # patient-level measures for sense checking; not final measures for analysis
   

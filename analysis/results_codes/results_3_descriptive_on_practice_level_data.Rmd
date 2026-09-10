@@ -189,7 +189,7 @@ descr_numerator <- monthly_long %>%              # Here i can also use monthly l
 table(descr_numerator$Setting)
 ```
 # Graph 1: Medication counts
-```{r graph_A1}
+```{r graph_A1, fig.width=10, fig.height=20, fig.cap="Figure 1. Medication counts by condition and setting (GP vs Pharmacy First)."}
 graph_A1_numerator <- ggplot(
   descr_numerator,
   aes(
@@ -235,6 +235,16 @@ graph_A1_numerator <- ggplot(
     )
   )
 graph_A1_numerator
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig1_medication_counts_by_condition.png",
+  plot = graph_A1_numerator,
+  path = here::here(),
+  width = 10,
+  height = 20,
+  dpi = 300
+)
 ```
 
 ## 6.2 Medication rate over time
@@ -256,7 +266,7 @@ descr_rate <- monthly_long %>%
 ```
 
 #graph 2: Medication rate
-```{r graph_A2_rate}
+```{r graph_A2_rate, fig.width=10, fig.height=20, fig.cap="Figure 2. Medication rate per 1,000 population by condition and setting."}
 graph_A2_rate <- ggplot(
   descr_rate,
   aes(
@@ -302,6 +312,16 @@ graph_A2_rate <- ggplot(
     )
   )
 graph_A2_rate
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig2_medication_rate_by_condition.png",
+  plot = graph_A2_rate,
+  path = here::here(),
+  width = 10,
+  height = 20,
+  dpi = 300
+)
 ```
 # 7. GP intervention-control descriptive plots
 ```{r intervention-control-data}
@@ -370,7 +390,7 @@ descr_pairs <- practice_level_data %>%
 table(descr_pairs$condition)
 ```
 ## Graph
-```{r graph-uticontrol}
+```{r graph-uticontrol, fig.width=10, fig.height=5, fig.cap="Figure 3. GP medications for UTI and vulvovaginal candidiasis (control)."}
 graph_A3_uti <- descr_pairs %>%
   filter(
     condition %in%
@@ -413,11 +433,21 @@ graph_A3_uti <- descr_pairs %>%
   )
 
 graph_A3_uti
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig3_uti_vs_vulvovaginal_candidiasis.png",
+  plot = graph_A3_uti,
+  path = here::here(),
+  width = 10,
+  height = 5,
+  dpi = 300
+)
 ```
 
 ## 7.2 Sore throat vs acute bronchitis
 
-```{r graph-sorethroat-control}
+```{r graph-sorethroat-control, fig.width=10, fig.height=5, fig.cap="Figure 4. GP medications for sore throat and acute bronchitis (control)."}
 graph_A3_sorethroat <- descr_pairs %>%
   filter(
     condition %in%
@@ -460,11 +490,21 @@ graph_A3_sorethroat <- descr_pairs %>%
   )
 
 graph_A3_sorethroat
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig4_sorethroat_vs_acutebronchitis.png",
+  plot = graph_A3_sorethroat,
+  path = here::here(),
+  width = 10,
+  height = 5,
+  dpi = 300
+)
 ```
 
 ## 7.3 Insect bite vs allergic conjunctivitis
 
-```{r graph-insectbite-control}
+```{r graph-insectbite-control, fig.width=10, fig.height=5, fig.cap="Figure 5. GP medications for insect bite and allergic conjunctivitis (control)."}
 graph_A3_insectbite <- descr_pairs %>%
   filter(
     condition %in%
@@ -507,6 +547,16 @@ graph_A3_insectbite <- descr_pairs %>%
   )
 
 graph_A3_insectbite
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig5_insectbite_vs_allergicconjunctivitis.png",
+  plot = graph_A3_insectbite,
+  path = here::here(),
+  width = 10,
+  height = 5,
+  dpi = 300
+)
 ```
 
 
@@ -535,7 +585,7 @@ table(descr_pairs_rate$condition)
 ```
 
 
-```{r graph-uti-control}
+```{r graph-uti-control, fig.width=10, fig.height=5, fig.cap="Figure 6. GP medication rate for UTI and vulvovaginal candidiasis (control)."}
 graph_B3_uti <- descr_pairs_rate %>%
   filter(
     condition %in%
@@ -578,10 +628,20 @@ graph_B3_uti <- descr_pairs_rate %>%
   )
 
 graph_B3_uti
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig6_rate_uti_vs_vulvovaginal_candidiasis.png",
+  plot = graph_B3_uti,
+  path = here::here(),
+  width = 10,
+  height = 5,
+  dpi = 300
+)
 ```
 
 ## 8.2 Sore throat vs acute bronchitis rate
-```{r graph-sorethroatcontrol}
+```{r graph-sorethroatcontrol, fig.width=10, fig.height=5, fig.cap="Figure 7. GP medication rate for sore throat and acute bronchitis (control)."}
 graph_B3_sorethroat <- descr_pairs_rate %>%
   filter(
     condition %in%
@@ -624,10 +684,20 @@ graph_B3_sorethroat <- descr_pairs_rate %>%
   )
 
 graph_B3_sorethroat
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig7_rate_sorethroat_vs_acutebronchitis.png",
+  plot = graph_B3_sorethroat,
+  path = here::here(),
+  width = 10,
+  height = 5,
+  dpi = 300
+)
 ```
 
 ## 8.3 Insect bite vs allergic conjunctivitis rate
-```{r graph-insectbitecontrol}
+```{r graph-insectbitecontrol, fig.width=10, fig.height=5, fig.cap="Figure 8. GP medication rate for insect bite and allergic conjunctivitis (control)."}
 graph_B3_insectbite <- descr_pairs_rate %>%
   filter(
     condition %in%
@@ -670,6 +740,16 @@ graph_B3_insectbite <- descr_pairs_rate %>%
   )
 
 graph_B3_insectbite
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig8_rate_insectbite_vs_allergicconjunctivitis.png",
+  plot = graph_B3_insectbite,
+  path = here::here(),
+  width = 10,
+  height = 5,
+  dpi = 300
+)
 ```
 
 # 8. ITSA models — GP
@@ -838,12 +918,13 @@ summary(gee_uti_model)
 
 ##7.Fitted values from the GEE model
 
-```{r plot-gee-uti-post-trend}
-gee_uti_plot <- gee_uti_data %>%
+```{r plot-gee-uti-post-trend, fig.width=10, fig.height=6, fig.cap="Figure 9. GP medications for UTI — observed values and GEE fitted trend."}
+gee_uti_plot_data <- gee_uti_data %>%
   mutate(
     fitted_rate = predict( gee_uti_model,type = "response"),fitted_count = fitted_rate 
     )
-  ggplot(gee_uti_plot,aes(x = interval_start)) +
+
+gee_uti_trend_plot <- ggplot(gee_uti_plot_data,aes(x = interval_start)) +
    # Observed monthly medications
   geom_point(aes(y = gp_medication_uti), size = 1.5, alpha = 0.6
     ) +
@@ -869,6 +950,17 @@ gee_uti_plot <- gee_uti_data %>%
       hjust = 1
     )
   )
+gee_uti_trend_plot
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig9_gee_uti_observed_vs_fitted.png",
+  plot = gee_uti_trend_plot,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 ```
 
 
@@ -939,8 +1031,8 @@ monthly_uti <- gee_uti_data %>%
   )
 ```
 # 11. Visualise observed prescribing rate
-```{r observed_rate_plot}
-ggplot( monthly_uti, aes(x = interval_start, y = rate_per_1000)) +
+```{r observed_rate_plot, fig.width=10, fig.height=6, fig.cap="Figure 10. GP UTI antimicrobial prescribing — monthly rate before and after Pharmacy First implementation."}
+observed_rate_plot <- ggplot( monthly_uti, aes(x = interval_start, y = rate_per_1000)) +
    geom_line(linewidth = 0.8) +
    geom_point(size = 1.5) +
    # Pharmacy First implementation
@@ -970,6 +1062,17 @@ ggplot( monthly_uti, aes(x = interval_start, y = rate_per_1000)) +
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
+observed_rate_plot
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig10_gp_uti_prescribing_rate.png",
+  plot = observed_rate_plot,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 ```
 
 ## 12.Fitted/predicted trend from the GEE model
@@ -1098,7 +1201,7 @@ trend_results
 
 #post_estimation_trends-plot
 
-```{r post_estimation_trends-plot}
+```{r post_estimation_trends-plot, fig.width=10, fig.height=6, fig.cap="Figure 11. Post-estimation trends: UTI (treatment) vs vulvovaginal candidiasis (control)."}
 
 library(dplyr)
 library(ggplot2)
@@ -1115,7 +1218,7 @@ plot_data <- practice_level_uti_and_control_long %>%
 
 intervention_date <- as.Date("2025-10-01")  #
 
-ggplot(plot_data, aes(x = interval_start, colour = group_label, group = group_label)) +
+post_estimation_trend_plot <- ggplot(plot_data, aes(x = interval_start, colour = group_label, group = group_label)) +
   geom_point(aes(y = actual_rate, shape = group_label), size = 2) +
   geom_line(aes(y = predicted_rate, linetype = group_label)) +
   geom_vline(xintercept = as.numeric(intervention_date), linetype = "dotted") +
@@ -1131,6 +1234,17 @@ ggplot(plot_data, aes(x = interval_start, colour = group_label, group = group_la
   #theme_minimal()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+post_estimation_trend_plot
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig11_post_estimation_trends.png",
+  plot = post_estimation_trend_plot,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 ```
   
 
@@ -1219,32 +1333,67 @@ dispersion_manual
 # ------------------------------------------------------------------------------
 # 4. Residual diagnostics
 #-------------------------------------------------------------------------------
-```{r Residual diagnostics}
+```{r residual-diagnostics-data}
 df_diag <- practice_level_uti_and_control_long %>%
   mutate(
     pearson_resid = residuals(fit_ar1, type = "pearson"),
     fitted_vals   = fitted(fit_ar1)
   )
+```
 
+```{r residuals-vs-fitted, fig.width=10, fig.height=6, fig.cap="Figure 12. Residuals vs fitted values from the AR(1) GEE model."}
 # Residuals vs fitted (look for trend/funnel = misspecified mean or variance)
+
+# Save as PNG
+png(here::here("output", "results_3_Fig12_residuals_vs_fitted.png"), width = 10, height = 6, units = "in", res = 300)
 plot(df_diag$fitted_vals, df_diag$pearson_resid,
      xlab = "Fitted values", ylab = "Pearson residuals",
      main = "Residuals vs Fitted")
 abline(h = 0, col = "red", lty = 2)
+dev.off()
 
-# Residuals vs time 
+plot(df_diag$fitted_vals, df_diag$pearson_resid,
+     xlab = "Fitted values", ylab = "Pearson residuals",
+     main = "Residuals vs Fitted")
+abline(h = 0, col = "red", lty = 2)
+```
+
+```{r residuals-vs-time, fig.width=10, fig.height=6, fig.cap="Figure 13. Residuals vs time from the AR(1) GEE model."}
+# Residuals vs time
+
+# Save as PNG
+png(here::here("output", "results_3_Fig13_residuals_vs_time.png"), width = 10, height = 6, units = "in", res = 300)
 plot(df_diag$T, df_diag$pearson_resid,
      xlab = "Time", ylab = "Pearson residuals",
      main = "Residuals vs Time")
 abline(h = 0, col = "red", lty = 2)
+dev.off()
 
+plot(df_diag$T, df_diag$pearson_resid,
+     xlab = "Time", ylab = "Pearson residuals",
+     main = "Residuals vs Time")
+abline(h = 0, col = "red", lty = 2)
+```
+
+```{r residuals-by-practice, fig.width=10, fig.height=6, fig.cap="Figure 14. Pearson residuals over time by practice."}
 # Residuals by practice (spot clusters with systematically poor fit)
 library(ggplot2)
-ggplot(df_diag, aes(x = T , y = pearson_resid, group = practice)) +
+residuals_by_practice_plot <- ggplot(df_diag, aes(x = T , y = pearson_resid, group = practice)) +
   geom_line(alpha = 0.2) +
   geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
   labs(title = "Pearson residuals over time by practice")
 
+residuals_by_practice_plot
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig14_residuals_by_practice.png",
+  plot = residuals_by_practice_plot,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 ```
 
 #-------------------------------------------------------------------------------
@@ -1252,9 +1401,9 @@ ggplot(df_diag, aes(x = T , y = pearson_resid, group = practice)) +
 #         do effect estimates change much across correlation structure choices?
 #-------------------------------------------------------------------------------
 
-```{r bind_rows}
+```{r bind_rows, fig.width=10, fig.height=6, fig.cap="Figure 15. Sensitivity of rate-ratio estimates to the working correlation structure (exponentiated)."}
 
-bind_rows(
+sensitivity_plot_exp <- bind_rows(
   tidy(fit_ar1,   exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "ar1"),
   tidy(fit_exch,  exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "exchangeable"),
   tidy(fit_indep, exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "independence")
@@ -1268,15 +1417,26 @@ bind_rows(
   labs(y = "Rate ratio (95% CI)", x = NULL,
        title = "Sensitivity of estimates to working correlation structure")
 
+sensitivity_plot_exp
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig15_sensitivity_correlation_structure_rr.png",
+  plot = sensitivity_plot_exp,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 ```
 
 
 #bind_rows_1
 
 
-```{r bind_rows_1}
+```{r bind_rows_1, fig.width=10, fig.height=6, fig.cap="Figure 16. Sensitivity of rate-ratio estimates to the working correlation structure (manually exponentiated)."}
 
-bind_rows(
+sensitivity_plot_manual_exp <- bind_rows(
   tidy(fit_ar1,   conf.int = TRUE) %>% mutate(structure = "ar1"),
   tidy(fit_exch,  conf.int = TRUE) %>% mutate(structure = "exchangeable"),
   tidy(fit_indep, conf.int = TRUE) %>% mutate(structure = "independence")
@@ -1291,7 +1451,18 @@ bind_rows(
   geom_hline(yintercept = 1, linetype = "dashed") +
   coord_flip() +
   labs(y = "Rate ratio (95% CI)", x = NULL,
-       title = "Sensitivity of estimates to working correlation structure")
+       title = "Sensitivity of estimates to working correlation structure (manually exponentiated)")
 
+sensitivity_plot_manual_exp
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_Fig16_sensitivity_correlation_structure_rr_manual.png",
+  plot = sensitivity_plot_manual_exp,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 ```
 
