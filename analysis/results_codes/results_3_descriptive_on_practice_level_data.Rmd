@@ -211,7 +211,7 @@ graph_A1_numerator <- ggplot(
     y = "Number of medications (numerator)",
     colour = "Setting"
   ) +
-  theme_minimal(base_size = 11) +
+  theme_bw(base_size = 11) +
   theme(
     axis.text.x = element_text(
       angle = 45,
@@ -271,7 +271,7 @@ graph_A2_rate <- ggplot(descr_rate,aes(x = interval_start,y = rate_per_1000,colo
     y = "Rate per 1,000 population",
     colour = "Setting"
   ) +
-  theme_minimal(base_size = 11) +
+  theme_bw(base_size = 11) +
   theme(
     axis.text.x = element_text(
       angle = 45,
@@ -685,7 +685,132 @@ ggsave(
 )
 ```
 
-# 8. ITSA models — GP
+
+
+
+
+
+
+
+
+## 9. PF medication rate (median, mean, IQR)
+```{r}
+names(descr_pairs_rate)
+print(descr_pairs_rate)
+```
+
+## 9.1.Both GP and PF together
+```{r descr_summary_rate}
+descr_summary_rate <- descr_pairs_rate %>%
+  filter(condition %in% str_to_sentence(conditions)) %>%  # exclude controls
+  group_by(interval_start, Setting) %>%
+  summarise(
+    median_rate = median(rate_per_1000, na.rm = TRUE),
+    mean_rate   = mean(rate_per_1000, na.rm = TRUE),
+    q1_rate     = quantile(rate_per_1000, 0.25, na.rm = TRUE),
+    q3_rate     = quantile(rate_per_1000, 0.75, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+descr_summary_rate
+```
+
+##graph_A4_1medication_rate
+
+```{r graph_A4_1, fig.width=10, fig.height=6, fig.cap="Figure A4. Monthly  Pharmacy First prescribing rates, median (solid), mean (dashed), and interquartile range (shaded)."}
+graph_A4_1 <- ggplot(descr_summary_rate, aes(x = interval_start)) +
+  geom_ribbon(aes(ymin = q1_rate, ymax = q3_rate,),
+              fill = "steelblue", alpha = 0.25) +
+  geom_line(aes(y = median_rate), color = "steelblue", linewidth = 1) +
+  geom_line(aes(y = mean_rate), color = "red", linetype = "dashed", linewidth = 1) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  labs(
+    title = "Monthly prescribing rate",
+    subtitle = "Median (solid line), mean (dashed line), and interquartile range (shaded area)",
+    x = "Month",
+    y = "Rate per 1,000 eligible population"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+graph_A4_1
+
+# Save as PNG
+ggsave(
+  filename = "output/results_3_FigA4_distribution_rate.png",
+  plot = graph_A4_1,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+```
+
+## 9.2.GP vs PF (median, mean, IQR))
+```{r descr_summary_rate_by_settings}
+descr_summary_rate_by_settings <- descr_pairs_rate %>%
+  filter(condition %in% str_to_sentence(conditions)) %>%  # exclude controls
+  group_by(interval_start, Setting) %>%
+  summarise(
+    median_rate = median(rate_per_1000, na.rm = TRUE),
+    mean_rate   = mean(rate_per_1000, na.rm = TRUE),
+    q1_rate     = quantile(rate_per_1000, 0.25, na.rm = TRUE),
+    q3_rate     = quantile(rate_per_1000, 0.75, na.rm = TRUE),
+    .groups = "drop"
+  )
+descr_summary_rate_by_settings
+```
+
+## graph_A4_by_settings
+
+```{r graph_A4_by_settings, fig.width=10, fig.height=6, fig.cap="Figure A4. Monthly medication rate, GP vs Pharmacy First: median (solid), mean (dashed), and interquartile range (shaded)."}
+  graph_A4_2_by_settings <- ggplot(descr_summary_rate, aes(x = interval_start)) +
+  geom_ribbon(aes(ymin = q1_rate, ymax = q3_rate, fill = Setting), alpha = 0.2) +
+  geom_line(aes(y = median_rate, colour = Setting, linetype = "Median"), linewidth = 1) +
+  geom_line(aes(y = mean_rate, colour = Setting, linetype = "Mean"), linewidth = 1) +
+  scale_colour_manual(values = c("GP" = "steelblue", "PF" = "firebrick")) +
+  scale_fill_manual(values = c("GP" = "steelblue", "PF" = "firebrick")) +
+  scale_linetype_manual(values = c("Median" = "solid", "Mean" = "dashed")) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  labs(
+    title = "Monthly medication rate: GP vs PF",
+    subtitle = "Median (solid line) and mean (dashed line), with interquartile range (shaded), per 1,000 eligible population",
+    x = "Month",
+    y = "Rate per 1,000 eligible population",
+    colour = "Setting",
+    fill = "Setting",
+    linetype = "Statistic"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+graph_A4_2_by_settings
+# Save as PNG
+ggsave(
+  filename = "output/results_3_FigA4_medication_rate_gp_vs_pf.png",
+  plot = graph_A4_2_by_settings,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+```
+
+
+
+
+
+
+
+# II. ITSA models — GP
 The following section prepares an interrupted time-series analysis for all seven Pharmacy First conditions.
 The intervention is **PF service implementation on 1 february 2024**.
 However,**GP Connect on 1 October 2025** may influence reported data in GP records.
@@ -707,7 +832,6 @@ The model specification is:
 \beta_3 X_{gt}T_{gt}
 +
 \log(Pop_{gt})
-\tag{7}
 \]
 
 where:
@@ -726,7 +850,7 @@ where:
 - `β3` = change in the time trend (slope) following PF service implementation.
 
 
-## 8.1 Prepare ITSA dataset
+## II.1 Prepare ITSA dataset
 
 ```{r}
 #names(practice_level_data)
@@ -769,14 +893,14 @@ print(
 # Export into csv
 #write_csv(practice_level_data_itsa,"practice_level_da
 ```
-## II.GEE models:
+## II.3.GEE models:
 
 #All Data
 ```{r All_Data}
 practice_level_data_itsa
 ```
 
-## II.1.GP UTI medication prescribing
+## II.3.1.GP UTI medication prescribing
 
 ```{r gee_uti_data}
 # 1. Load packages
@@ -897,7 +1021,7 @@ ggsave(
 ```
 
 
-# 7. Incidence-rate ratios (IRRs)
+# 7. incidence-rate ratios (IRRs)
 
 ```{r irr}
 irr_results <- broom::tidy(
@@ -1021,9 +1145,8 @@ gee_uti <- gee_uti_data %>%
   )
 ```
 
-#II.Controlled ITSA
+#II.3.2.Controlled ITSA
 ```{r }
-
 names(practice_level_data)
 ```
 

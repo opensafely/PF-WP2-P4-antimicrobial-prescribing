@@ -655,7 +655,7 @@ actions:
     outputs:
       moderately_sensitive:
         chart: output/results_2_volume_prescribed_vulvovaginal_candiasis_control_4_uti.png
-  generate_results_3_descriptive_on_practice_level_data:
+  generate_html_results_3_descriptive_on_practice_level_data:
     run: r:v2 -e 'rmarkdown::render("analysis/results_codes/results_3_descriptive_on_practice_level_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
     - combine_monthly_patient_gz 
