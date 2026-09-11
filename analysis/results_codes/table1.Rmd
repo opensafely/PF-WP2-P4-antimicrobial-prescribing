@@ -673,3 +673,230 @@ ggplot(plot_data, aes(month_date)) +
   theme_classic()
 
 ```
+#Table region
+```{r}
+library(readr)
+dataset_patients_combined<- read_csv(here("output", "dataset_patients_combined.csv.gz"))
+names(dataset_patients_combined)
+library(dplyr)
+str(dataset_patients_combined)
+table(dataset_patients_combined$include_patient_otitis_media)
+dataset_patients_combined <- dataset_patients_combined %>%
+filter(start_date > as.Date("2024-02-01"))%>%
+  mutate(
+    across(
+      c(include_patient_otitis_media,
+        include_patient_sinusitis,
+        include_patient_sore_throat,
+        include_patient_insect_bites,
+        include_patient_shingles,
+        include_patient_impetigo,
+        include_patient_uuti,
+        include_patient_overall_eligible
+      ),
+      ~ as.integer(.x)
+    )
+  )
+table(dataset_patients_combined$include_patient_otitis_media)
+#Prescribing rate region
+GP_medication_rate_by_region <- dataset_patients_combined %>%
+group_by(region) %>%
+  summarise(
+    GP_uti = sum(numerator_gp_medication_uti, na.rm = TRUE) * 1000 /
+      sum(include_patient_uuti, na.rm = TRUE),
+    
+    GP_sinusitis = sum(numerator_gp_medication_sinusitis, na.rm = TRUE) * 1000 /
+      sum(include_patient_sinusitis, na.rm = TRUE),
+    
+    GP_insectbite = sum(numerator_gp_medication_insectbite, na.rm = TRUE) * 1000 /
+      sum(include_patient_insect_bites, na.rm = TRUE),
+    
+    GP_otitismedia = sum(numerator_gp_medication_otitismedia, na.rm = TRUE) * 1000 /
+      sum(include_patient_otitis_media, na.rm = TRUE),
+    
+    GP_sorethroat = sum(numerator_gp_medication_sorethroat, na.rm = TRUE) * 1000 /
+      sum(include_patient_sore_throat, na.rm = TRUE),
+    
+    GP_shingles = sum(numerator_gp_medication_shingles, na.rm = TRUE) * 1000 /
+      sum(include_patient_shingles, na.rm = TRUE),
+    
+    GP_impetigo = sum(numerator_gp_medication_impetigo, na.rm = TRUE) * 1000 /
+      sum(include_patient_impetigo, na.rm = TRUE),
+    
+    GP_all_conditions = sum(numerator_gp_medication_all_conditions, na.rm = TRUE) * 1000 /
+      sum(include_patient_uuti +include_patient_sinusitis +
+          include_patient_insect_bites +include_patient_otitis_media +
+          include_patient_sore_throat +include_patient_shingles + include_patient_impetigo,
+        na.rm = TRUE
+      ),
+    
+    GP_acutebronchitis = sum(numerator_gp_medication_acutebronchitis_control,
+      na.rm = TRUE ) * 1000 / sum(include_patient_sore_throat,na.rm = TRUE ),
+    GP_conjunctivitis = sum(numerator_gp_medication_conjunctivitisallergic_control,
+      na.rm = TRUE ) * 1000 / sum(include_patient_insect_bites, na.rm = TRUE),
+    GP_candidiasis = sum(numerator_gp_medication_vulvovaginalcandidiasis_control,
+      na.rm = TRUE ) * 1000 / sum(include_patient_uuti,na.rm = TRUE))
+
+GP_medication_rate_by_region
+library(dplyr)
+library(tidyr)
+#
+GP_medication_rate_by_region_long <- GP_medication_rate_by_region %>%
+  pivot_longer(
+    cols = -region,
+    names_to = "condition",
+    values_to = "medications"
+  ) %>%
+  mutate(
+    condition = recode(
+      condition,
+      GP_uti = "UTI",
+      GP_sinusitis = "Sinusitis",
+      GP_insectbite = "Insect bites",
+      GP_otitismedia = "Acute otitis media",
+      GP_sorethroat = "Sore throat",
+      GP_shingles = "Shingles",
+      GP_impetigo = "Impetigo",
+      GP_all_conditions = "All Pharmacy First conditions",
+      GP_acutebronchitis = "Acute bronchitis (control)",
+      GP_conjunctivitis = "Allergic conjunctivitis (control)",
+      GP_candidiasis = "Vulvovaginal candidiasis (control)"
+    )
+  )
+#
+GP_medication_rate_by_region_long
+medication_table <- GP_medication_rate_by_region_long %>%
+  filter(region !="Missing")%>%
+  pivot_wider(
+    names_from = region,
+    values_from = medications
+  )
+medication_table
+library(gt)
+medication_table_gt_region <- medication_table %>%
+  gt() %>%
+  tab_header(
+    title = "GP prescribing rate by region"
+  ) %>%
+  fmt_number(
+    columns = -condition,
+    decimals = 0,
+    use_seps = TRUE
+  ) %>%
+  cols_label(
+    condition = "Condition"
+  ) %>%
+  tab_source_note(
+    source_note = "Values represent the total number of GP medication prescribing events per 1,000 eligible population per condition per region."
+  )
+medication_table_gt_region
+```
+
+#2.GP_medication_rate_by_IMD
+```{r GP_medication_rate_by_IMD}
+
+GP_medication_rate_by_IMD <- dataset_patients_combined %>%
+  group_by(imd) %>%
+  summarise(
+    GP_uti = sum(numerator_gp_medication_uti, na.rm = TRUE) * 1000 /
+      sum(include_patient_uuti, na.rm = TRUE),
+
+    GP_sinusitis = sum(numerator_gp_medication_sinusitis, na.rm = TRUE) * 1000 /
+      sum(include_patient_sinusitis, na.rm = TRUE),
+
+    GP_insectbite = sum(numerator_gp_medication_insectbite, na.rm = TRUE) * 1000 /
+      sum(include_patient_insect_bites, na.rm = TRUE),
+
+    GP_otitismedia = sum(numerator_gp_medication_otitismedia, na.rm = TRUE) * 1000 /
+      sum(include_patient_otitis_media, na.rm = TRUE),
+
+    GP_sorethroat = sum(numerator_gp_medication_sorethroat, na.rm = TRUE) * 1000 /
+      sum(include_patient_sore_throat, na.rm = TRUE),
+
+    GP_shingles = sum(numerator_gp_medication_shingles, na.rm = TRUE) * 1000 /
+      sum(include_patient_shingles, na.rm = TRUE),
+
+    GP_impetigo = sum(numerator_gp_medication_impetigo, na.rm = TRUE) * 1000 /
+      sum(include_patient_impetigo, na.rm = TRUE),
+
+    GP_all_conditions =
+      sum(numerator_gp_medication_all_conditions, na.rm = TRUE) * 1000 /
+      sum(
+        include_patient_uuti +
+        include_patient_sinusitis +
+        include_patient_insect_bites +
+        include_patient_otitis_media +
+        include_patient_sore_throat +
+        include_patient_shingles +
+        include_patient_impetigo,
+        na.rm = TRUE
+      ),
+
+    GP_acutebronchitis =
+      sum(numerator_gp_medication_acutebronchitis_control, na.rm = TRUE) * 1000 /
+      sum(include_patient_sore_throat, na.rm = TRUE),
+
+    GP_conjunctivitis =
+      sum(numerator_gp_medication_conjunctivitisallergic_control, na.rm = TRUE) * 1000 /
+      sum(include_patient_insect_bites, na.rm = TRUE),
+
+    GP_candidiasis =
+      sum(numerator_gp_medication_vulvovaginalcandidiasis_control, na.rm = TRUE) * 1000 /
+      sum(include_patient_uuti, na.rm = TRUE),
+
+    .groups = "drop"
+  )
+
+  #long
+  GP_medication_rate_by_IMD_long <- GP_medication_rate_by_IMD %>%
+  pivot_longer(
+    cols = -imd,
+    names_to = "condition",
+    values_to = "rate"
+  ) %>%
+  mutate(
+    condition = recode(
+      condition,
+      GP_uti = "UTI",
+      GP_sinusitis = "Sinusitis",
+      GP_insectbite = "Insect bites",
+      GP_otitismedia = "Acute otitis media",
+      GP_sorethroat = "Sore throat",
+      GP_shingles = "Shingles",
+      GP_impetigo = "Impetigo",
+      GP_all_conditions = "All Pharmacy First conditions",
+      GP_acutebronchitis = "Acute bronchitis (control)",
+      GP_conjunctivitis = "Allergic conjunctivitis (control)",
+      GP_candidiasis = "Vulvovaginal candidiasis (control)"
+    )
+  )
+  #table
+  medication_table_IMD <- GP_medication_rate_by_IMD_long %>%
+  filter(!is.na(imd)) %>%
+  pivot_wider(
+    names_from = imd,
+    values_from = rate
+  )
+
+  medication_table_gt_IMD <- medication_table_IMD %>%
+  gt() %>%
+  tab_header(
+    title = "GP prescribing rate by IMD quintile"
+  ) %>%
+  fmt_number(
+    columns = -condition,
+    decimals = 1,
+    use_seps = TRUE
+  ) %>%
+  cols_label(
+    condition = "Condition"
+  ) %>%
+  tab_source_note(
+    source_note =
+      "Values represent GP medication prescribing events per 1,000 eligible population by IMD quintile."
+  )
+
+medication_table_gt_IMD
+
+
+```
