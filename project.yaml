@@ -681,6 +681,18 @@ actions:
       fig14: output/results_3_Fig14_residuals_by_practice.png
       fig15: output/results_3_Fig15_sensitivity_correlation_structure_rr.png
       fig16: output/results_3_Fig16_sensitivity_correlation_structure_rr_manual.png
+      
+  generate_html_resultats_3_1:
+    run: r:v2 -e 'rmarkdown::render("analysis/results_codes/resultats_3_1.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
+    needs:
+    - combine_monthly_patient_gz 
+    - generate_measures_Arnaud
+    - generate_patient_measures_for_practices
+    - process_measures_to_practice_dataset_by_practice_only
+    outputs:
+     moderately_sensitive:
+      html: output/resultats_3_1.html
+   
   #################################################################
   # patient-level measures for sense checking; not final measures for analysis
   
