@@ -162,7 +162,7 @@ plot_gp_pf <- function(data, condition, condition_label, connect_date = GP_conne
 
   p <- ggplot(
     plot_data,
-    aes( x = interval_start, y = medication_count,group = Setting, color = Setting)) +
+    aes( x = interval_start, y = medication_count,group = Setting, color = Setting,shape= Setting)) +
     geom_line(linewidth = 0.6) +
     geom_point(size = 2.5,color="red") +
     geom_vline(xintercept = as.numeric(connect_date), linetype = "dashed", linewidth = 0.6) +
