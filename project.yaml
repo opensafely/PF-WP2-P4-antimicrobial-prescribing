@@ -702,22 +702,36 @@ actions:
     outputs:
      moderately_sensitive:
       html: output/results_4_descriptive_and_itsa_on_practice_level_data.html
-      fig1: output/results_4_Fig1_medication_counts_by_condition.png
-      fig2: output/results_4_Fig2_medication_rate_by_condition.png
-      fig3: output/results_4_Fig3_uti_vs_vulvovaginal_candidiasis.png
-      fig4: output/results_4_Fig4_sorethroat_vs_acutebronchitis.png
-      fig5: output/results_4_Fig5_insectbite_vs_allergicconjunctivitis.png
-      fig6: output/results_4_Fig6_rate_uti_vs_vulvovaginal_candidiasis.png
-      fig7: output/results_4_Fig7_rate_sorethroat_vs_acutebronchitis.png
-      fig8: output/results_4_Fig8_rate_insectbite_vs_allergicconjunctivitis.png
-      fig9: output/results_4_Fig9_gee_uti_observed_vs_fitted.png
-      fig10: output/results_4_Fig10_gp_uti_prescribing_rate.png
-      fig11: output/results_4_Fig11_post_estimation_trends.png
-      fig12: output/results_4_Fig12_residuals_vs_fitted.png
-      fig13: output/results_4_Fig13_residuals_vs_time.png
-      fig14: output/results_4_Fig14_residuals_by_practice.png
-      fig15: output/results_4_Fig15_sensitivity_correlation_structure_rr.png
-      fig16: output/results_4_Fig16_sensitivity_correlation_structure_rr_manual.png
+      fig1: output/results_4_Fig1_otitis_monthly_counts.png
+      fig2: output/results_4_Fig2_uti_monthly_counts.png
+      fig3: output/results_4_Fig3_sinusitis_monthly_counts.png
+      fig4: output/results_4_Fig4_insectbite_monthly_counts.png
+      fig5: output/results_4_Fig5_sorethroat_monthly_counts.png
+      fig6: output/results_4_Fig6_shingles_monthly_counts.png
+      fig7: output/results_4_Fig7_impetigo_monthly_counts.png
+      fig8: output/results_4_Fig8_all_conditions_monthly_counts.png
+      fig9: output/results_4_Fig9_uti_vs_control.png
+      fig10: output/results_4_Fig10_insectbite_vs_control.png
+      fig11: output/results_4_Fig11_sorethroat_vs_control.png
+      fig12: output/results_4_Fig12_plot_together_uti.png
+      fig13: output/results_4_Fig13_plot_together_sinusitis.png
+      fig14: output/results_4_Fig14_plot_together_insectbite.png
+      fig15: output/results_4_Fig15_plot_together_otitismedia.png
+      fig16: output/results_4_Fig16_plot_together_sorethroat.png
+      fig17: output/results_4_Fig17_plot_together_shingles.png
+      fig18: output/results_4_Fig18_plot_together_impetigo.png
+      fig19: output/results_4_Fig19_plot_together_all_conditions.png
+      fig20: output/results_4_Fig20_faceted_counts_by_condition.png
+      fig21: output/results_4_Fig21_faceted_rates_by_condition.png
+      fig22: output/results_4_Fig22_distribution_rate.png
+      fig23: output/results_4_Fig23_medication_rate_gp_vs_pf.png
+      fig24: output/results_4_Fig24_gee_uti_observed_vs_fitted.png
+      fig25: output/results_4_Fig25_gp_uti_prescribing_rate.png
+      fig26: output/results_4_Fig26_post_estimation_trends.png
+      fig27: output/results_4_Fig27_residuals_by_practice.png
+      fig28: output/results_4_Fig28_sensitivity_correlation_structure_rr.png
+      fig29: output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png
+
   #################################################################
   # patient-level measures for sense checking; not final measures for analysis
   

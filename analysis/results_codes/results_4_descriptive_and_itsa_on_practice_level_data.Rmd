@@ -2017,7 +2017,7 @@ ggsave(
 #         do effect estimates change much across correlation structure choices?
 
 
-```{r bind_rows, fig.width=10, fig.height=6, fig.cap="Figure 30. Sensitivity of rate-ratio estimates to the working correlation structure (exponentiated)."}
+```{r bind_rows, fig.width=10, fig.height=6, fig.cap="Figure 28. Sensitivity of rate-ratio estimates to the working correlation structure (exponentiated)."}
 
 sensitivity_plot_exp <- bind_rows(
   tidy(fit_ar1,   exponentiate = TRUE, conf.int = TRUE) %>% mutate(structure = "ar1"),
@@ -2050,7 +2050,7 @@ ggsave(
 #bind_rows_1
 
 
-```{r bind_rows_1, fig.width=10, fig.height=6, fig.cap="Figure 31. Sensitivity of rate-ratio estimates to the working correlation structure (manually exponentiated)."}
+```{r bind_rows_1, fig.width=10, fig.height=6, fig.cap="Figure 29. Sensitivity of rate-ratio estimates to the working correlation structure (manually exponentiated)."}
 
 sensitivity_plot_manual_exp <- bind_rows(
   tidy(fit_ar1,   conf.int = TRUE) %>% mutate(structure = "ar1"),
@@ -2073,7 +2073,7 @@ sensitivity_plot_manual_exp
 
 # Save as PNG
 ggsave(
-  filename = "output/results_4_Fig30_sensitivity_correlation_structure_rr_manual.png",
+  filename = "output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png",
   plot = sensitivity_plot_manual_exp,
   path = here::here(),
   width = 10,
