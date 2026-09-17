@@ -2003,7 +2003,7 @@ residuals_by_practice_plot
 
 # Save as PNG
 ggsave(
-  filename = "output/results_4_Fig29_residuals_by_practice.png",
+  filename = "output/results_4_Fig27_residuals_by_practice.png",
   plot = residuals_by_practice_plot,
   path = here::here(),
   width = 10,
@@ -2037,7 +2037,7 @@ sensitivity_plot_exp
 
 # Save as PNG
 ggsave(
-  filename = "output/results_4_Fig30_sensitivity_correlation_structure_rr.png",
+  filename = "output/results_4_Fig28_sensitivity_correlation_structure_rr.png",
   plot = sensitivity_plot_exp,
   path = here::here(),
   width = 10,
@@ -2073,7 +2073,7 @@ sensitivity_plot_manual_exp
 
 # Save as PNG
 ggsave(
-  filename = "output/results_4_Fig31_sensitivity_correlation_structure_rr_manual.png",
+  filename = "output/results_4_Fig30_sensitivity_correlation_structure_rr_manual.png",
   plot = sensitivity_plot_manual_exp,
   path = here::here(),
   width = 10,
