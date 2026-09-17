@@ -811,12 +811,7 @@ ggsave(
 )
 ```
 
-
-
-
-
 ###  plot_together(shorter)
-
 
 ```{r plot_together, fig.width=10, fig.height=6, fig.cap="Figures 12-19. Monthly medication counts by condition, GP vs Pharmacy First (function-generated versions of Figures 1-8)."}
 plot_gp_pf <- function(data, condition, condition_label) {
@@ -845,7 +840,8 @@ plot_gp_pf <- function(data, condition, condition_label) {
       x = interval_start,
       y = medication_count,
       group = Setting,
-      color = Setting
+      color = Setting,
+      shape = Setting
     )
   ) +
     geom_line(linewidth = 0.5) +
@@ -960,7 +956,8 @@ faceted_counts_plot <- ggplot(
     x = interval_start,
     y = medication_count,
     group = Setting,
-    color = Setting
+    color = Setting,
+    shape = Setting
   )
 ) +
   geom_line(linewidth = 0.5) +
@@ -1040,9 +1037,12 @@ montly_rate <- monthly %>%
     # Impetigo
     gp_rate_impetigo = (gp_medication_impetigo / elig_impetigo) * 1000,
     pf_rate_impetigo = (pf_medication_impetigo / elig_impetigo) * 1000,
+    
     # All conditions
     gp_rate_all_conditions = (gp_medication_all_conditions / population) * 1000,
     pf_rate_all_conditions = (pf_medication_all_conditions / population) * 1000
+    
+    #controls
     #acutebronchitis
     #gp_rate_acutebronchitis = (gp_medication_acutebronchitis_control / elig_sorethroat) * 1000,
     #pf_rate_acutebronchitis = (pf_medication_acutebronchitis_control / elig_sorethroat) * 1000,
@@ -1136,6 +1136,78 @@ summary_montly_prescribing_rate <- montly_rate %>%
 summary(summary_montly_prescribing_rate)
 
 ```
+## summary table
+
+```{r summarytable}
+library(gt)
+# Summary table from wide format to long format
+summary_gt <- summary_montly_prescribing_rate %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = c("service", "condition", "statistic"),
+    names_pattern = "(gp|pf)_(.*)_(mean|median|IQR)"
+  ) %>%
+  
+  # Here i reshape the statistics back into separate columns
+  pivot_wider(
+    names_from = statistic,
+    values_from = value
+  ) %>%
+  
+  # Service and condition names more readable
+  mutate(
+    service = recode(
+      service,
+      gp = "GP",
+      pf = "Pharmacy First"
+    ),
+    condition = recode(
+      condition,
+      uti = "UTI",
+      sinusitis = "Sinusitis",
+      insectbite = "Insect bite",
+      otitismedia = "Otitis media",
+      sorethroat = "Sore throat",
+      shingles = "Shingles",
+      impetigo = "Impetigo",
+      all_conditions = "All conditions"
+    )
+  ) %>%
+  
+  # i want to Keep only the columns required for the final table
+  select(condition, service, mean, median, IQR)
+
+
+# Formatted gt table
+summary_gt %>%
+  gt(groupname_col = "condition") %>%
+  
+  # Columns renamed
+  cols_label(
+    service = "Service",
+    mean = "Mean",
+    median = "Median",
+    IQR = "IQR"
+  ) %>%
+  
+  # Summary statistics (two decimal places)
+  fmt_number(
+    columns = c(mean, median, IQR),
+    decimals = 2
+  ) %>%
+  
+  # Table title
+  tab_header(
+    title = "Monthly prescribing rate summary"
+  ) %>%
+  
+  # Centre the service and numerical columns
+  cols_align(
+    align = "center",
+    columns = c(service, mean, median, IQR)
+  )
+
+```
 
 ## GP and PF medication rates for all PF conditions
 
@@ -1202,11 +1274,12 @@ faceted_rate_plot <- ggplot(
     x = interval_start,
     y = rate,
     group = Setting,
-    color = Setting
+    color = Setting,
+    shape = Setting
   )
 ) +
   geom_line(linewidth = 0.5) +
-  geom_point(size = 2.5, color = "darkred") +
+  geom_point(size = 2.5, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(
     ~ condition,
