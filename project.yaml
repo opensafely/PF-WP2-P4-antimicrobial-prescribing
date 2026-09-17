@@ -692,7 +692,7 @@ actions:
     outputs:
      moderately_sensitive:
       html: output/resultats_3_1.html
-  generate_html_resultats_4:
+  generate_html_results_4_descriptive_and_itsa_on_practice_level_data:
     run: r:v2 -e 'rmarkdown::render("analysis/results_codes/results_4_descriptive_and_itsa_on_practice_level_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
     - combine_monthly_patient_gz 
