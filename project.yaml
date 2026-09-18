@@ -683,7 +683,7 @@ actions:
       fig16: output/results_3_Fig16_sensitivity_correlation_structure_rr_manual.png
 
   generate_html_resultats_3_1:
-    run: r:v2 -e 'rmarkdown::render("analysis/results_codes/resultats_3_1.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
+    run: r:v3 -e 'rmarkdown::render("analysis/results_codes/resultats_3_1.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
     - combine_monthly_patient_gz 
     - generate_measures_Arnaud
@@ -693,7 +693,7 @@ actions:
      moderately_sensitive:
       html: output/resultats_3_1.html
   generate_html_results_4_descriptive_and_itsa_on_practice_level_data:
-    run: r:v2 -e 'rmarkdown::render("analysis/results_codes/results_4_descriptive_and_itsa_on_practice_level_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
+    run: r:v3 -e 'rmarkdown::render("analysis/results_codes/results_4_descriptive_and_itsa_on_practice_level_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
     - combine_monthly_patient_gz 
     - generate_measures_Arnaud
