@@ -10,7 +10,7 @@ The content has ONLY been made public to support the OpenSAFELY [open science an
 No clinical, policy or safety conclusions must be drawn from the contents of this repository.
 
 # Project oververview 
->Last updates : June 17, 2026.
+>Last updates : September 22, 2026.
 
 >This repository contains the analytical code and study materials for Protocol 4 (P4) of Work Package 2 (WP2) within the Pharmacy First Evaluation programme.
 
@@ -142,7 +142,7 @@ classDef condition fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px;
 classDef matching fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px;
 classDef measure fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
 classDef output fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px;
-
+ 
 class A source;
 class B1,B2,B3,B4,B5,B6,B7 condition;
 class C1,C2,C3,C4,C5,C6,C7 matching;
@@ -159,7 +159,11 @@ class G,H,I output;
 
 >## Codelists
 In codelists file (**codelists/**), we have a combination of codelists for P2 and P4. The codelists for P4 include specific antimicrobial treatment (Amoxicillin), PF conditions which are indexed as **"name of conditions " codes for pharmacy first**, and controls for which are named **"name of the condition " as control for " name of the PF condition"**. All these codelists were added using  : **opensafely codelists add link from OpenCodelists** in the VSC's terminal.
-# About the OpenSAFELY framework
+
+## Data dictionary
+All variables created for this analysis are described in the [Data dictionary](https://lshtm.sharepoint.com/:x:/r/sites/PharmacyFirstEvaluation_Group/Shared%20Documents/WP2%20-%20Development%20of%20data%20linkages/Protocols/WP2%20P4%20SAP/WP2%20P4%20Data%20dictonary/Data_dictionary_for_Protocol_4_June_26.xlsx?d=wd16305ce30384b22a5920c02d82ec82b&csf=1&web=1&e=zuoGZ0). The Excel workbook contains separate sheets describing patient-level data, practice-level data, and measures used for Protocol 4. The Data Dictionary is a living document and may be updated during the data analysis process to reflect changes to variable definitions, derived measures, or other analytical requirements.
+
+## About the OpenSAFELY framework
 
 The OpenSAFELY framework is a Trusted Research Environment (TRE) for electronic
 health records research in the NHS, with a focus on public accountability and
@@ -167,5 +171,5 @@ research quality.
 
 Read more at [OpenSAFELY.org](https://opensafely.org).
 
-# Licences
+## Licences
 As standard, research projects have a MIT license. 
