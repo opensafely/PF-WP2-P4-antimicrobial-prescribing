@@ -10,7 +10,7 @@ The content has ONLY been made public to support the OpenSAFELY [open science an
 No clinical, policy or safety conclusions must be drawn from the contents of this repository.
 
 # Project oververview 
->Last updates : June 17, 2026.
+>Last updates : September 22, 2026.
 
 >This repository contains the analytical code and study materials for Protocol 4 (P4) of Work Package 2 (WP2) within the Pharmacy First Evaluation programme.
 
