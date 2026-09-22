@@ -478,7 +478,7 @@ actions:
   # 2.combine monthly tables into one csv.gz
   combine_monthly_patient_gz:
     run: python:v2 analysis/preprocess_combine_gz_Arnaud.py --output output/dataset_patients_combined.csv.gz
-    needs: [generate_patient_dataset_2022_02_01,
+    needs: [ #generate_patient_dataset_2022_02_01,
             # generate_patient_dataset_2022_03_01,
             # generate_patient_dataset_2022_04_01,
             # generate_patient_dataset_2022_05_01,
