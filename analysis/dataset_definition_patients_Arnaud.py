@@ -1761,22 +1761,29 @@ dataset.pregnant = case(
     when(dataset.pregnancy_code.is_not_null()).then("P"),
     otherwise="0",)
 pregnant_this_month = dataset.pregnant.is_in(("P-E", "P-EDD", "P"))
+
+"""
 dataset.pregnant_this_month = pregnant_this_month
+"""
 
 # bullous_impetigo during the specific month
 bullous_impetigo_this_month = check_code_in_time_window(index_date-months(1),index_date,clinical_events,codelists.gp_snomed_codelist_bullous_impetigo)
+"""
 dataset.bullous_impetigo_this_month = bullous_impetigo_this_month
-
+"""
 # recurrent_impetigo: (defined as 2 or more episodes in the same year) 
-# an episode is defined as a 4 week period, so any codes within this time are considered to be part of the same episode.
+# an episode is  defined as a 4 week period, so any codes within this time are considered to be part of the same episode.
 # >= two 4-week-separated episodes
 recurrent_impetigo_this_year = check_recurrent_status(index_date, clinical_events, codelists.gp_snomed_codelist_impetigo, 
                                                       lookback_months=12, gap_weeks=4, min_episodes=2)
+"""
 dataset.recurrent_impetigo_this_year = recurrent_impetigo_this_year
-
+"""
 # catheter_status: excluding patients who clearly have a catheter, and for following 12 months after code is included
 catheter_status = check_code_in_time_window(index_date - months(12),index_date,clinical_events,codelists.gp_snomed_codelist_urinary_catheter)
+"""
 dataset.catheter_status = catheter_status
+"""
 
 # recurrent_uti: (2 episodes in last 6 months, or 3 episodes in last 12 months) an episode is defined as a 4 week period, so any codes within this time are considered to be part of the same episode.
 # recurrent_uti_6m = (age < 0)
@@ -1790,9 +1797,11 @@ recurrent_uti_12m = check_recurrent_status(
     lookback_months=12, gap_weeks=4, min_episodes=3
 )
 recurrent_uti = recurrent_uti_6m | recurrent_uti_12m
+"""
 dataset.recurrent_uti_6m = recurrent_uti_6m
 dataset.recurrent_uti_12m = recurrent_uti_12m
 dataset.recurrent_uti = recurrent_uti
+"""
 
 ########################################################
 """
@@ -1872,7 +1881,7 @@ include_patient_overall_eligible = (include_patient_otitis_media|include_patient
                                   |include_patient_shingles|include_patient_impetigo|include_patient_uuti)
 dataset.include_patient_overall_eligible = include_patient_overall_eligible
 #P4
-
+"""
 measure_base_population = (
     dataset.alive
     & dataset.registered_start
@@ -1894,8 +1903,7 @@ pop= (
     & (dataset.age <= 120)
 )
 dataset.pop = pop
-
-
+"""
 ######################################################## 
 '''A&E variables'''
 #3.Numerators
