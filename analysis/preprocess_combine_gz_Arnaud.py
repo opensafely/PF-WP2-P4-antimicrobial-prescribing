@@ -17,7 +17,7 @@ for d in start_dates:
     file = Path(f"output/dataset_patients_{d}.csv.gz")
 
     if file.exists():
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, low_memory=False) #df = pd.read_csv(file) seems to not work, i added "low_memory:False"
         dfs.append(df)
 
 combined = pd.concat(dfs, ignore_index=True)
