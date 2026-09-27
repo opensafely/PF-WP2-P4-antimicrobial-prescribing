@@ -1342,7 +1342,7 @@ descr_summary_rate
 
 ```{r graph_A4_1, fig.width=10, fig.height=6, fig.cap="Figure 22. Monthly Pharmacy First prescribing rates, median (solid), mean (dashed), and interquartile range (shaded)."}
 graph_A4_1 <- ggplot(descr_summary_rate, aes(x = interval_start)) +
-  geom_ribbon(aes(ymin = q1_rate*0.8, ymax = q3_rate*1.08,),
+  geom_ribbon(aes(ymin = q1_rate, ymax = q3_rate,),
               fill = "steelblue", alpha = 0.25) +
   geom_line(aes(y = median_rate), color = "steelblue", linewidth = 1) +
   geom_line(aes(y = mean_rate), color = "red", linetype = "dashed", linewidth = 1) +
@@ -1400,9 +1400,9 @@ names(descr_summary_rate_by_settings)
 ```{r graph_A4_by_settings, fig.width=10, fig.height=6, fig.cap="Figure 23. Monthly medication rate, GP vs Pharmacy First: median (solid), mean (dashed), and interquartile range (shaded)."}
 graph_A4_2_by_settings <- ggplot(descr_summary_rate_by_settings,aes(x = interval_start)) +
   #GP interquartile range
-  geom_ribbon(aes(ymin = gp_q1_rate*0.8,ymax = gp_q3_rate*1.2),fill = "steelblue",alpha = 0.2) +
+  geom_ribbon(aes(ymin = gp_q1_rate,ymax = gp_q3_rate),fill = "steelblue",alpha = 0.2) +
   # PF interquartile range
-  geom_ribbon(aes(ymin = pf_q1_rate*0.8,ymax = pf_q3_rate*1.2 ),fill = "firebrick",alpha = 0.2) +
+  geom_ribbon(aes(ymin = pf_q1_rate,ymax = pf_q3_rate ),fill = "firebrick",alpha = 0.2) +
   # GP median
   geom_line(aes(y = gp_median_rate,colour = "GP",linetype = "Median"),linewidth = 1) +
   # GP mean
