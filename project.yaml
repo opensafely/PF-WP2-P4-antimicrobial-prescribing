@@ -772,6 +772,13 @@ actions:
       # fig27: output/results_4_Fig27_residuals_by_practice.png
       # fig28: output/results_4_Fig28_sensitivity_correlation_structure_rr.png
       # fig29: output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png
+
+  generate_html_results_5_fig20_faceted_counts_by_condition:
+    run: r:v2 analysis/results_codes/results_5_Fig20_faceted_counts_by_condition.R
+    needs: [generate_patient_measures_for_practices]
+    outputs:
+      moderately_sensitive:
+        fig20: output/results_5_Fig20_faceted_counts_by_condition.png
   #################################################################
   # patient-level measures for sense checking; not final measures for analysis
   
