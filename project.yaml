@@ -735,7 +735,7 @@ actions:
       fig29: output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png
 
   generate_html_results_5_descriptive_and_itsa_on_practice_measures_data:
-    run: r:v3 -e 'rmarkdown::render("analysis/results_codes/results_5_descriptive_and_itsa_on_practice_level_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
+    run: r:v3 -e 'rmarkdown::render("analysis/results_codes/results_5_descriptive_and_itsa_on_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs: 
     - generate_measures_Arnaud
     - generate_patient_measures_for_practices
