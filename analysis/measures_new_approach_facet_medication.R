@@ -15,7 +15,7 @@ library(here)
 #    (plus any group_by columns, if added later)
 # -----------------------------------------------------------------------------
 measures_new_approach <- read_csv(
-  here("output", "measures_new_approach.csv"),
+  here("output", "measures_new_approach_medication.csv"),
   show_col_types = FALSE
 ) %>%
   mutate(interval_start = as.Date(interval_start))
@@ -131,7 +131,7 @@ facet_numerators_plot
 # 4. Save as PNG
 # -----------------------------------------------------------------------------
 ggsave(
-  filename = here("output", "measures_new_approach_facet_numerators.png"),
+  filename = here("output", "measures_new_approach_facet_medication.png"),
   plot = facet_numerators_plot,
   width = 10,
   height = 6,
