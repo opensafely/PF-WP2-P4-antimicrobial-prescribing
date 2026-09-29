@@ -23,6 +23,20 @@ measures_new_approach <- read_csv(
 # GP Connect date (vertical line)
 GP_connect <- as.Date("2025-10-01")
 
+message("Number of rows: ", nrow(measures_new_approach))
+message("Number of columns: ", ncol(measures_new_approach))
+
+message(
+  "Date range: ",
+  min(measures_new_approach$interval_start, na.rm = TRUE),
+  " to ",
+  max(measures_new_approach$interval_start, na.rm = TRUE)
+)
+
+print(head(measures_new_approach))
+
+
+
 # Conditions to include
 conditions <- c(
   "uti",
