@@ -1238,6 +1238,7 @@ for name, condition_codes in pf_conditions_pf_codes.items():
 
         setattr(dataset, f"numerator_pf_{medication_name}_{name}", count_medication)
         setattr(dataset, f"numerator_pf_{medication_name}_date_{name}", count_medication_date)
+
 # 1.B.One week lagged medication
 '''
 Main changes made:
