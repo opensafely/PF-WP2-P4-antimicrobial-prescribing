@@ -1638,9 +1638,9 @@ for medication_name, medication_codes in codelists.pf_first_secondline_medicatio
 
 """ 
 #2.B.2.One week lagged medication of each condition
-# ---------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # GP Medications: condition matched monthly, medication matched monthly+7days
-# ---------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------
 for name, condition_codes in all_conditions_gp_codes.items():
     # 1. GP consultations for condition -- MONTHLY window (unchanged)
     condition_events = select_events_from_codelist(gp_events_clean, condition_codes)
