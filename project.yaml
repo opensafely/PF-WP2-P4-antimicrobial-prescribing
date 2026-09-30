@@ -779,18 +779,7 @@ actions:
     outputs:
       moderately_sensitive:
         fig20: output/results_5_Fig20_faceted_counts_by_condition.png
-  generate_measures_new_approach_medication:
-    run: ehrql:v1 generate-measures analysis/measures_new_approach_medication.py
-      --output output/measures_new_approach_medication.csv
-    outputs:
-      highly_sensitive:
-        measures: output/measures_new_approach_medication.csv
-  process_measures_new_approach_facet_medication:
-    run: r:v2 analysis/measures_new_approach_facet_medication.R
-    needs: [generate_measures_new_approach_medication]
-    outputs:
-      moderately_sensitive:
-        figure: output/measures_new_approach_facet_medication.png
+
   generate_measures_new_approach_consultation:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation.py
       --output output/measures_new_approach_consultation.csv
@@ -803,8 +792,18 @@ actions:
     outputs:
       moderately_sensitive:
         figure: output/measures_new_approach_facet_consultation.png
-
-
+  generate_measures_new_approach_medication:
+    run: ehrql:v1 generate-measures analysis/measures_new_approach_medication.py
+      --output output/measures_new_approach_medication.csv
+    outputs:
+      highly_sensitive:
+        measures: output/measures_new_approach_medication.csv
+  process_measures_new_approach_facet_medication:
+    run: r:v2 analysis/measures_new_approach_facet_medication.R
+    needs: [generate_measures_new_approach_medication]
+    outputs:
+      moderately_sensitive:
+        figure: output/measures_new_approach_facet_medication.png
   #################################################################
   # patient-level measures for sense checking; not final measures for analysis
   

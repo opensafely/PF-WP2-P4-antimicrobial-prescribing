@@ -116,7 +116,7 @@ facet_numerators_plot <- ggplot(
   labs(
     title = "Monthly consultation counts by condition and setting",
     x = "Month",
-    y = "Consultation count (numerator)"
+    y = "Consultation count"
   ) +
   theme_bw() +
   theme(
