@@ -1320,7 +1320,7 @@ selected_pf_id_events_lag = select_events_by_consultation_id(selected_events_lag
 
 name = "uti"  # <-- restrict to UTI only
 condition_codes = pf_conditions_pf_codes[name]
-# 1. PF consultations for condition -- MONTHLY window (unchanged)
+# 1. PF consultations for condition -- MONTHLY window 
 condition_events = select_events_from_codelist(selected_pf_id_events, condition_codes)
 condition_ids = condition_events.consultation_id
 # 2. All events from those SAME consultation ids, but pulled from the
@@ -1346,7 +1346,9 @@ for medication_name, medication_codes in codelists.pf_first_secondline_medicatio
     setattr(dataset, f"numerator_pf_{medication_name}_{name}_lag", count_medication_lag)
     setattr(dataset, f"numerator_pf_{medication_name}_date_{name}_lag", count_medication_date_lag)
 """
+
 # New approach
+
 lag_end_date = index_date + days(7)
 selected_events_lag = select_events_between(clinical_events, start_date, lag_end_date)
 
@@ -1515,8 +1517,9 @@ for name, codes in all_conditions_gp_codes.items():
     setattr(dataset, f"numerator_gp_consultation_{name}", count_gp_consultation)
     setattr(dataset, f"numerator_gp_date_{name}", count_gp_date)
 
-"""Old
+
 # ---- GP Medication : airadukunda ------------------------------------------
+"""Old
 # 2. Numerators 
 for name, condition_codes in all_conditions_gp_codes.items():
 
