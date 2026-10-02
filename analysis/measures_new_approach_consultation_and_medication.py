@@ -236,3 +236,43 @@ measures.define_measure(
     numerator= dataset.numerator_gp_medication_all_conditions,
     denominator= measure_base_population & dataset.include_patient_overall_eligible
     )
+
+#III.Measures for controls (We assummed the denominator for controls to be the same as the denominator for the related conditions)
+#III.1.GP consultations for controls conditions
+#1.Acute bronchitis control
+measures.define_measure(
+    name="gp_consultation_acutebronchitis_control",
+    numerator=dataset.numerator_gp_consultation_acutebronchitis_control,
+    denominator= measure_base_population & dataset.include_patient_sore_throat
+)
+#2.conjunctivitisallergic
+measures.define_measure(
+    name="gp_consultation_conjunctivitisallergic_control",
+    numerator=dataset.numerator_gp_consultation_conjunctivitisallergic_control,
+    denominator=measure_base_population & dataset.include_patient_insect_bites
+)
+#3.vulvovaginal candidiasis
+measures.define_measure(
+    name="gp_consultation_vulvovaginalcandidiasis_control",
+    numerator=dataset.numerator_gp_consultation_vulvovaginalcandidiasis_control,
+    denominator=measure_base_population & dataset.include_patient_uuti
+)
+#III.2. GP medications for controls conditions 
+#1.Acute bronchitis control
+measures.define_measure(
+    name="gp_medication_acutebronchitis_control",
+    numerator=dataset.numerator_gp_medication_acutebronchitis_control,
+    denominator= measure_base_population & dataset.include_patient_sore_throat
+)
+#2.conjunctivitisallergic
+measures.define_measure(
+    name="gp_medication_conjunctivitisallergic_control",
+    numerator=dataset.numerator_gp_medication_conjunctivitisallergic_control,
+    denominator=measure_base_population & dataset.include_patient_insect_bites
+)
+#3.vulvovaginal candidiasis
+measures.define_measure(
+    name="gp_medication_vulvovaginalcandidiasis_control",
+    numerator=dataset.numerator_gp_medication_vulvovaginalcandidiasis_control,
+    denominator=measure_base_population & dataset.include_patient_uuti
+)
