@@ -804,6 +804,14 @@ actions:
     outputs:
       moderately_sensitive:
         figure: output/measures_new_approach_facet_medication.png
+
+  generate_measures_new_approach_consultation_and_medication:
+    run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation_and_medication.py
+      --output output/measures_new_approach_consultation_and_medication.csv
+    outputs:
+      highly_sensitive:
+        measures: output/measures_new_approach_consultation_and_medication.csv
+
   #################################################################
   # patient-level measures for sense checking; not final measures for analysis
   
