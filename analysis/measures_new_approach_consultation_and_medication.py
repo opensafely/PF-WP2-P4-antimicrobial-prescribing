@@ -3,10 +3,23 @@ from ehrql import case, create_measures, months, when
 from analysis.dataset_definition_patients_measures_Arnaud import dataset
 # opensafely exec ehrql:v1 generate-measures analysis/measures_new_approach_consultation.py --output output/measures_new_approach_consultation.csv
 
+#Groups
+GROUPS = {
+    #"sex": patients.sex,
+    #"imd": patients.imd,
+    #"ethnicity": dataset.ethnicity,
+    "practice": dataset.practice,
+    "month": dataset.start_date
+    #"stp": patients.stp,
+    #"region": patients.region,
+}
+
+
 measures = create_measures()
 measures.configure_disclosure_control(enabled=False)
 measures.define_defaults(
     intervals=months(7).starting_on("2025-07-01"),
+    group_by=GROUPS
     # intervals=months(4).starting_on("2024-07-01")
 )
 
@@ -18,17 +31,6 @@ measure_base_population = (
 )
 
 
-#Groups
-GROUPS = {
-    #"sex": patients.sex,
-    #"imd": patients.imd,
-    #"ethnicity": patients.ethnicity,
-    "practice": patients.practice,
-    "month": patients.start_date
-    #"stp": patients.stp,
-    #"region": patients.region,
-}
-
 
 #------------Protocole_4------------------------------------------------
 #  I.Measures for each PF condition The denominator can change over time
@@ -36,7 +38,7 @@ GROUPS = {
 measures.define_measure(
     name="pf_consultation_uti",
     numerator= dataset.numerator_pf_consultation_uti,
-    denominator=measure_base_population & dataset.include_patient_uuti,group_by=GROUPS
+    denominator=measure_base_population & dataset.include_patient_uuti
     )
 
 # measures.define_measure(
