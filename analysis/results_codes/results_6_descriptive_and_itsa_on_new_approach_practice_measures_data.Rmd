@@ -58,9 +58,7 @@ practice_measures <- read_csv(
     interval_end   = as.Date(interval_end)
   )
 
-#practice_measures <- read_csv("C:/Users/arnau/Downloads/practice_measures.csv")
 
-table(practice_measures$measure)
 
 # (a) Counts: one column per measure (numerator), e.g. gp_medication_uti
 practice_measures_counts <- practice_measures %>%
@@ -68,9 +66,7 @@ practice_measures_counts <- practice_measures %>%
   pivot_wider(names_from = measure, values_from = numerator)
 
 # (b) Populations: the denominator of each measure is its eligible population.
-#     Column names are kept identical to the previous dataset so that all
-#     downstream code runs unchanged. The denominator of the all-conditions
-#     measure is used as the overall practice population.
+
 denominator_map <- c(
   gp_medication_uti                             = "populationeligible_uuti",
   gp_medication_sinusitis                       = "populationeligible_sinusitis",
