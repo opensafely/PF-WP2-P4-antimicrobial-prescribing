@@ -59,7 +59,6 @@ practice_measures <- read_csv(
   )
 
 
-
 # (a) Counts: one column per measure (numerator), e.g. gp_medication_uti
 practice_measures_counts <- practice_measures %>%
   select(practice, interval_start, measure, numerator) %>%
