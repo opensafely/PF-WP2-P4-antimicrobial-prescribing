@@ -811,7 +811,6 @@ actions:
     outputs:
       highly_sensitive:
         measures: output/measures_new_approach_consultation_and_medication.csv
-    
   generate_html_results_6_descriptive_and_itsa_on_new_approach_measures_data:
     run: r:v3 -e 'rmarkdown::render("/workspace/analysis/results_codes/results_6_descriptive_and_itsa_on_new_approach_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")' #run: r:v3 -e 'rmarkdown::render("analysis/results_codes/results_6_descriptive_and_itsa_on_new_approach_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
