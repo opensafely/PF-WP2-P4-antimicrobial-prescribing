@@ -43,7 +43,7 @@ group = {
 }
 #"""
 # appointments scheduled 
-"""
+#"""
 measures.define_measure(
     name="appointments_scheduled",
     numerator=dataset.appointment_scheduled,
@@ -197,7 +197,7 @@ measures.define_measure(
     denominator=measure_base_population & dataset.include_patient_uuti,
     group_by=group,
 )
-"""
+#"""
 #------------P4.Medications-------------------------------------------------------------------
 #UTI 
 measures.define_measure(
