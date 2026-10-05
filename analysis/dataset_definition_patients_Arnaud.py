@@ -3,7 +3,7 @@
 # gunzip -c output/dataset_definition_patients.csv.gz > output/dataset_definition_patients.csv
 
 from ehrql import create_dataset, show, days, weeks, months, years, case, when, get_parameter,codelist_from_csv # Here we added codelist_from_csv to be able to read csv codelist
-#----------------------useful link-----------------------------------------------------------------------------------
+#----------------------Useful link-----------------------------------------------------------------------------------
 # "tpp" : is the real dataset used in OpenSAFELY analyses.("core" is generic)
 #  "raw.tpp" :https://docs.opensafely.org/ehrql/reference/schemas/raw.tpp/ (accessible?, better for medication duration?)
 # "tpp schemas": https://docs.opensafely.org/ehrql/reference/schemas/tpp/
