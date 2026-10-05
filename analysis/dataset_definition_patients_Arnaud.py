@@ -13,6 +13,9 @@ from ehrql import create_dataset, show, days, weeks, months, years, case, when, 
 #  Multiple times run: https://docs.opensafely.org/ehrql/how-to/multiple-time-periods/
 #1.Pass parameters via the project.yaml
 #2.The measures framework (best approach) : https://docs.opensafely.org/ehrql/explanation/measures/
+#  Validation:consultations (compare the protocol 4 and 2)
+#  Validation : medications : compare medications  vs : a)PF monly report:  https://reports.opensafely.org/reports/opensafely-pharmacy-first-monthly-dashboard/#summary-of-medications-recorded-in-pharmacy-first-consultationswhich 
+#                                                       b)2025 SPAUR report :
 from ehrql.tables.tpp import (patients, practice_registrations, clinical_events, addresses, 
                               ethnicity_from_sus,
                               emergency_care_attendances,appointments,medications) # I added medications to be able to assing treatment to the dataset
