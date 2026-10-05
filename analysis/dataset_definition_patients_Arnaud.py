@@ -11,8 +11,8 @@ from ehrql import create_dataset, show, days, weeks, months, years, case, when, 
 #  Command line use: https://docs.opensafely.org/ehrql/reference/cli/#dump-example-data 
 #  Opensafely command line use: https://docs.opensafely.org/opensafely-cli/#installing-opensafely
 #  Multiple times run: https://docs.opensafely.org/ehrql/how-to/multiple-time-periods/
-#1.Pass parameters via the "project.yaml"
-#2.The measures framework (best approach) : https://docs.opensafely.org/ehrql/explanation/measures/
+#  1.Pass parameters via the "project.yaml"
+#  2.The measures framework (best approach) : https://docs.opensafely.org/ehrql/explanation/measures/
 #  Validation consultations (compare the protocol 4 and 2)
 #  Validation medications : compare medications  vs : a)PF monly report:  https://reports.opensafely.org/reports/opensafely-pharmacy-first-monthly-dashboard/#summary-of-medications-recorded-in-pharmacy-first-consultationswhich 
 #                                                     b)SPAUR report(2025) :https://www.gov.uk/government/publications/english-surveillance-programme-for-antimicrobial-utilisation-and-resistance-espaur-2024-to-2025-report
