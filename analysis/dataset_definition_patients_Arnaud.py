@@ -16,6 +16,8 @@ from ehrql import create_dataset, show, days, weeks, months, years, case, when, 
 #  Validation consultations (compare the protocol 4 and 2)
 #  Validation medications (compare medications  vs ): a)PF monly report:  https://reports.opensafely.org/reports/opensafely-pharmacy-first-monthly-dashboard/#summary-of-medications-recorded-in-pharmacy-first-consultationswhich 
 #                                                     b)SPAUR report(2025) :https://www.gov.uk/government/publications/english-surveillance-programme-for-antimicrobial-utilisation-and-resistance-espaur-2024-to-2025-report
+#                                                     c)NHSBSA report(2025) :https://www.nhsbsa.nhs.uk/ 
+#                                                     d)Openprescribing (2025):https://openprescribing.net/
 from ehrql.tables.tpp import (patients, practice_registrations, clinical_events, addresses, 
                               ethnicity_from_sus,
                               emergency_care_attendances,appointments,medications) # I added medications to be able to assing treatment to the dataset
