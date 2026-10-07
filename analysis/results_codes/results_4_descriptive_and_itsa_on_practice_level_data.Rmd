@@ -774,7 +774,7 @@ ggsave(
   )
 
 sorethroat_control_plot <- ggplot(
-  insectbite_control_monthly,
+  sorethroat_control_monthly,
   aes(
     x = interval_start,
     y = medication_count,
