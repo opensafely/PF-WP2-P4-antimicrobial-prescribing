@@ -115,16 +115,15 @@ monthly <- practice_level_data %>%
     elig_conjunctivitisallergic_control = sum(populationeligible_conjunctivitisallergic_control, na.rm = TRUE),
     across(
       starts_with("gp_medication_"),
-      ~ sum(.x, na.rm = TRUE)   # Find all variables whose names start with gp_medication_ and sum each one within each month.
+      ~ sum(.x, na.rm = TRUE)   # This finds all variables whose names start with gp_medication_ and sum each one within each month.
     ),
     across(
       starts_with("pf_medication_"),
-      ~ sum(.x, na.rm = TRUE)  #  Find all variables whose names start with pf_medication_ and sum each one within each month (.x represents the current column being processed).
+      ~ sum(.x, na.rm = TRUE)  #  This finds all variables whose names start with pf_medication_ and sum each one within each month (.x represents the current column being processed).
     ),
     .groups = "drop"          #  This remove the grouping (our dataset is now a normal data frame)
   )
 ```
-
 
 ## 0.1. otitis_plot
 
@@ -162,9 +161,10 @@ otitis_plot <- ggplot(
     color = Setting,
     shape = Setting
   )
-) +
+) + 
   geom_line(linewidth = 0.5) +
   geom_point(size = 2.5,color="red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -174,7 +174,8 @@ otitis_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 otitis_plot
@@ -224,6 +225,7 @@ uti_plot <- ggplot(
 ) +
   geom_line(linewidth = 0.5) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -248,9 +250,6 @@ ggsave(
   dpi = 300
 )
 ```
-
-
-
 
 ## 0.3. sinusitis_plot
 
@@ -287,6 +286,7 @@ sinusitis_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -296,7 +296,8 @@ sinusitis_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 sinusitis_plot
@@ -350,6 +351,7 @@ insectbite_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -359,7 +361,8 @@ insectbite_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 insectbite_plot
@@ -373,10 +376,7 @@ ggsave(
   height = 6,
   dpi = 300
 )
-```
-  
-  
-  
+``` 
 
 ## 0.5. sorethroat_plot
 
@@ -413,6 +413,7 @@ sorethroat_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -422,7 +423,8 @@ sorethroat_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 sorethroat_plot
@@ -474,6 +476,7 @@ shingles_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -483,7 +486,8 @@ shingles_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 shingles_plot
@@ -537,6 +541,7 @@ impetigo_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -546,7 +551,8 @@ impetigo_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 impetigo_plot
@@ -598,6 +604,7 @@ all_conditions_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -607,7 +614,8 @@ all_conditions_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 all_conditions_plot
@@ -661,6 +669,7 @@ uti_control_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -671,7 +680,8 @@ uti_control_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 uti_control_plot
@@ -723,6 +733,7 @@ insectbite_control_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -733,7 +744,8 @@ insectbite_control_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 insectbite_control_plot
@@ -785,6 +797,7 @@ sorethroat_control_plot <- ggplot(
 ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -795,7 +808,8 @@ sorethroat_control_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 sorethroat_control_plot
@@ -846,6 +860,7 @@ plot_gp_pf <- function(data, condition, condition_label) {
   ) +
     geom_line(linewidth = 0.5) +
     geom_point(size = 2.5, color = "red") +
+    geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
     geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
     scale_x_date(
       date_labels = "%Y-%m",
@@ -963,6 +978,7 @@ faceted_counts_plot <- ggplot(
 ) +
   geom_line(linewidth = 0.5) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(
     ~ condition,
@@ -1281,6 +1297,7 @@ faceted_rate_plot <- ggplot(
 ) +
   geom_line(linewidth = 0.5) +
   geom_point(size = 2.5, color = "red") +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(
     ~ condition,
@@ -1347,7 +1364,8 @@ graph_A4_1 <- ggplot(descr_summary_rate, aes(x = interval_start)) +
               fill = "steelblue", alpha = 0.25) +
   geom_line(aes(y = median_rate), color = "steelblue", linewidth = 1) +
   geom_line(aes(y = mean_rate), color = "red", linetype = "dashed", linewidth = 1) +
-  geom_vline(xintercept = as.numeric(GP_connect),linetype = "dotted",linewidth = 0.8) +
+  geom_vline(xintercept = as.numeric(PF_start), linetype = "dashed", linewidth = 0.6) +
+  # geom_vline(xintercept = as.numeric(GP_connect),linetype = "dotted",linewidth = 0.8) +
   scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
   labs(
     title = "Monthly prescribing rate",
@@ -1625,7 +1643,8 @@ gee_uti_trend_plot <- ggplot(gee_uti_plot_data,aes(x = interval_start)) +
   # GEE fitted trend
   geom_line(aes(y = fitted_count),linewidth = 1) +
   # GP Connect intervention
-  geom_vline(xintercept = as.numeric(GP_connect),linetype = "dotted",linewidth = 0.8) +
+  geom_vline(xintercept = as.numeric(PF_start), linetype = "dashed", linewidth = 0.6) +
+  # geom_vline(xintercept = as.numeric(GP_connect),linetype = "dotted",linewidth = 0.8) +
   scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 months") +
   labs(
     title = "GP medications for UTI",
