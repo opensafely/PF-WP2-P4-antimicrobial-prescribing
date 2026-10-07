@@ -22,6 +22,8 @@ measures_new_approach <- read_csv(
 
 # GP Connect date (vertical line)
 GP_connect <- as.Date("2025-10-01")
+PF_start <- as.Date("2024-02-01")
+
 
 message("Number of rows: ", nrow(measures_new_approach))
 message("Number of columns: ", ncol(measures_new_approach))
@@ -103,7 +105,8 @@ facet_numerators_plot <- ggplot(
 ) +
   geom_line(linewidth = 0.5) +
   geom_point(size = 2.5, color = "red") +
-  geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
+  geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.3) +
+  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.3,color = "blue") +
   facet_wrap(
     ~ condition,
     scales = "free_y",
@@ -111,7 +114,7 @@ facet_numerators_plot <- ggplot(
   ) +
   scale_x_date(
     date_labels = "%Y-%m",
-    date_breaks = "1 months"
+    date_breaks = "2 months"
   ) +
   labs(
     title = "Monthly consultation counts by condition and setting",
