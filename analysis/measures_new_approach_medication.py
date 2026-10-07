@@ -6,7 +6,7 @@ from analysis.dataset_definition_patients_measures_Arnaud import dataset
 measures = create_measures()
 measures.configure_disclosure_control(enabled=False)
 measures.define_defaults(
-    intervals=months(7).starting_on("2025-07-01"),
+    intervals=months(48).starting_on("2022-02-01"),
     # intervals=months(4).starting_on("2024-07-01")
 )
 
