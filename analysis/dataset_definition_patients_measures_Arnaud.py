@@ -442,7 +442,6 @@ for medication_name, medication_codes in codelists.pf_first_secondline_medicatio
     setattr(dataset, f"numerator_pf_{medication_name}_{name}_lag", count_medication_lag)
     setattr(dataset, f"numerator_pf_{medication_name}_date_{name}_lag", count_medication_date_lag)
 
-
 '''
 # -------1.B.2.Lag for each condition-------------------------------------
 
