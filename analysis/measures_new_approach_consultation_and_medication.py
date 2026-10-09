@@ -276,3 +276,187 @@ measures.define_measure(
     numerator=dataset.numerator_gp_medication_vulvovaginalcandidiasis_control,
     denominator=measure_base_population & dataset.include_patient_uuti
 )
+
+#IV.Specific antibiotics (two commonly prescribed antibiotics (before PF) for each condition)
+
+
+# 1. UTI: Nitrofurantoin and trimethoprim
+measures.define_measure(
+    name="pf_nitrofurantoin_uti",
+    numerator=dataset.numerator_pf_nitrofurantoin_uti,
+    denominator=measure_base_population & dataset.include_patient_uuti
+)
+
+measures.define_measure(
+    name="gp_nitrofurantoin_uti",
+    numerator=dataset.numerator_gp_nitrofurantoin_uti,
+    denominator=measure_base_population & dataset.include_patient_uuti
+)
+
+measures.define_measure(
+    name="pf_trimethoprim_uti",
+    numerator=dataset.numerator_pf_trimethoprim_uti,
+    denominator=measure_base_population & dataset.include_patient_uuti
+)
+
+measures.define_measure(
+    name="gp_trimethoprim_uti",
+    numerator=dataset.numerator_gp_trimethoprim_uti,
+    denominator=measure_base_population & dataset.include_patient_uuti
+)
+
+
+# 2. Sinusitis: Phenoxymethylpenicillin and doxycycline
+measures.define_measure(
+    name="pf_phenoxymethylpenicillin_sinusitis",
+    numerator=dataset.numerator_pf_phenoxymethylpenicillin_sinusitis,
+    denominator=measure_base_population & dataset.include_patient_sinusitis
+)
+
+measures.define_measure(
+    name="gp_phenoxymethylpenicillin_sinusitis",
+    numerator=dataset.numerator_gp_phenoxymethylpenicillin_sinusitis,
+    denominator=measure_base_population & dataset.include_patient_sinusitis
+)
+
+measures.define_measure(
+    name="pf_doxycycline_sinusitis",
+    numerator=dataset.numerator_pf_doxycycline_sinusitis,
+    denominator=measure_base_population & dataset.include_patient_sinusitis
+)
+
+measures.define_measure(
+    name="gp_doxycycline_sinusitis",
+    numerator=dataset.numerator_gp_doxycycline_sinusitis,
+    denominator=measure_base_population & dataset.include_patient_sinusitis
+)
+
+
+# 3. Insect bites: Flucloxacillin and clarithromycin
+measures.define_measure(
+    name="pf_flucloxacillin_insectbite",
+    numerator=dataset.numerator_pf_flucloxacillin_insectbite,
+    denominator=measure_base_population & dataset.include_patient_insect_bites
+)
+
+measures.define_measure(
+    name="gp_flucloxacillin_insectbite",
+    numerator=dataset.numerator_gp_flucloxacillin_insectbite,
+    denominator=measure_base_population & dataset.include_patient_insect_bites
+)
+
+measures.define_measure(
+    name="pf_clarithromycin_insectbite",
+    numerator=dataset.numerator_pf_clarithromycin_insectbite,
+    denominator=measure_base_population & dataset.include_patient_insect_bites
+)
+
+measures.define_measure(
+    name="gp_clarithromycin_insectbite",
+    numerator=dataset.numerator_gp_clarithromycin_insectbite,
+    denominator=measure_base_population & dataset.include_patient_insect_bites
+)
+
+
+# 4. Otitis media: Amoxicillin and clarithromycin
+measures.define_measure(
+    name="pf_amoxicillin_otitismedia",
+    numerator=dataset.numerator_pf_amoxicillin_otitismedia,
+    denominator=measure_base_population & dataset.include_patient_otitis_media
+)
+
+measures.define_measure(
+    name="gp_amoxicillin_otitismedia",
+    numerator=dataset.numerator_gp_amoxicillin_otitismedia,
+    denominator=measure_base_population & dataset.include_patient_otitis_media
+)
+
+measures.define_measure(
+    name="pf_clarithromycin_otitismedia",
+    numerator=dataset.numerator_pf_clarithromycin_otitismedia,
+    denominator=measure_base_population & dataset.include_patient_otitis_media
+)
+
+measures.define_measure(
+    name="gp_clarithromycin_otitismedia",
+    numerator=dataset.numerator_gp_clarithromycin_otitismedia,
+    denominator=measure_base_population & dataset.include_patient_otitis_media
+)
+
+
+# 5. Sore throat: Phenoxymethylpenicillin and clarithromycin
+measures.define_measure(
+    name="pf_phenoxymethylpenicillin_sorethroat",
+    numerator=dataset.numerator_pf_phenoxymethylpenicillin_sorethroat,
+    denominator=measure_base_population & dataset.include_patient_sore_throat
+)
+
+measures.define_measure(
+    name="gp_phenoxymethylpenicillin_sorethroat",
+    numerator=dataset.numerator_gp_phenoxymethylpenicillin_sorethroat,
+    denominator=measure_base_population & dataset.include_patient_sore_throat
+)
+
+measures.define_measure(
+    name="pf_clarithromycin_sorethroat",
+    numerator=dataset.numerator_pf_clarithromycin_sorethroat,
+    denominator=measure_base_population & dataset.include_patient_sore_throat
+)
+
+measures.define_measure(
+    name="gp_clarithromycin_sorethroat",
+    numerator=dataset.numerator_gp_clarithromycin_sorethroat,
+    denominator=measure_base_population & dataset.include_patient_sore_throat
+)
+
+
+# 6. Shingles: Aciclovir and valaciclovir
+measures.define_measure(
+    name="pf_aciclovir_shingles",
+    numerator=dataset.numerator_pf_aciclovir_shingles,
+    denominator=measure_base_population & dataset.include_patient_shingles
+)
+
+measures.define_measure(
+    name="gp_aciclovir_shingles",
+    numerator=dataset.numerator_gp_aciclovir_shingles,
+    denominator=measure_base_population & dataset.include_patient_shingles
+)
+
+measures.define_measure(
+    name="pf_valaciclovir_shingles",
+    numerator=dataset.numerator_pf_valaciclovir_shingles,
+    denominator=measure_base_population & dataset.include_patient_shingles
+)
+
+measures.define_measure(
+    name="gp_valaciclovir_shingles",
+    numerator=dataset.numerator_gp_valaciclovir_shingles,
+    denominator=measure_base_population & dataset.include_patient_shingles
+)
+
+
+# 7. Impetigo: Fusidic acid and flucloxacillin
+measures.define_measure(
+    name="pf_fusidic_acid_impetigo",
+    numerator=dataset.numerator_pf_fusidic_acid_impetigo,
+    denominator=measure_base_population & dataset.include_patient_impetigo
+)
+
+measures.define_measure(
+    name="gp_fusidic_acid_impetigo",
+    numerator=dataset.numerator_gp_fusidic_acid_impetigo,
+    denominator=measure_base_population & dataset.include_patient_impetigo
+)
+
+measures.define_measure(
+    name="pf_flucloxacillin_impetigo",
+    numerator=dataset.numerator_pf_flucloxacillin_impetigo,
+    denominator=measure_base_population & dataset.include_patient_impetigo
+)
+
+measures.define_measure(
+    name="gp_flucloxacillin_impetigo",
+    numerator=dataset.numerator_gp_flucloxacillin_impetigo,
+    denominator=measure_base_population & dataset.include_patient_impetigo
+)
