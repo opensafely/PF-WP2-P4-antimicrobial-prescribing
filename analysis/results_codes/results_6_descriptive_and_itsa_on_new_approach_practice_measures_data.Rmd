@@ -58,6 +58,7 @@ practice_measures <- read_csv(
     interval_end   = as.Date(interval_end)
   )
 
+names(practice_measures)
 
 # (a) Counts: one column per measure (numerator), e.g. gp_medication_uti
 practice_measures_counts <- practice_measures %>%
