@@ -59,11 +59,15 @@ practice_measures <- read_csv(
   )
 
 names(practice_measures)
+table(practice_measures$measure)
 
 # (a) Counts: one column per measure (numerator), e.g. gp_medication_uti
 practice_measures_counts <- practice_measures %>%
   select(practice, interval_start, measure, numerator) %>%
   pivot_wider(names_from = measure, values_from = numerator)
+
+  names(practice_measures_counts)
+table(practice_measures_counts$measure)
 
 # (b) Populations: the denominator of each measure is its eligible population.
 
