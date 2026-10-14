@@ -113,3 +113,113 @@ ggsave(
   height = 6,
   dpi = 300
 )
+
+#II.Medications by condition: Stacked barplot
+# Medication variables across all conditions
+medication_data <- practice_level_data_by_practice_only %>%
+  select(
+    practice, interval_start,
+    pf_nitrofurantoin_uti:gp_clarithromycin_sorethroat,
+    pf_aciclovir_shingles:gp_flucloxacillin_impetigo
+  ) %>%
+  pivot_longer(
+    cols = -c(practice, interval_start),
+    names_to = "measure",
+    values_to = "count"
+  ) %>%
+  mutate(
+    setting = if_else(grepl("^pf_", measure), "PF", "GP"),
+    antibiotic = sub("^(pf|gp)_", "", measure),
+    condition = case_when(
+      grepl("_uti$", measure) ~ "UTI",
+      grepl("_sinusitis$", measure) ~ "Sinusitis",
+      grepl("_insectbite$", measure) ~ "Insect bites",
+      grepl("_otitismedia$", measure) ~ "Otitis media",
+      grepl("_sorethroat$", measure) ~ "Sore throat",
+      grepl("_shingles$", measure) ~ "Shingles",
+      grepl("_impetigo$", measure) ~ "Impetigo",
+      TRUE ~ NA_character_
+    ),
+    antibiotic = sub(
+      "_(uti|sinusitis|insectbite|otitismedia|sorethroat|shingles|impetigo)$",
+      "", antibiotic
+    ),
+    antibiotic = tools::toTitleCase(gsub("_", " ", antibiotic))
+  ) %>%
+  filter(!is.na(condition))
+
+# Sum counts across practices by month, condition and antibiotic
+medication_monthly <- medication_data %>%
+  group_by(interval_start, setting, condition, antibiotic) %>%
+  summarise(
+    count = sum(count, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# GP: individual antibiotics stacked by condition
+gp_antibiotics_by_condition <- medication_monthly %>%
+  filter(setting == "GP") %>%
+  filter(condition=="UTI")%>%
+  ggplot(aes(
+    x = interval_start,
+    y = count,
+    fill = antibiotic
+  )) +
+  geom_area(position = "stack") +
+  facet_wrap(~ condition, scales = "free_y") +
+  labs(
+    title = "C.GP antibiotic prescribing by condition",
+    x = "Month",
+    y = "Medication count",
+    fill = "Antibiotic"
+  ) +
+ theme_bw() +
+  guides(fill = guide_legend(nrow = 1, title.position = "left")) +
+  theme(legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(0.4, "cm"))
+    
+# Pharmacy First: individual antibiotics stacked by condition
+pf_antibiotics_by_condition <- medication_monthly %>%
+  filter(setting == "PF") %>%
+  filter(condition=="UTI")%>%
+  ggplot(aes(
+    x = interval_start,
+    y = count,
+    fill = antibiotic
+  )) +
+  geom_area(position = "stack") +
+  facet_wrap(~ condition, scales = "free_y",ncol=2) +
+  labs(
+    title = "D.Pharmacy First antibiotic prescribing by condition",
+    x = "Month",
+    y = "Medication count",
+    fill = "Antibiotic"
+  ) +
+  theme_bw() +
+  guides(fill = guide_legend(nrow = 1, title.position = "left")) +
+  theme(legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(0.4, "cm"))
+
+# Display separately
+print(gp_antibiotics_by_condition)
+print(pf_antibiotics_by_condition)
+ggsave(
+  filename = "output/results_7_medications_gp_by_condition.png",
+  plot = gp_antibiotics_by_condition,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+ggsave(
+  filename = "output/results_7_medications_pf_by_condition.png",
+  plot = pf_antibiotics_by_condition,
+  path = here::here(),
+  width = 10,
+  height = 6,
+  dpi = 300
+)

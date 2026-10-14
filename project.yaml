@@ -775,7 +775,7 @@ actions:
       # fig29: output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png
    
   generate_results_7_specific_medications:
-    run: r:v2 analysis/results_codes/results_7_medications.R
+    run: r:v2 analysis/results_codes/results_7_specific_medications.R
     needs: 
     - generate_measures_Arnaud
     - generate_patient_measures_for_practices
@@ -784,6 +784,8 @@ actions:
       moderately_sensitive:
         chart_1: output/results_7_medications_pf.png
         chart_2: output/results_7_medications_gp.png
+        chart_3: output/results_7_medications_pf_by_condition.png
+        chart_4: output/results_7_medications_gp_by_condition.png
     
   generate_html_results_5_fig20_faceted_counts_by_condition:
     run: r:v2 analysis/results_codes/results_5_Fig20_faceted_counts_by_condition.R
@@ -791,7 +793,7 @@ actions:
     outputs:
       moderately_sensitive:
         fig20: output/results_5_Fig20_faceted_counts_by_condition.png
-
+  
   generate_measures_new_approach_consultation:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation.py
       --output output/measures_new_approach_consultation.csv
