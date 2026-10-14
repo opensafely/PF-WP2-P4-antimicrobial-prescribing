@@ -107,13 +107,7 @@ stacked_plot <- ggplot(
   aes(x = interval_start, y = medication_count, fill = condition)
 ) +
   geom_col(width = 25, position = "stack") +            # ~1-month-wide bars
-  geom_line(
-    data = total_data,
-    aes(x = interval_start, y = medication_count),
-    inherit.aes = FALSE,
-    linewidth = 0.4,
-    colour = "black"
-  ) +
+  # geom_line( data = total_data, aes(x = interval_start, y = medication_count),inherit.aes = FALSE,linewidth = 0.4,colour = "black") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.3) +
   geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.3, color = "blue") +
   facet_wrap(~ Setting, ncol = 1, scales = "free_y") +
