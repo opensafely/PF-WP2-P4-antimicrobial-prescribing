@@ -112,7 +112,7 @@ stacked_plot <- ggplot(
   geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.3, color = "blue") +
   facet_wrap(~ Setting, ncol = 1, scales = "free_y") +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "2 months") +
-  scale_y_continuous(labels = comma) +
+  # scale_y_continuous(labels = comma) +
   scale_fill_brewer(palette = "Set2", name = "Condition") +
   labs(
     title = "Monthly medication volume by condition in both GP and PF settings",
