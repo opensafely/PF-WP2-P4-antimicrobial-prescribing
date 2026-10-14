@@ -167,6 +167,7 @@ gp_antibiotics_by_condition <- medication_monthly %>%
   )) +
   geom_area(position = "stack") +
   facet_wrap(~ condition, scales = "free_y") +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
     title = "C.GP antibiotic prescribing by condition",
     x = "Month",
@@ -190,6 +191,7 @@ pf_antibiotics_by_condition <- medication_monthly %>%
     fill = antibiotic
   )) +
   geom_area(position = "stack") +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   facet_wrap(~ condition, scales = "free_y",ncol=2) +
   labs(
     title = "D.Pharmacy First antibiotic prescribing by condition",
