@@ -122,6 +122,7 @@ facet_numerators_plot <- ggplot(
     y = "Medication count"
   ) +
   theme_bw() +
+  
   theme(
     legend.position = "bottom",
     axis.text.x = element_text(angle = 45, hjust = 1),

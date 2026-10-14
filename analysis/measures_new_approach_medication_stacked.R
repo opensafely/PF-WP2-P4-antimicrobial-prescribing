@@ -114,6 +114,7 @@ stacked_plot <- ggplot(
   scale_x_date(date_labels = "%Y-%m", date_breaks = "2 months") +
   scale_y_continuous(labels = comma) +
   scale_fill_brewer(palette = "Set2", name = "Condition") +
+  guides(fill = guide_legend(nrow = 1, title.position = "left")) +
   labs(
     title = "Monthly medication volume by condition in both GP and PF settings",
     #subtitle = "Bars: stacked by condition; black line: Total",
