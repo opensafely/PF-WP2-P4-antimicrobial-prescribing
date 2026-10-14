@@ -50,6 +50,8 @@ gp_antibiotics_plot <- antibiotic_monthly %>%
   filter(setting == "GP") %>%
   ggplot(aes(x = interval_start, y = count, fill = antibiotic)) +
   geom_area(position = "stack") +
+  geom_vline(xintercept = as.Date(GP_connect),linetype = "dashed",colour = "blue",linewidth = 0.8 ) +
+  geom_vline(xintercept = as.Date(PF_start),linetype = "dashed",colour = "black",linewidth = 0.8 ) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
     title = "A.GP antibiotic prescribing across conditions",
@@ -74,6 +76,8 @@ pf_antibiotics_plot <- antibiotic_monthly %>%
   filter(setting == "PF") %>%
   ggplot(aes(x = interval_start, y = count, fill = antibiotic)) +
   geom_area(position = "stack") +
+  geom_vline(xintercept = as.Date(GP_connect),linetype = "dashed",colour = "blue",linewidth = 0.8 ) +
+  geom_vline(xintercept = as.Date(PF_start),linetype = "dashed",colour = "black",linewidth = 0.8 ) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
     title = "B.PF antibiotic prescribing across conditions",
@@ -166,6 +170,8 @@ gp_antibiotics_by_condition <- medication_monthly %>%
     fill = antibiotic
   )) +
   geom_area(position = "stack") +
+  geom_vline(xintercept = as.Date(GP_connect),linetype = "dashed",colour = "blue",linewidth = 0.8 ) +
+  geom_vline(xintercept = as.Date(PF_start),linetype = "dashed",colour = "black",linewidth = 0.8 ) +
   facet_wrap(~ condition, scales = "free_y") +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -191,6 +197,8 @@ pf_antibiotics_by_condition <- medication_monthly %>%
     fill = antibiotic
   )) +
   geom_area(position = "stack") +
+  geom_vline(xintercept = as.Date(GP_connect),linetype = "dashed",colour = "blue",linewidth = 0.8 ) +
+  geom_vline(xintercept = as.Date(PF_start),linetype = "dashed",colour = "black",linewidth = 0.8 ) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   facet_wrap(~ condition, scales = "free_y",ncol=2) +
   labs(
