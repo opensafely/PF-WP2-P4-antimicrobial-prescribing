@@ -115,7 +115,7 @@ facet_numerators_plot <- ggplot(
     date_labels = "%Y-%m",
     date_breaks = "2 months"
   ) +
-  scale_y_continuous(labels = comma) +
+  #scale_y_continuous(labels = comma) +
   labs(
     title = "Monthly medication counts by condition and setting",
     x = "Month",
