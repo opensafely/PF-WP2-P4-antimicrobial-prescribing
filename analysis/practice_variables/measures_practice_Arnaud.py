@@ -319,22 +319,19 @@ measures.define_measure(
 measures.define_measure(
     name="gp_nitrofurantoin_uti",
     numerator=dataset.numerator_gp_nitrofurantoin_uti,
-    denominator=measure_base_population & dataset.include_patient_uuti,
-    group_by=group,
+    denominator=measure_base_population & dataset.include_patient_uuti
 )
 
 measures.define_measure(
     name="pf_trimethoprim_uti",
     numerator=dataset.numerator_pf_trimethoprim_uti,
-    denominator=measure_base_population & dataset.include_patient_uuti,
-    group_by=group,
-)
+    denominator=measure_base_population & dataset.include_patient_uuti
+    )
 
 measures.define_measure(
     name="gp_trimethoprim_uti",
     numerator=dataset.numerator_gp_trimethoprim_uti,
-    denominator=measure_base_population & dataset.include_patient_uuti,
-    group_by=group,
+    denominator=measure_base_population & dataset.include_patient_uuti
 )
 
 
@@ -342,8 +339,7 @@ measures.define_measure(
 measures.define_measure(
     name="pf_phenoxymethylpenicillin_sinusitis",
     numerator=dataset.numerator_pf_phenoxymethylpenicillin_sinusitis,
-    denominator=measure_base_population & dataset.include_patient_sinusitis,
-    group_by=group,
+    denominator=measure_base_population & dataset.include_patient_sinusitis
 )
 
 measures.define_measure(
