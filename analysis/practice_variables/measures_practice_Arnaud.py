@@ -23,7 +23,7 @@ GROUPS = {
 measures = create_measures()
 measures.configure_disclosure_control(enabled=False)
 measures.define_defaults(
-    intervals=months(2).starting_on("2024-02-01"), # intervals=months(2).starting_on("2025-10-01") Here we may be able to see both GP and PF data in GP records.
+    intervals=months(48).starting_on("2024-02-01"), # intervals=months(2).starting_on("2025-10-01") Here we may be able to see both GP and PF data in GP records.
     group_by=GROUPS
     #intervals=years(48).starting_on("2024-02-01")
 )
