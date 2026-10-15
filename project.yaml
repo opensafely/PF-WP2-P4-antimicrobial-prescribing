@@ -792,8 +792,7 @@ actions:
     needs: [generate_patient_measures_for_practices]
     outputs:
       moderately_sensitive:
-        fig20: output/results_5_Fig20_faceted_counts_by_condition.png
-  
+        fig20: output/results_5_Fig20_faceted_counts_by_condition.png 
   generate_measures_new_approach_consultation:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation.py
       --output output/measures_new_approach_consultation.csv
