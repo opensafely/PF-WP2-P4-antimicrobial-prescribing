@@ -133,3 +133,102 @@ ggsave(
   dpi = 300
 )
 
+
+#....................Annual medication volume
+
+
+```r
+# -----------------------------------------------------------------------------
+# 2. Annual numerators by condition and setting
+# -----------------------------------------------------------------------------
+
+numerators_annual <- measures_new_approach %>%
+  filter(
+    str_detect(
+      measure,
+      paste0(
+        "^(gp|pf)_medication_(",
+        paste(conditions, collapse = "|"),
+        ")$"
+      )
+    )
+  ) %>%
+  mutate(
+    year = as.integer(format(interval_start, "%Y"))
+  ) %>%
+  group_by(year, measure) %>%
+  summarise(
+    medication_count = sum(numerator, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  extract(
+    measure,
+    into = c("Setting", "condition"),
+    regex = "^(gp|pf)_medication_(.*)$"
+  ) %>%
+  mutate(
+    Setting = recode(Setting, gp = "GP", pf = "PF"),
+    condition = recode(
+      condition,
+      uti = "UTI",
+      sinusitis = "Sinusitis",
+      insectbite = "Insect bites",
+      otitismedia = "Otitis media",
+      sorethroat = "Sore throat",
+      shingles = "Shingles",
+      impetigo = "Impetigo",
+      all_conditions = "All PF conditions"
+    )
+  )
+
+# -----------------------------------------------------------------------------
+# 3. Annual stacked barplot: GP vs PF
+# -----------------------------------------------------------------------------
+
+stacked_data <- numerators_annual %>%
+  filter(condition != "All PF conditions") %>%
+  mutate(
+    condition = fct_reorder(
+      condition,
+      medication_count,
+      .fun = sum,
+      .desc = TRUE
+    )
+  )
+
+stacked_plot <- ggplot(
+  stacked_data,
+  aes(
+    x = factor(year),
+    y = medication_count,
+    fill = condition
+  )
+) +
+  geom_col(position = "stack", width = 0.7) +
+  facet_wrap(~ Setting, ncol = 1, scales = "free_y") +
+  scale_y_continuous(labels = comma) +
+  scale_fill_brewer(palette = "Set2", name = "Condition") +
+  guides(fill = guide_legend(nrow = 2, title.position = "left")) +
+  labs(
+    title = "Annual medication volume by condition in GP and PF settings",
+    subtitle = "Annual totals summed across months",
+    x = "Year",
+    y = "Medication count"
+  ) +
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold")
+  )
+
+stacked_plot
+
+ggsave(
+  filename = here("output", "measures_new_approach_medication_stacked_annual.png"),
+  plot = stacked_plot,
+  width = 10,
+  height = 7,
+  dpi = 300
+)
+```
+

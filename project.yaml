@@ -830,7 +830,8 @@ actions:
     needs: [generate_measures_new_approach_medication]
     outputs:
       moderately_sensitive:
-        figure: output/measures_new_approach_medication_stacked.png
+        figure_1: output/measures_new_approach_medication_stacked.png
+        figure_2: output/measures_new_approach_medication_stacked_annual.png
 
   generate_measures_new_approach_consultation_and_medication:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation_and_medication.py
