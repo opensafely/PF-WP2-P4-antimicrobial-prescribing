@@ -824,8 +824,8 @@ actions:
     needs: [generate_measures_new_approach_medication]
     outputs:
       moderately_sensitive:
-        figure: output/measures_new_approach_facet_medication_rate.png
-
+        figure: output/measures_new_approach_facet_medication_rate.png 
+        
   process_measures_new_approach_medication_stacked:
     run: r:v2 analysis/measures_new_approach_medication_stacked.R
     needs: [generate_measures_new_approach_medication]
