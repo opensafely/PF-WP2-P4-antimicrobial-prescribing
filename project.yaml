@@ -833,7 +833,6 @@ actions:
       moderately_sensitive:
         figure: output/measures_new_approach_medication_stacked.png
 
-
   generate_measures_new_approach_consultation_and_medication:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation_and_medication.py
       --output output/measures_new_approach_consultation_and_medication.csv
