@@ -206,8 +206,9 @@ otitis_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 0.5) +
-  geom_point(size = 2.5,color="red") +
+  geom_point(size = 1) + # ,color="red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
+  geom_vline(xintercept = PF_start, color="blue", linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
     title = "Monthly medication counts for otitis media",
@@ -265,7 +266,7 @@ uti_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 0.5) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1)+  #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -328,7 +329,7 @@ sinusitis_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) +  #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -391,7 +392,7 @@ insectbite_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1)+  #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -454,7 +455,7 @@ sorethroat_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) + # , color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -515,7 +516,7 @@ shingles_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) + # , color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -578,7 +579,7 @@ impetigo_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) + #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -639,7 +640,7 @@ all_conditions_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) +  #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -702,7 +703,7 @@ uti_control_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) +  #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -764,7 +765,7 @@ insectbite_control_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1.0) + # , color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -826,7 +827,7 @@ sorethroat_control_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1.0) + # , color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   scale_x_date(date_labels = "%Y-%m", date_breaks = "1 months") +
   labs(
@@ -887,7 +888,7 @@ plot_gp_pf <- function(data, condition, condition_label) {
     )
   ) +
     geom_line(linewidth = 0.5) +
-    geom_point(size = 2.5, color = "red") +
+    geom_point(size = 1.0) +  # , color = "red") +
     geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
     scale_x_date(
       date_labels = "%Y-%m",
@@ -1003,7 +1004,7 @@ faceted_counts_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 0.5) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1) + #, color = "red") +
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(
     ~ condition,
@@ -1321,7 +1322,7 @@ faceted_rate_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 0.5) +
-  geom_point(size = 2.5, color = "red") +
+  geom_point(size = 1)  +   #
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(
     ~ condition,
