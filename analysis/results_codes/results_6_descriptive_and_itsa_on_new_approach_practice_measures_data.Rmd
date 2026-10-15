@@ -1526,9 +1526,9 @@ where:
 ## 8.1 Prepare ITSA dataset
 
 ```{r}
-#names(practice_measures)
-# GP Connect intervention date
-intervention_date <- as.Date("2025-10-01")
+# names(practice_measures)
+# GP Connect intervention date or PF_start_date
+intervention_date <- as.Date("2024-02-01")
 #ITSA dataset
 
 study_start <- min(practice_measures$interval_start)
