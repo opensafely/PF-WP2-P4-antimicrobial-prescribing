@@ -133,16 +133,11 @@ ggsave(
   dpi = 300
 )
 
-
-#....................Annual medication volume
-
-
-```r
 # -----------------------------------------------------------------------------
-# 2. Annual numerators by condition and setting
+# II. Annual numerators by condition and setting
 # -----------------------------------------------------------------------------
 
-numerators_annual <- measures_new_approach %>%
+numerators_annual <- measures_new_approach%>%
   filter(
     str_detect(
       measure,
@@ -208,18 +203,14 @@ stacked_plot <- ggplot(
   facet_wrap(~ Setting, ncol = 1, scales = "free_y") +
   scale_y_continuous(labels = comma) +
   scale_fill_brewer(palette = "Set2", name = "Condition") +
-  guides(fill = guide_legend(nrow = 2, title.position = "left")) +
+  guides(fill = guide_legend(nrow = 1, title.position = "left")) +
   labs(
     title = "Annual medication volume by condition in GP and PF settings",
     subtitle = "Annual totals summed across months",
     x = "Year",
     y = "Medication count"
   ) +
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    strip.text = element_text(face = "bold")
-  )
+  theme_pf
 
 stacked_plot
 
@@ -230,5 +221,3 @@ ggsave(
   height = 7,
   dpi = 300
 )
-```
-
