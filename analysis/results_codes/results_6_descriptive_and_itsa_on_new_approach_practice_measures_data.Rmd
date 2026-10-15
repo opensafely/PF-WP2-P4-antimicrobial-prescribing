@@ -217,7 +217,7 @@ otitis_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 otitis_plot
@@ -277,7 +277,7 @@ uti_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 uti_plot
@@ -341,7 +341,7 @@ sinusitis_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 sinusitis_plot
@@ -405,7 +405,7 @@ insectbite_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1),
   )
 
 insectbite_plot
@@ -469,7 +469,7 @@ sorethroat_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 sorethroat_plot
@@ -531,7 +531,7 @@ shingles_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 shingles_plot
@@ -595,7 +595,7 @@ impetigo_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 impetigo_plot
@@ -657,7 +657,7 @@ all_conditions_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 all_conditions_plot
@@ -722,7 +722,7 @@ uti_control_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 uti_control_plot
@@ -785,7 +785,7 @@ insectbite_control_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 insectbite_control_plot
@@ -848,7 +848,7 @@ sorethroat_control_plot <- ggplot(
   ) +
   theme_bw() +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 sorethroat_control_plot
@@ -909,7 +909,7 @@ plot_gp_pf <- function(data, condition, condition_label) {
     ) +
     theme_bw() +
     theme(
-      legend.position = "bottom"
+      legend.position = "bottom",axis.text.x = element_text(angle = 45, hjust = 1)
     )
 }
 
@@ -1952,11 +1952,11 @@ post_estimation_trend_plot <- ggplot(plot_data, aes(x = interval_start, colour =
   scale_linetype_manual(values = c(Treatment = "solid", Control = "dashed")) +
   labs(
     title = "Urinary tract infections (Treatment) vs. Vulvovaginalis-candidiasis (Control)",
-    subtitle = paste("GP connect starts:", format(intervention_date, "%Y-%m-%d")),
+    subtitle = paste("GP connect starts:", format(intervention_date, "%Y-%m")),
     x = "Month", y = "Rate (medications per population)",
     colour = "Group", shape = "Group", linetype = "Group"
   ) +
-  #theme_minimal()+
+  theme_minimal()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 post_estimation_trend_plot
