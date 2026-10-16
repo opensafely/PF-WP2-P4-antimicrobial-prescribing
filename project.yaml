@@ -847,7 +847,9 @@ actions:
     moderately_sensitive:
       figure_1: output/distribution/GP/consultations/impetigo/A_spaghetti.png
       figure_2: output/distribution/GP/consultations/impetigo/D1_baseline_heatmap.png
-        
+      figure_3: output/distribution/GP/consultations/impetigo/D2_yoy_heatmap.png
+      figure_4: output/distribution/GP/consultations/impetigo/F_yoy_distribution.png
+
   process_measures_new_approach_consultation_and_medication:
     run: r:v3 -e 'rmarkdown::render("/workspace/analysis/results_codes/results_6_descriptive_and_itsa_on_new_approach_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")' #run: r:v3 -e 'rmarkdown::render("analysis/results_codes/results_6_descriptive_and_itsa_on_new_approach_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
