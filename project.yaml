@@ -840,6 +840,14 @@ actions:
       highly_sensitive:
         measures: output/measures_new_approach_consultation_and_medication.csv
 
+  process_measures_new_approach_medication_distribution_soai:
+   run: r:v2 analysis/measures_new_approach_medication_distribution_soai.R
+   needs: [generate_measures_new_approach_consultation_and_medication]
+   outputs:
+    moderately_sensitive:
+      figure_1: output/distribution/GP/consultations/impetigo/A_spaghetti.png
+      figure_2: output/distribution/GP/consultations/impetigo/D1_baseline_heatmap.png
+        
   process_measures_new_approach_consultation_and_medication:
     run: r:v3 -e 'rmarkdown::render("/workspace/analysis/results_codes/results_6_descriptive_and_itsa_on_new_approach_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")' #run: r:v3 -e 'rmarkdown::render("analysis/results_codes/results_6_descriptive_and_itsa_on_new_approach_practice_measures_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
