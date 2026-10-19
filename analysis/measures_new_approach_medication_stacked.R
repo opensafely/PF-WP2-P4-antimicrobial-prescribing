@@ -1,8 +1,6 @@
 
-# =============================================================================
+
 # Monthly and annual medication counts by condition and setting
-# GP vs Pharmacy First (PF)
-# =============================================================================
 
 library(tidyverse)
 library(here)
@@ -10,9 +8,7 @@ library(scales)
 library(lubridate)
 library(readr)
 
-# -----------------------------------------------------------------------------
-# 1. Load and inspect data
-# -----------------------------------------------------------------------------
+# 1. Data
 
 measures_new_approach <- read_csv(
   here("output", "measures_new_approach_medication.csv"),
@@ -35,14 +31,13 @@ message(
   max(measures_new_approach$interval_start, na.rm = TRUE)
 )
 
-print(head(measures_new_approach))
-
+#print(head(measures_new_approach))
 # Check output directory
-if (!dir.exists(here("output"))) {
-  stop("The output directory does not exist: ", here("output"))
-}
+#if (!dir.exists(here("output"))) {
+#  stop("The output directory does not exist: ", here("output"))
+#}
 
-# Conditions to include
+# Conditions
 conditions <- c(
   "uti",
   "sinusitis",
@@ -129,16 +124,8 @@ stacked_data <- numerators_monthly %>%
 
 stacked_plot <- ggplot(
   stacked_data,
-  aes(
-    x = interval_start,
-    y = medication_count,
-    fill = condition
-  )
-) +
-  geom_col(
-    width = 23,
-    position = "stack"
-  ) +
+  aes( x = interval_start, y = medication_count, fill = condition )) +
+  geom_col( width = 23, position = "stack") +
   geom_vline(
     xintercept = PF_start,
     linetype = "dashed",
@@ -151,11 +138,7 @@ stacked_plot <- ggplot(
     linewidth = 0.5,
     colour = "black"
   ) +
-  facet_wrap(
-    ~ Setting,
-    ncol = 1,
-    scales = "free_y"
-  ) +
+  facet_wrap(~ Setting, ncol = 1, scales = "free_y") +
   scale_x_date(
     date_labels = "%Y-%m",
     date_breaks = "2 months",
@@ -356,30 +339,14 @@ medication_annual <- numerators_monthly %>%
 print(medication_annual, n = Inf)
 
 # Export annual summary table
-write_csv(
-  medication_annual,
-  here(
-    "output",
-    "measures_new_approach_annual_medication_counts_and_changes.csv"
-  )
-)
+#write_csv(medication_annual, here("output","measures_new_approach_annual_medication_counts_and_changes.csv"))
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 # 5. Figure 1: Annual medication counts with percentage changes
-# -----------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------
 
-annual_counts_plot <- ggplot(
-  medication_annual,
-  aes(
-    x = factor(year),
-    y = annual_count,
-    fill = Setting
-  )
-) +
-  geom_col(
-    position = position_dodge(width = 0.85),
-    width = 0.75
-  ) +
+annual_counts_plot <- ggplot( medication_annual, aes(x = factor(year), y = annual_count,fill = Setting)) +
+  geom_col( position = position_dodge(width = 0.85),width = 0.75) +
   geom_text(
     aes(label = bar_label),
     position = position_dodge(width = 0.85),
