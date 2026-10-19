@@ -393,6 +393,7 @@ ggsave(
   dpi = 300
 )
 
+
 # -----------------------------------------------------------------------------
 # 6. Figure 2: Year-on-year percentage change
 # -----------------------------------------------------------------------------
@@ -403,59 +404,99 @@ medication_annual_change <- medication_annual %>%
     change_label = sprintf("%+.1f%%", percentage_change)
   )
 
-annual_change_plot <- ggplot(
-  medication_annual_change,
-  aes(
-    x = year,
-    y = percentage_change,
-    color = Setting,
-    group = Setting
-  )
-) +
-  geom_hline(
-    yintercept = 0,
-    linetype = "dashed",
-    linewidth = 0.4,
-    colour = "grey50"
-  ) +
-  geom_line(
-    linewidth = 0.6
-  ) +
-  geom_point(
-    size = 2
-  ) +
-  geom_text(
+message(
+  "Number of valid year-on-year comparisons: ",
+  nrow(medication_annual_change)
+)
+
+if (nrow(medication_annual_change) > 0) {
+
+  annual_change_plot <- ggplot(
+    medication_annual_change,
     aes(
-      label = change_label,
-      vjust = if_else(percentage_change >= 0, -0.8, 1.3)
-    ),
-    size = 2.7,
-    show.legend = FALSE,
-    check_overlap = TRUE
+      x = year,
+      y = percentage_change,
+      color = Setting,
+      group = Setting
+    )
   ) +
-  facet_wrap(
-    ~ condition,
-    scales = "free_y",
-    ncol = 2
-  ) +
-  scale_x_continuous(
-    breaks = sort(unique(medication_annual_change$year))
-  ) +
-  scale_y_continuous(
-    labels = label_number(suffix = "%"),
-    expand = expansion(mult = c(0.20, 0.30))
-  ) +
-  labs(
-    title = "Year-on-year change in medication counts",
-    subtitle = paste(
-      "Each year is compared with the immediately preceding",
-      "complete calendar year"
-    ),
-    x = "Year",
-    y = "Change from previous year (%)",
-    color = "Setting"
-  ) +
-  theme_pf
+    geom_hline(
+      yintercept = 0,
+      linetype = "dashed",
+      linewidth = 0.4,
+      colour = "grey50"
+    ) +
+    geom_line(linewidth = 0.6) +
+    geom_point(size = 2) +
+    geom_text(
+      aes(
+        label = change_label,
+        vjust = if_else(
+          percentage_change >= 0, -0.8, 1.3
+        )
+      ),
+      size = 2.7,
+      show.legend = FALSE,
+      check_overlap = TRUE
+    ) +
+    facet_wrap(
+      ~ condition,
+      scales = "free_y",
+      ncol = 2
+    ) +
+    scale_x_continuous(
+      breaks = sort(unique(medication_annual_change$year))
+    ) +
+    scale_y_continuous(
+      labels = label_number(suffix = "%"),
+      expand = expansion(mult = c(0.20, 0.30))
+    ) +
+    labs(
+      title = "Year-on-year change in medication counts",
+      subtitle = paste(
+        "Consecutive complete calendar years only;",
+        "previous-year count must be greater than zero"
+      ),
+      x = "Year",
+      y = "Change from previous year (%)",
+      color = "Setting"
+    ) +
+    theme_pf
+
+} else {
+
+  message(
+    "No eligible year-on-year percentage changes were found. ",
+    "Check annual counts, previous-year counts and year coverage."
+  )
+
+  annual_change_plot <- ggplot() +
+    annotate(
+      "text",
+      x = 0,
+      y = 0,
+      label = paste(
+        "No eligible year-on-year comparisons available.",
+        "Check complete-year coverage and previous-year counts.",
+        sep = "\n"
+      ),
+      size = 4
+    ) +
+    labs(
+      title = "Year-on-year change in medication counts",
+      x = NULL,
+      y = NULL
+    ) +
+    theme_void() +
+    theme(
+      plot.title = element_text(
+        face = "bold",
+        hjust = 0.5
+      )
+    ) +
+    xlim(-1, 1) +
+    ylim(-1, 1)
+}
 
 print(annual_change_plot)
 
