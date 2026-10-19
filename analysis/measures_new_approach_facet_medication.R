@@ -1,28 +1,23 @@
-# =============================================================================
-# Pharmacy First — measures_new_approach
-# Monthly medication counts (numerators) by condition and setting (GP vs PF),
-# faceted by PF condition
-# Author: Arnaud Iradukunda
-# =============================================================================
+#Monthly and annual medication counts
 
 library(tidyverse)
 library(here)
+library(lubridate)
+library(scales)
 
 # -----------------------------------------------------------------------------
-# 1. Data
-#    Output of generate_measures_new_approach, in long format:
-#    measure, interval_start, interval_end, ratio, numerator, denominator
-#    (plus any group_by columns, if added later)
+# 1. Read data
 # -----------------------------------------------------------------------------
+
 measures_new_approach <- read_csv(
   here("output", "measures_new_approach_medication.csv"),
   show_col_types = FALSE
 ) %>%
   mutate(interval_start = as.Date(interval_start))
 
-# GP Connect date (vertical line)
+# Important dates
 GP_connect <- as.Date("2025-10-01")
-PF_start <- as.Date("2024-02-01")
+PF_start   <- as.Date("2024-02-01")
 
 message("Number of rows: ", nrow(measures_new_approach))
 message("Number of columns: ", ncol(measures_new_approach))
@@ -34,11 +29,10 @@ message(
   max(measures_new_approach$interval_start, na.rm = TRUE)
 )
 
-print(head(measures_new_approach))
+# -----------------------------------------------------------------------------
+# 2. Define conditions
+# -----------------------------------------------------------------------------
 
-
-
-# Conditions to include
 conditions <- c(
   "uti",
   "sinusitis",
@@ -51,15 +45,18 @@ conditions <- c(
 )
 
 # -----------------------------------------------------------------------------
-# 2. Monthly numerators by condition and setting
-#    Summing by month and measure gives one total per month even if the
-#    measures are later split by group_by (e.g. practice, age band).
+# 3. Monthly medication counts by condition and setting
 # -----------------------------------------------------------------------------
+
 numerators_monthly <- measures_new_approach %>%
   filter(
     str_detect(
       measure,
-      paste0("^(gp|pf)_medication_(", paste(conditions, collapse = "|"), ")$")
+      paste0(
+        "^(gp|pf)_medication_(",
+        paste(conditions, collapse = "|"),
+        ")$"
+      )
     )
   ) %>%
   group_by(interval_start, measure) %>%
@@ -69,29 +66,32 @@ numerators_monthly <- measures_new_approach %>%
   ) %>%
   extract(
     measure,
-    into  = c("Setting", "condition"),
+    into = c("Setting", "condition"),
     regex = "^(gp|pf)_medication_(.*)$"
   ) %>%
   mutate(
-    Setting = case_when(
-      Setting == "gp" ~ "GP",
-      Setting == "pf" ~ "PF"
+    Setting = recode(
+      Setting,
+      gp = "GP",
+      pf = "PF"
     ),
-    condition = case_when(
-      condition == "uti"            ~ "UTI",
-      condition == "sinusitis"      ~ "Sinusitis",
-      condition == "insectbite"     ~ "Insect bites",
-      condition == "otitismedia"    ~ "Otitis media",
-      condition == "sorethroat"     ~ "Sore throat",
-      condition == "shingles"       ~ "Shingles",
-      condition == "impetigo"       ~ "Impetigo",
-      condition == "all_conditions" ~ "All PF conditions"
+    condition = recode(
+      condition,
+      uti            = "UTI",
+      sinusitis      = "Sinusitis",
+      insectbite     = "Insect bites",
+      otitismedia    = "Otitis media",
+      sorethroat     = "Sore throat",
+      shingles       = "Shingles",
+      impetigo       = "Impetigo",
+      all_conditions = "All PF conditions"
     )
   )
 
 # -----------------------------------------------------------------------------
-# 3. Faceted plot
+# 4. Figure 1: Monthly medication counts
 # -----------------------------------------------------------------------------
+
 facet_numerators_plot <- ggplot(
   numerators_monthly,
   aes(
@@ -103,9 +103,18 @@ facet_numerators_plot <- ggplot(
   )
 ) +
   geom_line(linewidth = 0.5) +
-  geom_point(size = 1.0)+ #, color = "red") +
-  geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.3) +
-  geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.3,color = "blue") +
+  geom_point(size = 1.0) +
+  geom_vline(
+    xintercept = GP_connect,
+    linetype = "dashed",
+    linewidth = 0.3
+  ) +
+  geom_vline(
+    xintercept = PF_start,
+    linetype = "dashed",
+    linewidth = 0.3,
+    color = "blue"
+  ) +
   facet_wrap(
     ~ condition,
     scales = "free_y",
@@ -115,29 +124,32 @@ facet_numerators_plot <- ggplot(
     date_labels = "%Y-%m",
     date_breaks = "2 months"
   ) +
-  #scale_y_continuous(labels = comma) +
+  scale_y_continuous(labels = comma) +
   labs(
     title = "Monthly medication counts by condition and setting",
     x = "Month",
-    y = "Medication count"
+    y = "Medication count",
+    color = "Setting",
+    shape = "Setting"
   ) +
   theme_bw() +
-  
   theme(
     legend.position = "bottom",
     axis.text.x = element_text(angle = 45, hjust = 1),
     strip.text = element_text(face = "bold")
   )
 
-facet_numerators_plot
+print(facet_numerators_plot)
 
-# -----------------------------------------------------------------------------
-# 4. Save as PNG
-# -----------------------------------------------------------------------------
 ggsave(
-  filename = here("output", "measures_new_approach_facet_medication.png"),
+  filename = here(
+    "output",
+    "measures_new_approach_facet_medication.png"
+  ),
   plot = facet_numerators_plot,
   width = 10,
   height = 6,
   dpi = 300
 )
+
+
