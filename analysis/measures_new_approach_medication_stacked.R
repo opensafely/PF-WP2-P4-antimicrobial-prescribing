@@ -154,7 +154,7 @@ stacked_plot <- ggplot(
   ) +
   guides(
     fill = guide_legend(
-      nrow = 2,
+      nrow = 1,
       title.position = "top"
     )
   ) +
@@ -239,7 +239,7 @@ stacked_annual_plot <- ggplot(
   ) +
   guides(
     fill = guide_legend(
-      nrow = 2,
+      nrow = 1,
       title.position = "top"
     )
   ) +
