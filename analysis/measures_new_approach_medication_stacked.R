@@ -335,7 +335,7 @@ medication_annual <- numerators_monthly %>%
   ) %>%
   ungroup()
 
-# Inspect annual summary
+# Annual summary
 print(medication_annual, n = Inf)
 
 # Export annual summary table
@@ -395,7 +395,187 @@ ggsave(
 
 
 # -----------------------------------------------------------------------------
-# 6. Figure 2: Year-on-year percentage change
+# 5. Annual medication counts and year-on-year changes(Reporting years: February to January
+# -----------------------------------------------------------------------------
+
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(here)
+
+medication_annual <- numerators_monthly %>%
+  mutate(
+    interval_start = as.Date(interval_start),
+    calendar_year = year(interval_start),
+    month = month(interval_start),
+
+    # February–January reporting years
+    year = if_else(
+      month >= 2,
+      calendar_year,
+      calendar_year - 1L
+    ),
+
+    # Reporting period labels
+    reporting_period = paste0(
+      year, "/", year + 1L
+    )
+  ) %>%
+  group_by(
+    condition,
+    Setting,
+    year,
+    reporting_period
+  ) %>%
+  summarise(
+    annual_count = sum(medication_count, na.rm = TRUE),
+    months_observed = n_distinct(interval_start),
+    .groups = "drop"
+  ) %>%
+  arrange(condition, Setting, year) %>%
+  group_by(condition, Setting) %>%
+  mutate(
+    # Previous reporting year
+    previous_year = lag(year),
+    previous_count = lag(annual_count),
+    previous_months = lag(months_observed),
+
+    # This checks whether reporting years are consecutive
+    consecutive_years = !is.na(previous_year) &
+      year == previous_year + 1L,
+
+    # Full reporting-year coverage
+    full_year = months_observed == 12,
+    previous_full_year = previous_months == 12,
+
+    # Absolute change between consecutive reporting years
+    absolute_change = if_else(
+      consecutive_years,
+      annual_count - previous_count,
+      NA_real_
+    ),
+
+    # Percentage change only when both periods are complete
+    percentage_change = if_else(
+      consecutive_years &
+        full_year &
+        previous_full_year &
+        !is.na(previous_count) &
+        previous_count > 0,
+      (annual_count - previous_count) /
+        previous_count * 100,
+      NA_real_
+    ),
+
+    # Percentage change labels
+    change_label = if_else(
+      !is.na(percentage_change),
+      sprintf("(%+.1f%%)", percentage_change),
+      ""
+    ),
+
+    # Bar labels
+    bar_label = case_when(
+      change_label != "" ~ paste0(
+        comma(annual_count),
+        "\n",
+        change_label
+      ),
+      TRUE ~ paste0(
+        comma(annual_count),
+        if_else(full_year, "", "*")
+      )
+    )
+  ) %>%
+  ungroup()
+
+# Print annual summary
+print(medication_annual, n = Inf)
+
+# Export annual summary table
+#write_csv(
+#  medication_annual,
+#  here(
+#   "output",
+#    "measures_new_approach_annual_medication_counts_and_changes.csv"
+# )
+#)
+
+# -----------------------------------------------------------------------------
+# 5.1.. Figure: Annual medication counts with percentage changes
+# -----------------------------------------------------------------------------
+
+full_annual_counts_plot <- ggplot(
+  medication_annual,
+  aes(
+    x = reporting_period,
+    y = annual_count,
+    fill = Setting
+  )
+) +
+  geom_col(
+    position = position_dodge(width = 0.85),
+    width = 0.75
+  ) +
+  geom_text(
+    aes(label = bar_label),
+    position = position_dodge(width = 0.85),
+    vjust = -0.2,
+    size = 2.6,
+    lineheight = 0.95,
+    show.legend = FALSE
+  ) +
+  facet_wrap(
+    ~ condition,
+    scales = "free_y",
+    ncol = 2
+  ) +
+  scale_x_discrete(
+    drop = FALSE
+  ) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = expansion(mult = c(0, 0.30))
+  ) +
+  labs(
+    title = "Annual medication counts by condition and setting",
+    subtitle = paste(
+      "February–January reporting years;",
+      "labels show annual totals and year-on-year percentage changes"
+    ),
+    caption = paste(
+      "* Reporting period based on fewer than 12 observed months.",
+      "Percentage changes are omitted when either reporting year",
+      "is incomplete or the previous count is zero."
+    ),
+    x = "Reporting year (February–January)",
+    y = "Annual medication count",
+    fill = "Setting"
+  ) +
+  theme_pf
+
+# Display plot
+print(annual_counts_plot)
+
+
+# -----------------------------------------------------------------------------
+# Save figure
+# -----------------------------------------------------------------------------
+
+ggsave(
+  filename = here(
+    "output",
+    "measures_new_approach_facet_medication_full_annual.png"
+  ),
+  plot = full_annual_counts_plot,
+  width = 13,
+  height = 10,
+  dpi = 300
+)
+
+
+# -----------------------------------------------------------------------------
+# 7. Figure 3: Year-on-year percentage change
 # -----------------------------------------------------------------------------
 
 medication_annual_change <- medication_annual %>%
