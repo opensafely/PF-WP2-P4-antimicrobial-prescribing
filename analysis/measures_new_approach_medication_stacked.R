@@ -420,7 +420,7 @@ medication_annual <- numerators_monthly %>%
     "Feb ", year, "\u2013Jan ", year + 1L
       )
     # Reporting period labels
-    #reporting_period = paste0(
+    # reporting_period = paste0(
     #  year, "/", year + 1L
     #)
   ) %>%
