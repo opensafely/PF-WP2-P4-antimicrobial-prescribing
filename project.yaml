@@ -833,7 +833,8 @@ actions:
         figure_1: output/measures_new_approach_medication_stacked.png
         Figure 2: output/measures_new_approach_medication_stacked_annual.png
         Figure 3: output/measures_new_approach_facet_medication_annual.png
-        Figure 4: output/measures_new_approach_facet_medication_annual_percentage_change.png
+        Figure 4: output/measures_new_approach_facet_medication_full_annual.png"
+        Figure 5: output/measures_new_approach_facet_medication_annual_percentage_change.png
   generate_measures_new_approach_consultation_and_medication:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation_and_medication.py
       --output output/measures_new_approach_consultation_and_medication.csv
