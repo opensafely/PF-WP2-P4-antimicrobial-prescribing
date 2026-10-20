@@ -395,7 +395,7 @@ ggsave(
 
 
 # -----------------------------------------------------------------------------
-# 5. Annual medication counts and year-on-year changes(Reporting years: February to January
+# 6. Annual medication counts and year-on-year changes(Reporting years: February to January
 # -----------------------------------------------------------------------------
 
 library(tidyverse)
@@ -416,10 +416,13 @@ medication_annual <- numerators_monthly %>%
       calendar_year - 1L
     ),
 
-    # Reporting period labels
     reporting_period = paste0(
-      year, "/", year + 1L
-    )
+    "Feb ", year, "\u2013Jan ", year + 1L
+      )
+    # Reporting period labels
+    #reporting_period = paste0(
+    #  year, "/", year + 1L
+    #)
   ) %>%
   group_by(
     condition,
@@ -502,7 +505,7 @@ print(medication_annual, n = Inf)
 #)
 
 # -----------------------------------------------------------------------------
-# 5.1.. Figure: Annual medication counts with percentage changes
+# 6.1.. Figure 2: full Annual medication counts with percentage changes
 # -----------------------------------------------------------------------------
 
 full_annual_counts_plot <- ggplot(
