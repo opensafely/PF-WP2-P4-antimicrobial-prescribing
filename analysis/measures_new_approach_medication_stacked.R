@@ -1,5 +1,3 @@
-
-
 # Monthly and annual medication counts by condition and setting
 
 library(tidyverse)
@@ -66,9 +64,7 @@ theme_pf <- theme_bw() +
     panel.grid.minor = element_blank()
   )
 
-# -----------------------------------------------------------------------------
 # 2.a. Monthly medication counts by condition and setting
-# -----------------------------------------------------------------------------
 
 numerators_monthly <- measures_new_approach %>%
   filter(
@@ -106,9 +102,8 @@ numerators_monthly <- measures_new_approach %>%
 # Inspect monthly data
 print(numerators_monthly)
 
-# -----------------------------------------------------------------------------
+
 # 2.b. Monthly stacked barplot: condition-specific medication counts
-# -----------------------------------------------------------------------------
 
 # Exclude the all-conditions aggregate to avoid double-counting
 stacked_data <- numerators_monthly %>%
@@ -182,10 +177,17 @@ ggsave(
   dpi = 300
 )
 
-# -----------------------------------------------------------------------------
-# 3.a. Annual medication counts by condition and setting
-# -----------------------------------------------------------------------------
+# Save the data underlying the monthly stacked PNG
+write_csv(
+  stacked_data %>%
+    arrange(Setting, interval_start, condition),
+  here(
+    "output",
+    "measures_new_approach_medication_stacked.csv"
+  )
+)
 
+# 3.a. Annual medication counts by condition and setting
 numerators_annual <- numerators_monthly %>%
   mutate(
     year = year(interval_start)
@@ -196,11 +198,7 @@ numerators_annual <- numerators_monthly %>%
     months_observed = n_distinct(month(interval_start)),
     .groups = "drop"
   )
-
-# -----------------------------------------------------------------------------
 # 3.b. Annual stacked barplot: GP vs PF
-# -----------------------------------------------------------------------------
-
 stacked_annual_data <- numerators_annual %>%
   filter(condition != "All PF conditions") %>%
   mutate(
@@ -263,11 +261,17 @@ ggsave(
   height = 8,
   dpi = 300
 )
+# Save the data underlying the annual stacked PNG
+write_csv(
+  stacked_annual_data %>%
+    arrange(Setting, year, condition),
+  here(
+    "output",
+    "measures_new_approach_medication_stacked_annual.csv"
+  )
+)
 
-# -----------------------------------------------------------------------------
 # 4. Annual medication counts and year-on-year changes
-# -----------------------------------------------------------------------------
-
 medication_annual <- numerators_monthly %>%
   mutate(
     year = year(interval_start),
@@ -337,14 +341,7 @@ medication_annual <- numerators_monthly %>%
 
 # Annual summary
 print(medication_annual, n = Inf)
-
-# Export annual summary table
-#write_csv(medication_annual, here("output","measures_new_approach_annual_medication_counts_and_changes.csv"))
-
-# ------------------------------------------------------------------------------------------------------------
 # 5. Figure 1: Annual medication counts with percentage changes
-# -------------------------------------------------------------------------------------------------------------
-
 annual_counts_plot <- ggplot( medication_annual, aes(x = factor(year), y = annual_count,fill = Setting)) +
   geom_col( position = position_dodge(width = 0.85),width = 0.75) +
   geom_text(
@@ -393,11 +390,16 @@ ggsave(
   dpi = 300
 )
 
+# Save the data underlying the calendar-year annual PNG
+write_csv(
+  medication_annual,
+  here(
+    "output",
+    "measures_new_approach_facet_medication_annual.csv"
+  )
+)
 
-# -----------------------------------------------------------------------------
 # 6. Annual medication counts and year-on-year changes(Reporting years: February to January
-# -----------------------------------------------------------------------------
-
 library(tidyverse)
 library(lubridate)
 library(scales)
@@ -491,35 +493,13 @@ medication_annual <- numerators_monthly %>%
     )
   ) %>%
   ungroup()
-
 # Print annual summary
 print(medication_annual, n = Inf)
-
-# Export annual summary table
-#write_csv(
-#  medication_annual,
-#  here(
-#   "output",
-#    "measures_new_approach_annual_medication_counts_and_changes.csv"
-# )
-#)
-
-# -----------------------------------------------------------------------------
-# 6.1.. Figure 2: full Annual medication counts with percentage changes
-# -----------------------------------------------------------------------------
-
+# 6.1.Figure 2: full Annual medication counts with percentage changes
 full_annual_counts_plot <- ggplot(
   medication_annual,
-  aes(
-    x = reporting_period,
-    y = annual_count,
-    fill = Setting
-  )
-) +
-  geom_col(
-    position = position_dodge(width = 0.85),
-    width = 0.75
-  ) +
+  aes(x = reporting_period, y = annual_count, fill = Setting )) +
+  geom_col( position = position_dodge(width = 0.85), width = 0.75) +
   geom_text(
     aes(label = bar_label),
     position = position_dodge(width = 0.85),
@@ -527,20 +507,11 @@ full_annual_counts_plot <- ggplot(
     size = 2.6,
     lineheight = 0.95,
     show.legend = FALSE
-  ) +
-  facet_wrap(
-    ~ condition,
-    scales = "free_y",
-    ncol = 2
-  ) +
-  scale_x_discrete(
-    drop = FALSE
-  ) +
-  scale_y_continuous(
-    labels = scales::comma,
-    expand = expansion(mult = c(0, 0.30))
-  ) +
-  labs(
+    ) +
+    facet_wrap(~ condition, scales = "free_y", ncol = 2) +
+    scale_x_discrete(drop = FALSE) + 
+    scale_y_continuous(labels = scales::comma,expand = expansion(mult = c(0, 0.30))) +
+    labs(
     title = "Annual medication counts by condition and setting",
     subtitle = paste(
       "February–January reporting years;",
@@ -556,15 +527,9 @@ full_annual_counts_plot <- ggplot(
     fill = "Setting"
   ) +
   theme_pf
-
-# Display plot
+# Plot
 print(annual_counts_plot)
-
-
-# -----------------------------------------------------------------------------
 # Save figure
-# -----------------------------------------------------------------------------
-
 ggsave(
   filename = here(
     "output",
@@ -576,6 +541,14 @@ ggsave(
   dpi = 300
 )
 
+# Save the data underlying the February–January annual PNG
+write_csv(
+  medication_annual,
+  here(
+    "output",
+    "measures_new_approach_facet_medication_full_annual.csv"
+  )
+)
 
 # -----------------------------------------------------------------------------
 # 7. Figure 3: Year-on-year percentage change
@@ -694,6 +667,15 @@ ggsave(
   dpi = 300
 )
 
+# Save the data underlying the percentage-change PNG
+write_csv(
+  medication_annual_change,
+  here(
+    "output",
+    "measures_new_approach_facet_medication_annual_percentage_change.csv"
+  )
+)
+
 # -----------------------------------------------------------------------------
 # 7. Data quality checks
 # -----------------------------------------------------------------------------
@@ -717,21 +699,13 @@ print(monthly_coverage, n = Inf)
 # Identify years with fewer than 12 observed months
 incomplete_years <- medication_annual %>%
   filter(months_observed < 12) %>%
-  select(
-    condition,
-    Setting,
-    year,
-    months_observed,
-    annual_count
-  )
+  select( condition, Setting, year, months_observed,annual_count )
 
 message("Annual summaries with fewer than 12 observed months:")
 print(incomplete_years, n = Inf)
-
-# Check that the stacked plots exclude the aggregate condition
+# Check 
 stopifnot(
   !any(stacked_data$condition == "All PF conditions"),
   !any(stacked_annual_data$condition == "All PF conditions")
 )
-
-#message("All plots and the annual summary table have been saved.")
+# message("All plots and the annual summary table have been saved.")
