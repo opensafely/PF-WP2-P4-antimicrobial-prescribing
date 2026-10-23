@@ -830,8 +830,8 @@ actions:
     outputs:
       moderately_sensitive:
         # Monthly and annual medication counts by condition and setting
-        figure_1: output/measures_new_approach_medication_stacked.png
-        csv_1   : output/measures_new_approach_medication_stacked.csv
+        figure 1: output/measures_new_approach_medication_stacked.png
+        csv_1 : output/measures_new_approach_medication_stacked.csv
         Figure 2: output/measures_new_approach_medication_stacked_annual.png
         csv_2 : output/measures_new_approach_medication_stacked_annual.csv
         Figure 3: output/measures_new_approach_facet_medication_annual.png
