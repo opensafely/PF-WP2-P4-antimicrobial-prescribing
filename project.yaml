@@ -831,10 +831,15 @@ actions:
       moderately_sensitive:
         # Monthly and annual medication counts by condition and setting
         figure_1: output/measures_new_approach_medication_stacked.png
+        csv_1   : output/measures_new_approach_medication_stacked.csv
         Figure 2: output/measures_new_approach_medication_stacked_annual.png
+        csv_2 : output/measures_new_approach_medication_stacked_annual.csv
         Figure 3: output/measures_new_approach_facet_medication_annual.png
+        csv_3 : output/measures_new_approach_facet_medication_annual.csv
         Figure 4: output/measures_new_approach_facet_medication_full_annual.png
+        csv_4: output/measures_new_approach_facet_medication_full_annual.csv
         Figure 5: output/measures_new_approach_facet_medication_annual_percentage_change.png
+        csv_5: output/measures_new_approach_facet_medication_annual_percentage_change.csv
   generate_measures_new_approach_consultation_and_medication:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_consultation_and_medication.py
       --output output/measures_new_approach_consultation_and_medication.csv
