@@ -783,9 +783,13 @@ actions:
     outputs:
       moderately_sensitive:
         chart_1: output/results_7_medications_pf.png
+        csv_1: output/results_7_medications_pf.csv
         chart_2: output/results_7_medications_gp.png
+        csv_2: output/results_7_medications_gp.csv
         chart_3: output/results_7_medications_pf_by_condition.png
+        csv_3: output/results_7_medications_pf_by_condition.csv
         chart_4: output/results_7_medications_gp_by_condition.png
+        csv_4: output/results_7_medications_gp_by_condition.csv
     
   generate_html_results_5_fig20_faceted_counts_by_condition:
     run: r:v2 analysis/results_codes/results_5_Fig20_faceted_counts_by_condition.R

@@ -110,6 +110,13 @@ ggsave(
   height = 6,
   dpi = 300
 )
+# CSV underlying results_7_medications_gp.png
+write_csv(
+  antibiotic_monthly %>%
+    filter(setting == "GP") %>%
+    arrange(interval_start, antibiotic),
+  here("output", "results_7_medications_gp.csv")
+)
 ggsave(
   filename = "output/results_7_medications_pf.png",
   plot = pf_antibiotics_plot,
@@ -117,6 +124,14 @@ ggsave(
   width = 10,
   height = 6,
   dpi = 300
+)
+
+# CSV underlying results_7_medications_pf.png
+write_csv(
+  antibiotic_monthly %>%
+    filter(setting == "PF") %>%
+    arrange(interval_start, antibiotic),
+  here("output", "results_7_medications_pf.csv")
 )
 
 #II.Medications by condition: Stacked barplot
@@ -226,6 +241,15 @@ ggsave(
   height = 6,
   dpi = 300
 )
+
+# CSV underlying results_7_medications_gp_by_condition.png
+write_csv(
+  medication_monthly %>%
+    filter(setting == "GP", condition == "UTI") %>%
+    arrange(interval_start, condition, antibiotic),
+  here("output", "results_7_medications_gp_by_condition.csv")
+)
+
 ggsave(
   filename = "output/results_7_medications_pf_by_condition.png",
   plot = pf_antibiotics_by_condition,
@@ -233,4 +257,12 @@ ggsave(
   width = 10,
   height = 6,
   dpi = 300
+)
+
+# CSV underlying results_7_medications_pf_by_condition.png
+write_csv(
+  medication_monthly %>%
+    filter(setting == "PF", condition == "UTI") %>%
+    arrange(interval_start, condition, antibiotic),
+  here("output", "results_7_medications_pf_by_condition.csv")
 )
