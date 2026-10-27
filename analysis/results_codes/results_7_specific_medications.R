@@ -1,3 +1,4 @@
+#Packages needed
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -98,7 +99,7 @@ pf_antibiotics_plot <- antibiotic_monthly %>%
   #  legend.position = "bottom"
   #)
 
-# Display the two separate graphs
+#Visualisation
 print(gp_antibiotics_plot)
 print(pf_antibiotics_plot)
 
@@ -110,7 +111,7 @@ ggsave(
   height = 6,
   dpi = 300
 )
-# CSV underlying results_7_medications_gp.png
+# CSV for results_7_medications_gp.png
 write_csv(
   antibiotic_monthly %>%
     filter(setting == "GP") %>%
@@ -126,7 +127,7 @@ ggsave(
   dpi = 300
 )
 
-# CSV underlying results_7_medications_pf.png
+# CSV for results_7_medications_pf.png
 write_csv(
   antibiotic_monthly %>%
     filter(setting == "PF") %>%
@@ -230,7 +231,7 @@ pf_antibiotics_by_condition <- medication_monthly %>%
     legend.text = element_text(size = 8),
     legend.key.size = unit(0.4, "cm"))
 
-# Display separately
+# Print
 print(gp_antibiotics_by_condition)
 print(pf_antibiotics_by_condition)
 ggsave(
@@ -242,7 +243,7 @@ ggsave(
   dpi = 300
 )
 
-# CSV underlying results_7_medications_gp_by_condition.png
+# CSV for results_7_medications_gp_by_condition.png
 write_csv(
   medication_monthly %>%
     filter(setting == "GP", condition == "UTI") %>%
@@ -259,7 +260,7 @@ ggsave(
   dpi = 300
 )
 
-# CSV underlying results_7_medications_pf_by_condition.png
+# CSV for results_7_medications_pf_by_condition.png
 write_csv(
   medication_monthly %>%
     filter(setting == "PF", condition == "UTI") %>%
