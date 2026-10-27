@@ -1818,7 +1818,7 @@ gee_uti <- gee_uti_data %>%
 ```
 
 #II.Controlled ITSA
-```{r }
+```{r ControlledTSA}
 
 names(practice_measures)
 ```
