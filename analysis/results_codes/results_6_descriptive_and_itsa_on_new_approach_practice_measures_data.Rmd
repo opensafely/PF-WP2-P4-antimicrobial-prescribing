@@ -1525,7 +1525,7 @@ where:
 
 ## 8.1 Prepare ITSA dataset
 
-```{r}
+```{r ITSA-dataset-preparation}
 # names(practice_measures)
 # GP Connect intervention date or PF_start_date
 intervention_date <- as.Date("2024-02-01")
@@ -2033,19 +2033,19 @@ qic_table %>% arrange(QIC)
 ## 2. Estimated within-cluster correlation (alpha)
 
 
-```{r }
+```{r corr}
 summary(fit_ar1)$corr        # the estimated correlation parameter(s)
 # For ar1, one alpha = lag-1 correlation. Near 0 -> independence would suffice.
 ```
 
 # 3. Dispersion / overdispersion check
 
-```{r }
+```{r dispersion}
 summary(fit_ar1)$dispersion
 ```
 
 # Manual Pearson-based check (rule of thumb: >1.5-2 = meaningful overdispersion)
-```{r }
+```{r Manual-Pearson-based-check}
 pearson_resid <- residuals(fit_ar1, type = "pearson")
 n_params <- length(coef(fit_ar1))
 n_obs    <- length(pearson_resid)
