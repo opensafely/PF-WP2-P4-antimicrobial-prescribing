@@ -651,7 +651,7 @@ plot_practice_figure <- function(cond, setting) {
         "Monthly rates require that month's denominator >= ", min_denom,
         "; monthly summaries shown only when >= ", min_practices,
         " practices contribute. ",
-        "Annual comparisons require 12 months in each year ",
+        "Comparisons require 12 months in each year ",
         "and mean monthly denominator >= ", min_denom, "."
       ),
       theme = theme(
@@ -710,7 +710,7 @@ practices_both_years_by_group <- rates_practice_year %>%
     .groups = "drop"
   )
 
-cat("\n========== QUALITY CHECKS ==========\n")
+cat("\n------------ QUALITY CHECKS--------------------------\n")
 cat("Data coverage:", format(min_month), "to", format(max_month), "\n")
 cat("Practice-month observations:", nrow(rates_practice), "\n")
 cat("Distinct practices:", n_distinct(rates_practice$practice), "\n")
