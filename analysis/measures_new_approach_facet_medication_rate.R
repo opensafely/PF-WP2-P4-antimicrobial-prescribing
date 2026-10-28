@@ -3,7 +3,7 @@
 
 library(tidyverse)
 library(here)
-
+library(patchwork)   # added: to put the two practice-level graphs side by side
 # -----------------------------------------------------------------------------
 # 1. Data
 # -----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ conditions <- c(
 
 # -----------------------------------------------------------------------------
 # 2. Monthly prescribing rates by condition and setting
-#   We  aggregate numerators and denominators before calculating rates.
+#   Here, we  aggregated numerators and denominators before calculating rates.
 # -----------------------------------------------------------------------------
 rates_monthly <- measures_new_approach %>%
   filter(
@@ -137,4 +137,10 @@ ggsave(
   width = 10,
   height = 6,
   dpi = 300
+)
+
+# Save the data used for the prescribing rates graph
+write_csv(
+  rates_monthly,
+  here("output", "measures_new_approach_facet_medication_rate.csv")
 )
