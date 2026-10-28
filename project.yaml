@@ -851,14 +851,35 @@ actions:
       highly_sensitive:
         measures: output/measures_new_approach_consultation_and_medication.csv
   
-  # process_measures_new_approach_facet_medication_rate_distribution:
-  #  run: r:v2 analysis/measures_new_approach_facet_medication_rate_distribution.R
-  #  needs: [generate_measures_new_approach_consultation_and_medication]
-  #  outputs:
-  #   moderately_sensitive:
-  #     practice_monthly_rates: output/practice_rate_monthly_by_practice.csv
-  #     practice_monthly_summary: output/practice_rate_monthly_summary.csv
-  #     practice_year1_year2: output/practice_rate_year1_year2.csv
+  process_measures_new_approach_facet_medication_rate_distribution:
+    run: r:v2 analysis/measures_new_approach_facet_medication_rate_distribution.R
+    needs: [generate_measures_new_approach_consultation_and_medication]
+    outputs:
+     moderately_sensitive:
+      monthly_summary: output/practice_rate_monthly_summary.csv
+      annual_summary: output/practice_rate_annual_summary.csv
+      annual_diagnostics: output/practice_rate_annual_diagnostics.csv
+
+      # GP practice figures
+      practice_rate_gp_uti: output/practice_rate_gp_uti.png
+      practice_rate_gp_sinusitis: output/practice_rate_gp_sinusitis.png
+      practice_rate_gp_insect_bites: output/practice_rate_gp_insect_bites.png
+      practice_rate_gp_otitis_media: output/practice_rate_gp_otitis_media.png
+      practice_rate_gp_sore_throat: output/practice_rate_gp_sore_throat.png
+      practice_rate_gp_shingles: output/practice_rate_gp_shingles.png
+      practice_rate_gp_impetigo: output/practice_rate_gp_impetigo.png
+      practice_rate_gp_all_pf_conditions: output/practice_rate_gp_all_pf_conditions.png
+
+      # Pharmacy First figures
+      practice_rate_pf_uti: output/practice_rate_pf_uti.png
+      practice_rate_pf_sinusitis: output/practice_rate_pf_sinusitis.png
+      practice_rate_pf_insect_bites: output/practice_rate_pf_insect_bites.png
+      practice_rate_pf_otitis_media: output/practice_rate_pf_otitis_media.png
+      practice_rate_pf_sore_throat: output/practice_rate_pf_sore_throat.png
+      practice_rate_pf_shingles: output/practice_rate_pf_shingles.png
+      practice_rate_pf_impetigo: output/practice_rate_pf_impetigo.png
+      practice_rate_pf_all_pf_conditions: output/practice_rate_pf_all_pf_conditions.png
+
 
   process_measures_new_approach_medication_distribution_soai:
    run: r:v2 analysis/measures_new_approach_medication_distribution_soai.R
