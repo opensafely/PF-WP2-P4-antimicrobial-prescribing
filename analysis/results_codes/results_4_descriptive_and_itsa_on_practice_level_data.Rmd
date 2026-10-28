@@ -1508,7 +1508,8 @@ where:
 ```{r}
 #names(practice_level_data)
 # GP Connect intervention date
-intervention_date <- as.Date("2025-10-01")
+#intervention_date <- as.Date("2025-10-01")
+intervention_date <- as.Date("2022-02-01")
 #ITSA dataset
 
 practice_level_data_itsa <- practice_level_data %>%
