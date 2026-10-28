@@ -18,7 +18,7 @@ GROUPS = {
 measures = create_measures()
 measures.configure_disclosure_control(enabled=False)
 measures.define_defaults(
-    intervals=months(24).starting_on("2024-02-01"),
+    intervals=months(48).starting_on("2022-02-01"),
     group_by=GROUPS
     # intervals=months(4).starting_on("2024-07-01")
 )
