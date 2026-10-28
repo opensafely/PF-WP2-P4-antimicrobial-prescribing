@@ -86,7 +86,7 @@ roundmid_any <- function(x, to = 6) {
   )
 }
 
-# 3. Read and validate input data ---------------------------------------------
+#3. Read and validate input data ---------------------------------------------
 
 input_file <- here(
   "output",  
