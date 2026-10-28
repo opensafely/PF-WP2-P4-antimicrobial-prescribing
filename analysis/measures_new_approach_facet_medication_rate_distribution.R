@@ -42,7 +42,6 @@ library(here)
 library(patchwork)
 
 #2. Settings-----------------------------------------------------------------
-
 practice_var <- "practice"
 min_denom <- 100       # This helps for SDC 
 min_practices <- 10    # minimum contributing practices for a monthly summary
