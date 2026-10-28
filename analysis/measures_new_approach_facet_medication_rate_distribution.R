@@ -41,11 +41,11 @@ library(purrr)
 library(here)
 library(patchwork)
 
-# 2. Settings -----------------------------------------------------------------
+#2. Settings-----------------------------------------------------------------
 
 practice_var <- "practice"
 min_denom <- 100       # This helps for SDC 
-min_practices <- 10   # minimum contributing practices for a monthly summary
+min_practices <- 10    # minimum contributing practices for a monthly summary
 
 # Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
