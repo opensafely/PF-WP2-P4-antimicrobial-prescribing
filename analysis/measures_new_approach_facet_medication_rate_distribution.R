@@ -44,8 +44,8 @@ library(patchwork)
 # 2. Settings -----------------------------------------------------------------
 
 practice_var <- "practice"
-min_denom <- 100
-min_practices <- 10   # minimum contributing practices for a monthly summary
+min_denom <-0 #//100
+min_practices <- 2  #//10   # minimum contributing practices for a monthly summary
 
 # Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
@@ -621,7 +621,7 @@ plot_practice_change <- function(cond, setting) {
       title = "Change across GP practices",
       subtitle = "Blue circle = Year 1; orange triangle = Year 2",
       x = NULL,
-      y = "Annual prescribing rate per 1,000 average eligible population"
+      y = "Prescribing rate per 1,000 average eligible population"
     ) +
     
     theme_bw() +
