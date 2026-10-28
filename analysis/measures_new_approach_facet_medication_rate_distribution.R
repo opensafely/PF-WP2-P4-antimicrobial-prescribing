@@ -1,17 +1,29 @@
 
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # PRACTICE-LEVEL PHARMACY FIRST PRESCRIBING ANALYSIS
 #
-# Graph A: Monthly median (solid), mean (dashed), IQR (shaded)
-# Graph B: Year 1 versus Year 2 annual prescribing rates by practice
+# Graph A:
+#   Monthly median (solid line), mean (dashed line), and IQR (shaded area)
+#   across GP practices.
 #
-# Year 1: February 2024 - January 2025
-# Year 2: February 2025 - January 2026
+# Graph B:
+#   Year 1 versus Year 2 annual prescribing rates for each practice.
 #
-# Annual rate = total prescriptions / mean monthly eligible population * 1000
-# Minimum monthly denominator = 100
-#---------------------------------------------------------------------------------------
-# 1. Packages ---------------------------------------------------------------------------
+# Year 1: February 2024 to January 2025
+# Year 2: February 2025 to January 2026
+#
+# Annual rate:
+#   Sum of monthly numerators / mean monthly denominator * 1,000
+#
+# Monthly Graph A rates require denominator >= 100.
+# Annual comparisons require 12 months in each year and mean monthly
+# denominator >= 100.
+#
+# Detailed practice-level CSVs are not written to output by default,
+# to avoid exceeding OpenSAFELY output-release row limits.
+# ------------------------------------------------------------------------------
+
+# 1. Packages -----------------------------------------------------------------
 
 library(dplyr)
 library(tidyr)
@@ -31,11 +43,10 @@ PF_start <- as.Date("2024-02-01")
 year2_start <- as.Date("2025-02-01")
 year2_end <- as.Date("2026-02-01")
 
-# GP Connect introduction
+# Pharmacy First launch and GP Connect introduction
 GP_connect <- as.Date("2025-10-01")
 
-# Conditions represented in the medication measure names.
-# Edit this list if the input file uses different condition identifiers.
+# Condition identifiers used in the input measure names
 conditions <- c(
   "uti",
   "sinusitis",
@@ -48,8 +59,10 @@ conditions <- c(
 )
 
 # Output directory
+output_dir <- here("output")
+
 dir.create(
-  here("output"),
+  output_dir,
   recursive = TRUE,
   showWarnings = FALSE
 )
@@ -93,7 +106,9 @@ if (length(missing_columns) > 0) {
 raw_data <- raw_data %>%
   mutate(
     interval_start = as.Date(interval_start),
-    practice = as.character(.data[[practice_var]])
+    practice = as.character(.data[[practice_var]]),
+    numerator = as.numeric(numerator),
+    denominator = as.numeric(denominator)
   )
 
 if (anyNA(raw_data$interval_start)) {
@@ -105,7 +120,14 @@ if (any(raw_data$numerator < 0, na.rm = TRUE) ||
   stop("Numerators and denominators must not be negative.")
 }
 
-# 4. Extract GP and Pharmacy First medication measures ------------------------
+if (anyNA(raw_data$numerator) || anyNA(raw_data$denominator)) {
+  warning(
+    "Missing numerator or denominator values found. ",
+    "They will be handled during aggregation."
+  )
+}
+
+# 4. Select GP and Pharmacy First medication measures -------------------------
 
 measure_pattern <- paste0(
   "^(gp|pf)_medication_(",
@@ -170,8 +192,7 @@ if (nrow(rates_practice) == 0) {
   )
 }
 
-# Check for duplicate practice-month-condition-setting combinations.
-# These should not exist after the aggregation above.
+# Confirm that each practice-month-setting-condition combination is unique.
 stopifnot(
   !anyDuplicated(
     rates_practice[
@@ -180,10 +201,10 @@ stopifnot(
   )
 )
 
-# Save practice-level monthly rates for reproducibility.
-write_csv(
-  rates_practice,
-  here("output", "practice_rate_monthly_by_practice.csv")
+message("Practice-level observations: ", nrow(rates_practice))
+message(
+  "Distinct practices: ",
+  n_distinct(rates_practice$practice)
 )
 
 # 5. Graph A data: monthly distribution across practices ----------------------
@@ -209,7 +230,11 @@ rates_practice_summary <- rates_practice %>%
       NA_real_
     } else {
       as.numeric(
-        quantile(prescribing_rate, 0.25, na.rm = TRUE)
+        quantile(
+          prescribing_rate,
+          probs = 0.25,
+          na.rm = TRUE
+        )
       )
     },
 
@@ -217,22 +242,26 @@ rates_practice_summary <- rates_practice %>%
       NA_real_
     } else {
       as.numeric(
-        quantile(prescribing_rate, 0.75, na.rm = TRUE)
+        quantile(
+          prescribing_rate,
+          probs = 0.75,
+          na.rm = TRUE
+        )
       )
     },
 
     .groups = "drop"
   )
 
-# Save Graph A data.
+# Aggregated output: suitable for release review, subject to normal checks.
 write_csv(
   rates_practice_summary,
   here("output", "practice_rate_monthly_summary.csv")
 )
 
-# 6. Graph B data: annual rate per practice -----------------------------------
+# 6. Graph B data: annual rates per practice ----------------------------------
 
-rates_practice_year <- rates_practice %>%
+rates_practice_annual_all <- rates_practice %>%
   mutate(
     year = case_when(
       interval_start >= PF_start &
@@ -249,38 +278,105 @@ rates_practice_year <- rates_practice %>%
   summarise(
     n_months = n_distinct(interval_start),
 
+    mean_denominator = mean(
+      denominator,
+      na.rm = TRUE
+    ),
+
+    annual_numerator = sum(
+      numerator,
+      na.rm = TRUE
+    ),
+
     annual_rate = if (
       n_distinct(interval_start) == 12 &&
-      all(denominator >= min_denom)
+      mean(denominator, na.rm = TRUE) >= min_denom
     ) {
-      1000 * sum(numerator) / mean(denominator)
+      1000 * sum(numerator, na.rm = TRUE) /
+        mean(denominator, na.rm = TRUE)
     } else {
       NA_real_
     },
 
     .groups = "drop"
-  ) %>%
-  mutate(
-    year = factor(
-      year,
-      levels = c("Year 1", "Year 2")
-    )
-  ) %>%
-  # Keep only complete 12-month periods with valid rates.
+  )
+
+# Diagnostic table: inspect missing months and denominator eligibility.
+annual_diagnostics <- rates_practice_annual_all %>%
+  group_by(Setting, condition, year) %>%
+  summarise(
+    practices_with_data = n_distinct(practice),
+
+    practices_with_12_months = n_distinct(
+      practice[n_months == 12]
+    ),
+
+    practices_with_mean_denominator_100_or_more = n_distinct(
+      practice[mean_denominator >= min_denom]
+    ),
+
+    practices_meeting_both_criteria = n_distinct(
+      practice[
+        n_months == 12 &
+          mean_denominator >= min_denom
+      ]
+    ),
+
+    .groups = "drop"
+  )
+
+message("\nAnnual eligibility diagnostics:")
+print(annual_diagnostics, n = Inf)
+
+# Save aggregated diagnostics rather than practice-level records.
+write_csv(
+  annual_diagnostics,
+  here("output", "practice_rate_annual_diagnostics.csv")
+)
+
+# Keep only practice-years that meet the annual eligibility criteria.
+rates_practice_annual_eligible <- rates_practice_annual_all %>%
   filter(
     n_months == 12,
+    mean_denominator >= min_denom,
     !is.na(annual_rate)
-  ) %>%
-  group_by(practice, Setting, condition) %>%
-  # Keep practices with both annual observations.
-  filter(n_distinct(year) == 2) %>%
-  ungroup()
+  )
 
-# Save Graph B data.
+# Keep only practices with eligible data in BOTH years.
+eligible_practices_both_years <- rates_practice_annual_eligible %>%
+  group_by(practice, Setting, condition) %>%
+  summarise(
+    n_years = n_distinct(year),
+    .groups = "drop"
+  ) %>%
+  filter(n_years == 2) %>%
+  select(practice, Setting, condition)
+
+rates_practice_year <- rates_practice_annual_eligible %>%
+  semi_join(
+    eligible_practices_both_years,
+    by = c("practice", "Setting", "condition")
+  )
+
+# Save an aggregated annual summary only; do not export practice-level rows.
+annual_summary <- rates_practice_year %>%
+  group_by(Setting, condition, year) %>%
+  summarise(
+    n_practices = n_distinct(practice),
+    median_annual_rate = median(annual_rate, na.rm = TRUE),
+    mean_annual_rate = mean(annual_rate, na.rm = TRUE),
+    q1_annual_rate = as.numeric(
+      quantile(annual_rate, 0.25, na.rm = TRUE)
+    ),
+    q3_annual_rate = as.numeric(
+      quantile(annual_rate, 0.75, na.rm = TRUE)
+    ),
+    .groups = "drop"
+  )
+
 write_csv(
-  rates_practice_year %>%
-    mutate(year = as.character(year)),
-  here("output", "practice_rate_year1_year2.csv")
+  annual_summary,
+  here("output", "practice_rate_annual_summary.csv")
 )
 
 # 7. Graph A: monthly prescribing trend ---------------------------------------
@@ -294,12 +390,30 @@ plot_practice_trend <- function(cond, setting) {
     )
 
   if (nrow(d) == 0) {
-    stop("No monthly summary data for: ", cond, " / ", setting)
+    return(
+      ggplot() +
+        annotate(
+          "text",
+          x = 1,
+          y = 1,
+          label = paste0(
+            "No monthly summary data\n",
+            cond, " / ", setting
+          )
+        ) +
+        xlim(0, 2) +
+        ylim(0, 2) +
+        labs(
+          title = paste("Monthly trend:", cond, "/", setting),
+          x = NULL,
+          y = NULL
+        ) +
+        theme_void()
+    )
   }
 
   ggplot(d, aes(x = interval_start)) +
 
-    # Interquartile range across practices
     geom_ribbon(
       aes(ymin = q1, ymax = q3),
       fill = "#9FB3C8",
@@ -307,21 +421,18 @@ plot_practice_trend <- function(cond, setting) {
       na.rm = TRUE
     ) +
 
-    # Median: solid line
     geom_line(
       aes(y = median, colour = "Median", linetype = "Median"),
       linewidth = 0.7,
       na.rm = TRUE
     ) +
 
-    # Mean: dashed line
     geom_line(
       aes(y = mean, colour = "Mean", linetype = "Mean"),
       linewidth = 0.7,
       na.rm = TRUE
     ) +
 
-    # Pharmacy First launch
     geom_vline(
       xintercept = PF_start,
       linetype = "dashed",
@@ -329,7 +440,6 @@ plot_practice_trend <- function(cond, setting) {
       colour = "blue"
     ) +
 
-    # GP Connect introduction
     geom_vline(
       xintercept = GP_connect,
       linetype = "dashed",
@@ -398,24 +508,77 @@ plot_practice_change <- function(cond, setting) {
       Setting == setting
     )
 
+  # If no practices qualify, show a panel rather than stopping the script.
   if (nrow(d) == 0) {
-    stop(
-      "No complete annual comparisons for: ",
-      cond, " / ", setting
+    return(
+      ggplot() +
+        annotate(
+          "text",
+          x = 1,
+          y = 1,
+          label = paste0(
+            "No complete annual comparisons\n",
+            cond, " / ", setting,
+            "\nCheck annual eligibility diagnostics"
+          ),
+          size = 3.5
+        ) +
+        xlim(0, 2) +
+        ylim(0, 2) +
+        labs(
+          title = "Change across GP practices",
+          x = NULL,
+          y = NULL
+        ) +
+        theme_void()
     )
   }
 
   wide <- d %>%
-    mutate(year = as.character(year)) %>%
     select(practice, year, annual_rate) %>%
     pivot_wider(
       names_from = year,
       values_from = annual_rate
-    ) %>%
+    )
+
+  # Guard against missing year columns.
+  if (!"Year 1" %in% names(wide)) {
+    wide[["Year 1"]] <- NA_real_
+  }
+
+  if (!"Year 2" %in% names(wide)) {
+    wide[["Year 2"]] <- NA_real_
+  }
+
+  wide <- wide %>%
     filter(
       !is.na(`Year 1`),
       !is.na(`Year 2`)
     )
+
+  if (nrow(wide) == 0) {
+    return(
+      ggplot() +
+        annotate(
+          "text",
+          x = 1,
+          y = 1,
+          label = paste0(
+            "No practices have both years\n",
+            cond, " / ", setting
+          ),
+          size = 3.5
+        ) +
+        xlim(0, 2) +
+        ylim(0, 2) +
+        labs(
+          title = "Change across GP practices",
+          x = NULL,
+          y = NULL
+        ) +
+        theme_void()
+    )
+  }
 
   n_up <- sum(wide$`Year 2` > wide$`Year 1`)
   n_down <- sum(wide$`Year 2` < wide$`Year 1`)
@@ -429,7 +592,6 @@ plot_practice_change <- function(cond, setting) {
     " | Unchanged: ", n_same
   )
 
-  # Use the same practices in the plot and annotation.
   d_plot <- d %>%
     filter(practice %in% wide$practice) %>%
     mutate(
@@ -448,7 +610,6 @@ plot_practice_change <- function(cond, setting) {
     )
   ) +
 
-    # Connect each practice's two annual observations.
     geom_line(
       colour = "grey65",
       alpha = 0.3,
@@ -509,27 +670,20 @@ plot_practice_figure <- function(cond, setting) {
   p2 <- plot_practice_change(cond, setting)
 
   p1 + p2 +
-
-    plot_layout(
-      widths = c(2.4, 1)
-    ) +
-
+    plot_layout(widths = c(2.4, 1)) +
     plot_annotation(
       title = paste0(
         cond, ": ", setting,
         " prescribing rates by GP practice"
       ),
-
       caption = paste0(
         "Year 1 = Feb 2024 to Jan 2025; ",
         "Year 2 = Feb 2025 to Jan 2026. ",
         "Blue dashed line = Pharmacy First launch; ",
         "black dashed line = GP Connect introduction. ",
-        "Annual comparisons include practices with 12 valid months ",
-        "in each year and monthly denominators >= ",
-        min_denom, "."
+        "Annual comparisons require 12 months in each year ",
+        "and mean monthly denominator >= ", min_denom, "."
       ),
-
       theme = theme(
         plot.title = element_text(
           face = "bold",
@@ -540,97 +694,95 @@ plot_practice_figure <- function(cond, setting) {
     )
 }
 
-# 10. Generate and save one figure per condition and setting ------------------
+# 10. Generate figures ---------------------------------------------------------
 
 practice_figs <- rates_practice %>%
   distinct(condition, Setting) %>%
   arrange(condition, Setting)
 
-pwalk(
-  practice_figs,
-  function(condition, Setting) {
+for (i in seq_len(nrow(practice_figs))) {
 
-    message(
-      "Generating figure: ",
-      condition, " / ", Setting
-    )
+  cond <- practice_figs$condition[i]
+  setting <- practice_figs$Setting[i]
 
-    p <- plot_practice_figure(
-      condition,
-      Setting
-    )
-
-    file_stub <- str_replace_all(
-      tolower(condition),
-      "[^a-z0-9]+",
-      "_"
-    )
-
-    output_file <- here(
-      "output",
-      paste0(
-        "practice_rate_",
-        tolower(Setting),
-        "_",
-        file_stub,
-        ".png"
-      )
-    )
-
-    ggsave(
-      filename = output_file,
-      plot = p,
-      width = 12,
-      height = 5.5,
-      units = "in",
-      dpi = 300,
-      bg = "white"
-    )
-  }
-)
-
-# 11. Display an example figure -----------------------------------------------
-
-print(
-  plot_practice_figure(
-    "All PF conditions",
-    "PF"
+  message(
+    "Generating figure: ",
+    cond, " / ", setting
   )
-)
 
-# 12. Final quality checks -----------------------------------------------------
+  p <- plot_practice_figure(cond, setting)
+
+  file_stub <- str_replace_all(
+    tolower(cond),
+    "[^a-z0-9]+",
+    "_"
+  )
+
+  output_file <- here(
+    "output",
+    paste0(
+      "practice_rate_",
+      tolower(setting),
+      "_",
+      file_stub,
+      ".png"
+    )
+  )
+
+  ggsave(
+    filename = output_file,
+    plot = p,
+    width = 12,
+    height = 5.5,
+    units = "in",
+    dpi = 300,
+    bg = "white"
+  )
+}
+
+# 11. Final quality checks -----------------------------------------------------
 
 cat("\n========== QUALITY CHECKS ==========\n")
 
 cat(
-  "Number of practice-month observations:",
+  "Practice-month observations:",
   nrow(rates_practice),
   "\n"
 )
 
 cat(
-  "Number of practices:",
+  "Distinct practices:",
   n_distinct(rates_practice$practice),
   "\n"
 )
 
 cat(
-  "Number of monthly summary rows:",
+  "Monthly summary rows:",
   nrow(rates_practice_summary),
   "\n"
 )
 
 cat(
-  "Number of complete annual comparison rows:",
+  "Eligible practice-year rows:",
+  nrow(rates_practice_annual_eligible),
+  "\n"
+)
+
+cat(
+  "Practices with both years:",
   nrow(rates_practice_year),
   "\n"
 )
 
 cat(
-  "Number of figures generated:",
+  "Number of condition-setting figures:",
   nrow(practice_figs),
   "\n"
 )
 
-cat("\nFigures and CSV files saved in:\n")
-cat(here("output"), "\n")
+cat("\nAggregated output files saved in:\n")
+cat(output_dir, "\n")
+
+cat("\nAnnual eligibility diagnostics:\n")
+print(annual_diagnostics, n = Inf)
+#
