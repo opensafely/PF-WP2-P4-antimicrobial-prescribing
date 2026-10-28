@@ -47,10 +47,10 @@ practice_var <- "practice"
 min_denom <- 100       # This helps for SDC 
 min_practices <- 10    # minimum contributing practices for a monthly summary
 
-# Pharmacy First launch
+#Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
 
-# Year boundaries
+#Year boundaries
 year2_start <- as.Date("2025-02-01")
 year2_end <- as.Date("2026-02-01")   # exclusive upper bound
 
