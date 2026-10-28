@@ -1505,7 +1505,7 @@ where:
 
 ## 8.1 Prepare ITSA dataset
 
-```{r}
+```{r PrepareITSAdataset}
 #names(practice_level_data)
 # GP Connect intervention date
 #intervention_date <- as.Date("2025-10-01")
@@ -1522,10 +1522,7 @@ practice_level_data_itsa <- practice_level_data %>%
     # Intervention start
     X = as.integer(interval_start >= intervention_date),
     # Time point of intervention
-    first_post_T = T[
-      interval_start == intervention_date
-    ][1],
-
+    first_post_T = T[interval_start == intervention_date][1],
     # Change in slope after  intervention
     XT = pmax(
       T - first_post_T,
@@ -1801,7 +1798,7 @@ gee_uti <- gee_uti_data %>%
 ```
 
 #II.Controlled ITSA
-```{r }
+```{r ControlledITSA}
 
 names(practice_level_data)
 ```
@@ -2020,19 +2017,19 @@ qic_table %>% arrange(QIC)
 ## 2. Estimated within-cluster correlation (alpha)
 
 
-```{r }
+```{r corr}
 summary(fit_ar1)$corr        # the estimated correlation parameter(s)
 # For ar1, one alpha = lag-1 correlation. Near 0 -> independence would suffice.
 ```
 
 # 3. Dispersion / overdispersion check
 
-```{r }
+```{r dispersion}
 summary(fit_ar1)$dispersion
 ```
 
 # Manual Pearson-based check (rule of thumb: >1.5-2 = meaningful overdispersion)
-```{r }
+```{r pearson_resid}
 pearson_resid <- residuals(fit_ar1, type = "pearson")
 n_params <- length(coef(fit_ar1))
 n_obs    <- length(pearson_resid)
