@@ -1,4 +1,16 @@
-#Monthly and annual medication counts
+
+# =============================================================================
+# Monthly medication counts by condition and setting
+# Statistical Disclosure Control (SDC)
+#
+# SDC rules:
+#   GP: redact counts < 8 for all dates
+#   PF: redact counts < 8 from February 2024 onwards
+#
+# Outputs:
+#   - Controlled monthly CSV
+#   - Controlled monthly line plot (PNG)
+# =============================================================================
 
 library(tidyverse)
 library(here)
@@ -13,15 +25,20 @@ measures_new_approach <- read_csv(
   here("output", "measures_new_approach_medication.csv"),
   show_col_types = FALSE
 ) %>%
-  mutate(interval_start = as.Date(interval_start))
+  mutate(
+    interval_start = as.Date(interval_start)
+  )
 
 # Important dates
 GP_connect <- as.Date("2025-10-01")
 PF_start   <- as.Date("2024-02-01")
 
-message("Number of rows: ", nrow(measures_new_approach))
-message("Number of columns: ", ncol(measures_new_approach))
-
+message(
+  "Number of rows: ", nrow(measures_new_approach)
+)
+message(
+  "Number of columns: ", ncol(measures_new_approach)
+)
 message(
   "Date range: ",
   min(measures_new_approach$interval_start, na.rm = TRUE),
@@ -44,20 +61,19 @@ conditions <- c(
   "all_conditions"
 )
 
+measure_pattern <- paste0(
+  "^(gp|pf)_medication_(",
+  paste(conditions, collapse = "|"),
+  ")$"
+)
+
 # -----------------------------------------------------------------------------
 # 3. Monthly medication counts by condition and setting
 # -----------------------------------------------------------------------------
 
 numerators_monthly <- measures_new_approach %>%
   filter(
-    str_detect(
-      measure,
-      paste0(
-        "^(gp|pf)_medication_(",
-        paste(conditions, collapse = "|"),
-        ")$"
-      )
-    )
+    str_detect(measure, measure_pattern)
   ) %>%
   group_by(interval_start, measure) %>%
   summarise(
@@ -88,22 +104,88 @@ numerators_monthly <- measures_new_approach %>%
     )
   )
 
+# Keep original numeric data unchanged for analysis.
 # -----------------------------------------------------------------------------
-# 4. Figure 1: Monthly medication counts
+# 4. Apply SDC
 # -----------------------------------------------------------------------------
 
-facet_numerators_plot <- ggplot(
-  numerators_monthly,
+numerators_monthly_sdc <- numerators_monthly %>%
+  mutate(
+    sdc_required = medication_count < 8 &
+      (
+        Setting == "GP" |
+          (
+            Setting == "PF" &
+              interval_start >= PF_start
+          )
+      ),
+    medication_count_sdc = if_else(
+      sdc_required,
+      NA_real_,
+      as.numeric(medication_count)
+    )
+  )
+
+# Report the number of cells flagged for suppression
+message(
+  "Number of monthly cells flagged for SDC: ",
+  sum(numerators_monthly_sdc$sdc_required, na.rm = TRUE)
+)
+
+# -----------------------------------------------------------------------------
+# 5. Export controlled monthly CSV
+# -----------------------------------------------------------------------------
+
+monthly_release <- numerators_monthly_sdc %>%
+  mutate(
+    medication_count = if_else(
+      sdc_required,
+      "[Redacted]",
+      as.character(medication_count)
+    )
+  ) %>%
+  select(
+    interval_start,
+    Setting,
+    condition,
+    medication_count
+  ) %>%
+  arrange(
+    Setting,
+    interval_start,
+    condition
+  )
+
+write_csv(
+  monthly_release,
+  here(
+    "output",
+    "measures_new_approach_facet_medication.csv"
+  )
+)
+
+# -----------------------------------------------------------------------------
+# 6. Plot controlled monthly medication counts
+# -----------------------------------------------------------------------------
+
+facet_numerators_plot_sdc <- ggplot(
+  numerators_monthly_sdc,
   aes(
     x = interval_start,
-    y = medication_count,
+    y = medication_count_sdc,
     group = Setting,
     color = Setting,
     shape = Setting
   )
 ) +
-  geom_line(linewidth = 0.5) +
-  geom_point(size = 1.0) +
+  geom_line(
+    linewidth = 0.5,
+    na.rm = FALSE
+  ) +
+  geom_point(
+    size = 1.0,
+    na.rm = TRUE
+  ) +
   geom_vline(
     xintercept = GP_connect,
     linetype = "dashed",
@@ -124,32 +206,67 @@ facet_numerators_plot <- ggplot(
     date_labels = "%Y-%m",
     date_breaks = "2 months"
   ) +
-  scale_y_continuous(labels = comma) +
+  scale_y_continuous(
+    labels = comma
+  ) +
   labs(
     title = "Monthly medication counts by condition and setting",
+    subtitle = paste(
+      "Statistical disclosure control applied:",
+      "GP all dates; PF from February 2024"
+    ),
     x = "Month",
     y = "Medication count",
     color = "Setting",
-    shape = "Setting"
+    shape = "Setting",
+    caption = paste(
+      "Suppressed counts are displayed as gaps.",
+      "Dashed blue line: Pharmacy First launch;",
+      "dashed black line: GP Connect implementation."
+    )
   ) +
   theme_bw() +
   theme(
     legend.position = "bottom",
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    strip.text = element_text(face = "bold")
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    ),
+    strip.text = element_text(
+      face = "bold"
+    )
   )
 
-print(facet_numerators_plot)
+print(facet_numerators_plot_sdc)
+
+# -----------------------------------------------------------------------------
+# 7. Save controlled PNG
+# -----------------------------------------------------------------------------
 
 ggsave(
   filename = here(
     "output",
     "measures_new_approach_facet_medication.png"
   ),
-  plot = facet_numerators_plot,
+  plot = facet_numerators_plot_sdc,
   width = 10,
   height = 6,
   dpi = 300
 )
 
+# -----------------------------------------------------------------------------
+# 8. SDC audit summary (for internal review)
+# -----------------------------------------------------------------------------
 
+sdc_audit <- numerators_monthly_sdc %>%
+  group_by(Setting, condition) %>%
+  summarise(
+    total_months = n(),
+    suppressed_months = sum(sdc_required, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(Setting, condition)
+
+print(sdc_audit, n = Inf)
+
+message("SDC-controlled monthly CSV and PNG have been created.")
