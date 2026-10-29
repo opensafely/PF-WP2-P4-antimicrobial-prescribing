@@ -186,13 +186,17 @@ ggsave(
   #  "measures_new_approach_medication_stacked.csv"
   #)
 #)
-#SDC
+
+# SDC: GP for all dates; PF from February 2024 onwards
 write_csv(
   stacked_data %>%
     arrange(Setting, interval_start, condition) %>%
     mutate(
       medication_count = if_else(
-        medication_count < 7,
+        medication_count < 8 &
+          (Setting == "GP" |
+             (Setting == "PF" &
+                interval_start >= as.Date("2024-02-01"))),
         "[Redacted]",
         as.character(medication_count)
       )
@@ -202,6 +206,7 @@ write_csv(
     "measures_new_approach_medication_stacked.csv"
   )
 )
+
 
 # 3.a. Annual medication counts by condition and setting
 numerators_annual <- numerators_monthly %>%
