@@ -1,6 +1,6 @@
 
 
-# Pharmacy First: antibiotic prescribing by setting and condition
+# Pharmacy First: first-second-line antibiotic prescribing by setting and condition
 # Statistical Disclosure Control (SDC)
 # 1. Packages
 library(dplyr)
@@ -34,8 +34,7 @@ dir.create(
   recursive = TRUE,
   showWarnings = FALSE
 )
-
-# 3. SDC functions
+# 3. SDC
 # GP: suppress counts < 8 throughout the period.
 # PF: suppress counts < 8 from February 2024 onwards.
 
@@ -228,7 +227,6 @@ medication_monthly <- antibiotic_data %>%
   ) %>%
   apply_sdc_plot()
 
-
 # 7. "all conditions" data
 
 all_conditions_data <- antibiotic_monthly %>%
@@ -240,7 +238,6 @@ all_plot_data <- bind_rows(
   all_conditions_data
 )
 # 8. Separate GP and PF plots and CSVs for each condition, including all
-
 condition_names <- c(
   "UTI" = "uti",
   "Sinusitis" = "sinusitis",
@@ -285,10 +282,7 @@ for (condition_name in names(condition_names)) {
       gp_filename
     )
   }
-
-  
   # Pharmacy First
-  
   pf_data <- all_plot_data %>%
     filter(
       setting == "PF",
@@ -317,9 +311,7 @@ for (condition_name in names(condition_names)) {
   }
 }
 
-
 # 9. SDC audit
-
 
 cat("\nSDC audit: overall antibiotic counts\n")
 
