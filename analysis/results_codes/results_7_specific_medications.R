@@ -10,8 +10,6 @@ library(readr)
 library(here)
 library(grid)
 # 2. Read data and define dates
-
-
 practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
   show_col_types = FALSE
@@ -163,14 +161,24 @@ antibiotic_data <- practice_level_data_by_practice_only %>%
     names_to = "measure",
     values_to = "count"
   ) %>%
+  # Exclude consultations and aggregate medication counts
+  filter(
+    !grepl(
+      "^(pf|gp)_(consultation|medication)_",
+      measure
+    )
+  ) %>%
   mutate(
     setting = if_else(grepl("^pf_", measure), "PF", "GP"),
+
     antibiotic = sub("^(pf|gp)_", "", measure),
+
     condition_code = sub(
       ".*_(uti|sinusitis|insectbite|otitismedia|sorethroat|shingles|impetigo)$",
       "\\1",
       measure
     ),
+
     condition = recode(
       condition_code,
       uti = "UTI",
@@ -181,15 +189,17 @@ antibiotic_data <- practice_level_data_by_practice_only %>%
       shingles = "Shingles",
       impetigo = "Impetigo"
     ),
+
     antibiotic = sub(
       "_(uti|sinusitis|insectbite|otitismedia|sorethroat|shingles|impetigo)$",
       "",
       antibiotic
     ),
-    antibiotic = tools::toTitleCase(gsub("_", " ", antibiotic))
+
+    antibiotic = tools::toTitleCase(
+      gsub("_", " ", antibiotic)
+    )
   )
-
-
 # 5. Overall antibiotic counts across conditions
 
 # Aggregate across practices and conditions by month, setting and antibiotic.
