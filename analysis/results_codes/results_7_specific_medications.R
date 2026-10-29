@@ -100,30 +100,11 @@ make_antibiotic_plot <- function(data, plot_title) {
     )
   ) +
     geom_area(position = "stack", na.rm = TRUE) +
-    geom_vline(
-      xintercept = GP_connect,
-      linetype = "dashed",
-      colour = "blue",
-      linewidth = 0.8
-    ) +
-    geom_vline(
-      xintercept = PF_start,
-      linetype = "dashed",
-      colour = "black",
-      linewidth = 0.8
-    ) +
-    scale_x_date(
-      date_labels = "%Y-%m",
-      date_breaks = "1 month"
-    ) +
-    labs(
-      title = plot_title,
-      x = "Month",
-      y = "Number of prescriptions",
-      fill = "Antibiotic"
-    ) +
-    antibiotic_theme +
-    guides(fill = guide_legend(nrow = 1, title.position = "left"))
+    geom_vline( xintercept = GP_connect, linetype = "dashed",colour = "blue", linewidth = 0.8) +
+    geom_vline(xintercept = PF_start,linetype = "dashed",colour = "black",linewidth = 0.5) +
+    scale_x_date(date_labels = "%Y-%m",date_breaks = "1 month") +
+    labs(title = plot_title, x = "Month", y = "Number of prescriptions", fill = "Antibiotic") +
+    antibiotic_theme + guides(fill = guide_legend(nrow = 1, title.position = "left"))
 }
 # Function for CSV and PNG saving
 save_antibiotic_outputs <- function(data, plot, filename) {
@@ -237,7 +218,6 @@ save_antibiotic_outputs(
   pf_antibiotics_plot,
   "results_7_medications_pf"
 )
-
 
 # 6. Medication counts by individual condition
 
