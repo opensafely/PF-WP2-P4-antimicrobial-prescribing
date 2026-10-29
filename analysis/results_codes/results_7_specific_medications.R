@@ -182,7 +182,6 @@ antibiotic_data <- practice_level_data_by_practice_only %>%
     )
   )
 # 5. Overall antibiotic counts across conditions
-
 # Aggregate across practices and conditions by month, setting and antibiotic.
 
 antibiotic_monthly <- antibiotic_data %>%
