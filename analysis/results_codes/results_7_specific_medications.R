@@ -98,7 +98,8 @@ make_antibiotic_plot <- function(data, plot_title) {
       fill = antibiotic
     )
   ) +
-    geom_area(position = "stack", na.rm = TRUE) +
+    #geom_area(position = "stack", na.rm = TRUE) +
+    geom_col(position = "stack", na.rm = TRUE) +
     geom_vline( xintercept = GP_connect, linetype = "dashed",colour = "blue", linewidth = 0.8) +
     geom_vline(xintercept = PF_start,linetype = "dashed",colour = "black",linewidth = 0.5) +
     scale_x_date(date_labels = "%Y-%m",date_breaks = "1 month") +
