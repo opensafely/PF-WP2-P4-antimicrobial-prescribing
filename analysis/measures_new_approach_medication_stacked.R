@@ -178,9 +178,25 @@ ggsave(
 )
 
 # Save the data underlying the monthly stacked PNG
+#write_csv(
+# stacked_data %>%
+    #arrange(Setting, interval_start, condition),
+  #here(
+  #  "output",
+  #  "measures_new_approach_medication_stacked.csv"
+  #)
+#)
+#SDC
 write_csv(
   stacked_data %>%
-    arrange(Setting, interval_start, condition),
+    arrange(Setting, interval_start, condition) %>%
+    mutate(
+      medication_count = if_else(
+        medication_count < 7,
+        "[Redacted]",
+        as.character(medication_count)
+      )
+    ),
   here(
     "output",
     "measures_new_approach_medication_stacked.csv"
@@ -262,9 +278,26 @@ ggsave(
   dpi = 300
 )
 # Save the data underlying the annual stacked PNG
+#write_csv(
+  #stacked_annual_data %>%
+    #arrange(Setting, year, condition),
+  #here(
+ #   "output",
+#    "measures_new_approach_medication_stacked_annual.csv"
+#  )
+#)
+
+# Save the data underlying the annual stacked PNG with SDC applied
 write_csv(
   stacked_annual_data %>%
-    arrange(Setting, year, condition),
+    arrange(Setting, year, condition) %>%
+    mutate(
+      medication_count = if_else(
+        year >= 2024 & medication_count < 7,
+        "[Redacted]",
+        as.character(medication_count)
+      )
+    ),
   here(
     "output",
     "measures_new_approach_medication_stacked_annual.csv"
@@ -391,13 +424,35 @@ ggsave(
 )
 
 # Save the data underlying the calendar-year annual PNG
+#write_csv(
+#  medication_annual,
+#  here(
+#    "output",
+#    "measures_new_approach_facet_medication_annual.csv"
+#  )
+#)
+
+# Save the calendar-year annual data with SDC applied
 write_csv(
-  medication_annual,
+  medication_annual %>%
+    mutate(
+      annual_count = if_else(
+        year >= 2024 & annual_count < 7,
+        "[Redacted]",
+        as.character(annual_count)
+      ),
+      previous_count = if_else(
+        year >= 2024 & previous_count < 7,
+        "[Redacted]",
+        as.character(previous_count)
+      )
+    ),
   here(
     "output",
     "measures_new_approach_facet_medication_annual.csv"
   )
 )
+
 
 # 6. Annual medication counts and year-on-year changes(Reporting years: February to January
 library(tidyverse)
@@ -542,13 +597,35 @@ ggsave(
 )
 
 # Save the data underlying the February–January annual PNG
+#write_csv(
+#  medication_annual,
+#  here(
+ #   "output",
+ #   "measures_new_approach_facet_medication_full_annual.csv"
+ # )
+#)
+
+# Save the data underlying the February–January annual PNG with SDC applied
 write_csv(
-  medication_annual,
+  medication_annual %>%
+    mutate(
+      annual_count = if_else(
+        year >= 2024 & annual_count < 7,
+        "[Redacted]",
+        as.character(annual_count)
+      ),
+      previous_count = if_else(
+        year >= 2024 & previous_count < 7,
+        "[Redacted]",
+        as.character(previous_count)
+      )
+    ),
   here(
     "output",
     "measures_new_approach_facet_medication_full_annual.csv"
   )
 )
+
 
 # -----------------------------------------------------------------------------
 # 7. Figure 3: Year-on-year percentage change
@@ -668,13 +745,42 @@ ggsave(
 )
 
 # Save the data underlying the percentage-change PNG
+#write_csv(
+  #medication_annual_change,
+  #here(
+  #  "output",
+ #   "measures_new_approach_facet_medication_annual_percentage_change.csv"
+#  )
+#)
+
+# Save the data underlying the percentage-change PNG with SDC applied
 write_csv(
-  medication_annual_change,
+  medication_annual_change %>%
+    mutate(
+      annual_count = if_else(
+        year >= 2024 & annual_count < 7,
+        "[Redacted]",
+        as.character(annual_count)
+      ),
+      previous_count = if_else(
+        year >= 2024 & previous_count < 7,
+        "[Redacted]",
+        as.character(previous_count)
+      ),
+      percentage_change = if_else(
+        year >= 2024 &
+          (annual_count == "[Redacted]" |
+           previous_count == "[Redacted]"),
+        NA_real_,
+        percentage_change
+      )
+    ),
   here(
     "output",
     "measures_new_approach_facet_medication_annual_percentage_change.csv"
   )
 )
+
 
 # -----------------------------------------------------------------------------
 # 7. Data quality checks
