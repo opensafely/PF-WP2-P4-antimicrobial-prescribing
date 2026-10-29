@@ -213,7 +213,7 @@ write_csv(
   rates_monthly_release,
   here(
     "output",
-    "measures_new_approach_facet_medication_rate.csv"
+    "measures_new_approach_facet_medication_rate_sdc.csv"
   )
 )
 
