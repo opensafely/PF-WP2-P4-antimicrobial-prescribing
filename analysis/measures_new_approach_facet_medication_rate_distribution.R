@@ -43,8 +43,8 @@ library(patchwork)
 
 #2. Settings-----------------------------------------------------------------
 practice_var <- "practice"
-min_denom <- 8  #//100       # This helps for SDC 
-min_practices <- 8 #10    # minimum contributing practices for a monthly summary
+min_denom <- 100       # This helps for SDC 
+min_practices <- 10    # minimum contributing practices for a monthly summary
 
 #Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
@@ -437,7 +437,7 @@ plot_practice_trend <- function(cond, setting) {
     
     geom_ribbon(
       aes(ymin = q1, ymax = q3),
-      fill = "#9FB3C8",
+      fill = "#90a8c2",
       alpha = 0.5,
       na.rm = TRUE
     ) +
@@ -457,14 +457,14 @@ plot_practice_trend <- function(cond, setting) {
     geom_vline(
       xintercept = PF_start,
       linetype = "dashed",
-      linewidth = 0.5,
+      linewidth = 0.2,
       colour = "blue"
     ) +
     
     geom_vline(
       xintercept = GP_connect,
       linetype = "dashed",
-      linewidth = 0.5,
+      linewidth = 0.2,
       colour = "black"
     ) +
     
@@ -588,14 +588,14 @@ plot_practice_change <- function(cond, setting) {
     
     geom_point(
       data = filter(d_plot, year == "Year 1"),
-      colour = "#3B6FB6",
+      colour = "#ea0b1a",
       size = 1.1,
       alpha = 0.65
     ) +
     
     geom_point(
       data = filter(d_plot, year == "Year 2"),
-      colour = "#E67E22",
+      colour = "#c222e6",
       shape = 17,
       size = 1.2,
       alpha = 0.65
@@ -618,7 +618,7 @@ plot_practice_change <- function(cond, setting) {
     
     labs(
       title = "Change across GP practices",
-      subtitle = "Blue circle = Year 1; orange triangle = Year 2",
+      subtitle = "Red circle = 2024; Purple triangle = 2025",
       x = NULL,
       y = "Prescribing rate per 1,000 average eligible population"
     ) +
