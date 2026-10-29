@@ -788,10 +788,6 @@ actions:
         fig_2: output/first_second_line_medication/results_7_medications_pf.png
         csv_2: output/first_second_line_medication/results_7_medications_pf.csv
         # Medication outputs by condition in GP
-        fig_3: output/first_second_line_medication/results_7_medications_gp_by_condition.png
-        csv_3: output/first_second_line_medication/results_7_medications_gp_by_condition.csv
-        fig_4: output/first_second_line_medication/results_7_medications_pf_by_condition.png
-        csv_4: output/first_second_line_medication/results_7_medications_pf_by_condition.csv
         fig_5: output/first_second_line_medication/gp_antibiotics_by_condition_uti.png
         csv_5: output/first_second_line_medication/gp_antibiotics_by_condition_uti.csv
         fig_6: output/first_second_line_medication/gp_antibiotics_by_condition_sinusitis.png
