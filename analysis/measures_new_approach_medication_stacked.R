@@ -193,10 +193,15 @@ write_csv(
     arrange(Setting, interval_start, condition) %>%
     mutate(
       medication_count = if_else(
-        medication_count < 8 &
-          (Setting == "GP" |
-             (Setting == "PF" &
-                interval_start >= as.Date("2024-02-01"))),
+        !is.na(medication_count) &
+          medication_count < 8 &
+          (
+            Setting == "GP" |
+              (
+                Setting == "PF" &
+                  interval_start >= as.Date("2024-02-01")
+              )
+          ),
         "[Redacted]",
         as.character(medication_count)
       )
