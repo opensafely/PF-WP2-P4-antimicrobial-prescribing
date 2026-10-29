@@ -2,7 +2,7 @@
 
 # Pharmacy First: first-second-line antibiotic prescribing by setting and condition
 # Statistical Disclosure Control (SDC)
-# 1. Packages
+# 1.Packages
 library(dplyr)
 library(tidyr)
 library(ggplot2)
