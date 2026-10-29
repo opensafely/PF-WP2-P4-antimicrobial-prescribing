@@ -437,7 +437,7 @@ plot_practice_trend <- function(cond, setting) {
     
     geom_ribbon(
       aes(ymin = q1, ymax = q3),
-      fill = "#90a8c2",
+      fill = "#baaf9f",
       alpha = 0.5,
       na.rm = TRUE
     ) +
