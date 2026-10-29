@@ -32,7 +32,14 @@ SDC_THRESHOLD <- 8
 SDC_PF_START  <- as.Date("2024-02-01")
 
 # Output directory
-output_dir <- here("output")
+# output_dir <- here("output")
+output_dir <- here::here("output", "first_second_line_medication")
+
+dir.create(
+  output_dir,
+  recursive = TRUE,
+  showWarnings = FALSE
+)
 
 # =============================================================================
 # 3. SDC functions
@@ -133,7 +140,7 @@ save_antibiotic_outputs <- function(data, plot, filename) {
 
   # Save PNG
   ggsave(
-    filename = here("output", paste0(filename, ".png")),
+    filename = file.path(output_dir, paste0(filename, ".png")),
     plot = plot,
     width = 10,
     height = 6,
@@ -141,11 +148,11 @@ save_antibiotic_outputs <- function(data, plot, filename) {
   )
 
   # Save SDC-protected CSV
-  write_csv(
+  readr::write_csv(
     data %>%
       arrange(interval_start, antibiotic) %>%
       apply_sdc_release(),
-    here("output", paste0(filename, ".csv"))
+    file.path(output_dir, paste0(filename, ".csv"))
   )
 }
 
