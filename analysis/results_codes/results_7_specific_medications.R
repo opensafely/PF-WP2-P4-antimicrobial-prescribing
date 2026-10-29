@@ -14,17 +14,16 @@ practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
   show_col_types = FALSE
 ) %>%
-  mutate(interval_start = as.Date(interval_start)) %>%
-  filter(interval_start <= as.Date("2026-02-01"))
+  mutate(interval_start = as.Date(interval_start)) #%>%
+  #filter(interval_start <= as.Date("2026-02-01"))
 
 # Reference dates
 GP_connect <- as.Date("2025-10-01")
-PF_start   <- as.Date("2022-02-01")
+PF_start   <- as.Date("2024-02-01")
 
 # SDC dates and threshold
 SDC_THRESHOLD <- 8                     # Redacted if less or equal to 7
 SDC_PF_START  <- as.Date("2024-02-01") # This will help to check small count in Post PF
-
 # Output directory
 # output_dir <- here("output")
 output_dir <- here::here("output", "first_second_line_medication")
@@ -100,8 +99,8 @@ make_antibiotic_plot <- function(data, plot_title) {
   ) +
     #geom_area(position = "stack", na.rm = TRUE) +
     geom_col(position = "stack", na.rm = TRUE) +
-    geom_vline( xintercept = GP_connect, linetype = "dashed",colour = "blue", linewidth = 0.8) +
-    geom_vline(xintercept = PF_start,linetype = "dashed",colour = "black",linewidth = 0.5) +
+    geom_vline( xintercept = GP_connect, linetype = "dashed",colour = "blue", linewidth = 0.3) +
+    geom_vline(xintercept = PF_start,linetype = "dashed",colour = "black",linewidth = 0.3) +
     scale_x_date(date_labels = "%Y-%m",date_breaks = "1 month") +
     labs(title = plot_title, x = "Month", y = "Number of prescriptions", fill = "Antibiotic") +
     antibiotic_theme + guides(fill = guide_legend(nrow = 1, title.position = "left"))
