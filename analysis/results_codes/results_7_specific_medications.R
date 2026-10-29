@@ -1,9 +1,7 @@
 
-# =============================================================================
+
 # Pharmacy First: antibiotic prescribing by setting and condition
 # Statistical Disclosure Control (SDC)
-# =============================================================================
-
 # 1. Packages
 library(dplyr)
 library(tidyr)
@@ -11,10 +9,8 @@ library(ggplot2)
 library(readr)
 library(here)
 library(grid)
-
-# =============================================================================
 # 2. Read data and define dates
-# =============================================================================
+
 
 practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
@@ -23,13 +19,13 @@ practice_level_data_by_practice_only <- read_csv(
   mutate(interval_start = as.Date(interval_start)) %>%
   filter(interval_start <= as.Date("2026-02-01"))
 
-# Plot reference dates
+# Reference dates
 GP_connect <- as.Date("2025-10-01")
 PF_start   <- as.Date("2022-02-01")
 
 # SDC dates and threshold
-SDC_THRESHOLD <- 8
-SDC_PF_START  <- as.Date("2024-02-01")
+SDC_THRESHOLD <- 8                     # Redacted if less or equal to 7
+SDC_PF_START  <- as.Date("2024-02-01") # This will help to check small count in Post PF
 
 # Output directory
 # output_dir <- here("output")
@@ -41,10 +37,7 @@ dir.create(
   showWarnings = FALSE
 )
 
-# =============================================================================
 # 3. SDC functions
-# =============================================================================
-
 # GP: suppress counts < 8 throughout the period.
 # PF: suppress counts < 8 from February 2024 onwards.
 
@@ -68,7 +61,7 @@ apply_sdc_plot <- function(data) {
     )
 }
 
-# Protect values in CSV files.
+# Protection of  values in CSV files.
 apply_sdc_release <- function(data) {
   data %>%
     mutate(
@@ -89,7 +82,7 @@ apply_sdc_release <- function(data) {
     select(-any_of(c("sdc_required", "count_plot")))
 }
 
-# Common plot theme
+# Plot theme
 antibiotic_theme <- theme_bw() +
   theme(
     legend.position = "bottom",
@@ -98,7 +91,7 @@ antibiotic_theme <- theme_bw() +
     legend.key.size = unit(0.4, "cm")
   )
 
-# Common plotting function
+# Plotting function
 make_antibiotic_plot <- function(data, plot_title) {
   ggplot(
     data,
@@ -134,8 +127,7 @@ make_antibiotic_plot <- function(data, plot_title) {
     antibiotic_theme +
     guides(fill = guide_legend(nrow = 1, title.position = "left"))
 }
-
-# Common save function for CSV and PNG
+# Function for CSV and PNG saving
 save_antibiotic_outputs <- function(data, plot, filename) {
 
   # Save PNG
@@ -156,9 +148,7 @@ save_antibiotic_outputs <- function(data, plot, filename) {
   )
 }
 
-# =============================================================================
 # 4. Extract antibiotic variables
-# =============================================================================
 
 antibiotic_data <- practice_level_data_by_practice_only %>%
   select(
@@ -199,12 +189,10 @@ antibiotic_data <- practice_level_data_by_practice_only %>%
     antibiotic = tools::toTitleCase(gsub("_", " ", antibiotic))
   )
 
-# =============================================================================
+
 # 5. Overall antibiotic counts across conditions
-# =============================================================================
 
 # Aggregate across practices and conditions by month, setting and antibiotic.
-# This follows the same overall aggregation approach as your original script.
 
 antibiotic_monthly <- antibiotic_data %>%
   group_by(interval_start, setting, antibiotic) %>%
@@ -240,9 +228,8 @@ save_antibiotic_outputs(
   "results_7_medications_pf"
 )
 
-# =============================================================================
+
 # 6. Medication counts by individual condition
-# =============================================================================
 
 medication_monthly <- antibiotic_data %>%
   group_by(interval_start, setting, condition, antibiotic) %>%
@@ -252,26 +239,18 @@ medication_monthly <- antibiotic_data %>%
   ) %>%
   apply_sdc_plot()
 
-# =============================================================================
-# 7. Create "all conditions" data
-# =============================================================================
 
-# Use the overall aggregate for "all conditions", rather than summing the
-# already-aggregated condition-level data a second time.
+# 7. "all conditions" data
 
 all_conditions_data <- antibiotic_monthly %>%
   mutate(condition = "All conditions")
 
-# Combine individual-condition data and the overall aggregate.
-# The condition-specific rows retain their own SDC flags and plot values.
+# Combination individual-condition data and the overall aggregate.
 all_plot_data <- bind_rows(
   medication_monthly,
   all_conditions_data
 )
-
-# =============================================================================
 # 8. Separate GP and PF plots and CSVs for each condition, including all
-# =============================================================================
 
 condition_names <- c(
   "UTI" = "uti",
@@ -288,10 +267,9 @@ for (condition_name in names(condition_names)) {
 
   condition_suffix <- unname(condition_names[[condition_name]])
 
-  # ---------------------------------------------------------------------------
-  # GP
-  # ---------------------------------------------------------------------------
-
+  
+  # A.General practice
+ 
   gp_data <- all_plot_data %>%
     filter(
       setting == "GP",
