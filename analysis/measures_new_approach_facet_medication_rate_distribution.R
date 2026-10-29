@@ -492,7 +492,7 @@ plot_practice_trend <- function(cond, setting) {
       title = paste0("Monthly ", setting, " prescribing across GP practices"),
       subtitle = paste(
         "Median (solid), mean (dashed);",
-        "shaded area = interquartile range"
+        "shaded area = IQR"
       ),
       x = "Month",
       y = "Prescribing rate per 1,000 eligible population"
