@@ -1,12 +1,14 @@
 
-#Prescribing rates
+# Prescribing rates with Statistical Disclosure Control (SDC)
 
 library(tidyverse)
 library(here)
-library(patchwork)   # added: to put the two practice-level graphs side by side
+library(patchwork)
+
 # -----------------------------------------------------------------------------
 # 1. Data
 # -----------------------------------------------------------------------------
+
 measures_new_approach <- read_csv(
   here("output", "measures_new_approach_medication.csv"),
   show_col_types = FALSE
@@ -28,33 +30,24 @@ conditions <- c(
   "all_conditions"
 )
 
+measure_pattern <- paste0(
+  "^(gp|pf)_medication_(",
+  paste(conditions, collapse = "|"),
+  ")$"
+)
+
 # -----------------------------------------------------------------------------
-# 2. Monthly prescribing rates by condition and setting
-#   Here, we  aggregated numerators and denominators before calculating rates.
+# 2. Monthly prescribing rates
+#    Aggregate numerators and denominators before calculating rates
 # -----------------------------------------------------------------------------
+
 rates_monthly <- measures_new_approach %>%
-  filter(
-    str_detect(
-      measure,
-      paste0(
-        "^(gp|pf)_medication_(",
-        paste(conditions, collapse = "|"),
-        ")$"
-      )
-    )
-  ) %>%
+  filter(str_detect(measure, measure_pattern)) %>%
   group_by(interval_start, measure) %>%
   summarise(
     numerator   = sum(numerator, na.rm = TRUE),
     denominator = sum(denominator, na.rm = TRUE),
     .groups = "drop"
-  ) %>%
-  mutate(
-    prescribing_rate = if_else(
-      denominator > 0,
-      1000 * numerator / denominator,
-      NA_real_
-    )
   ) %>%
   extract(
     measure,
@@ -73,24 +66,70 @@ rates_monthly <- measures_new_approach %>%
       shingles       = "Shingles",
       impetigo       = "Impetigo",
       all_conditions = "All PF conditions"
+    ),
+    prescribing_rate = if_else(
+      denominator > 0,
+      1000 * numerator / denominator,
+      NA_real_
     )
   )
 
+# -----------------------------------------------------------------------------
+# 3. Apply SDC
+#
+# GP: all dates
+# PF: from February 2024 onwards
+# Suppression threshold: numerator < 8
+# -----------------------------------------------------------------------------
 
-# 3. Plot monthly prescribing rates
+rates_monthly_sdc <- rates_monthly %>%
+  mutate(
+    sdc_required = numerator < 8 &
+      (
+        Setting == "GP" |
+          (
+            Setting == "PF" &
+              interval_start >= PF_start
+          )
+      ),
+    numerator_sdc = if_else(
+      sdc_required,
+      NA_real_,
+      as.numeric(numerator)
+    ),
+    denominator_sdc = if_else(
+      sdc_required,
+      NA_real_,
+      as.numeric(denominator)
+    ),
+    prescribing_rate_sdc = if_else(
+      sdc_required,
+      NA_real_,
+      prescribing_rate
+    )
+  )
 
-facet_rates_plot <- ggplot(
-  rates_monthly,
+message(
+  "Number of monthly cells suppressed: ",
+  sum(rates_monthly_sdc$sdc_required, na.rm = TRUE)
+)
+
+# -----------------------------------------------------------------------------
+# 4. Plot monthly prescribing rates after SDC
+# -----------------------------------------------------------------------------
+
+facet_rates_plot_sdc <- ggplot(
+  rates_monthly_sdc,
   aes(
     x = interval_start,
-    y = prescribing_rate,
+    y = prescribing_rate_sdc,
     group = Setting,
     color = Setting,
     shape = Setting
   )
 ) +
-  geom_line(linewidth = 0.5) +
-  geom_point(size = 1.0) +
+  geom_line(linewidth = 0.5, na.rm = FALSE) +
+  geom_point(size = 1.0, na.rm = TRUE) +
   geom_vline(
     xintercept = PF_start,
     linetype = "dashed",
@@ -113,9 +152,9 @@ facet_rates_plot <- ggplot(
   ) +
   labs(
     title = "Monthly prescribing rates by condition and setting",
-    #subtitle = paste( "Blue dashed line: Pharmacy First launch;", "black dashed line: GP Connect introduction"),
+    subtitle = "Rates subject to statistical disclosure control",
     x = "Month",
-    y = "Prescribing rate (per 1000 eligible population)",
+    y = "Prescribing rate (per 1,000 eligible population)",
     color = "Setting",
     shape = "Setting"
   ) +
@@ -126,21 +165,71 @@ facet_rates_plot <- ggplot(
     strip.text = element_text(face = "bold")
   )
 
-print(facet_rates_plot)
+print(facet_rates_plot_sdc)
 
-
-# 4. Save plot
+# -----------------------------------------------------------------------------
+# 5. Save controlled plot
+# -----------------------------------------------------------------------------
 
 ggsave(
-  filename = here("output", "measures_new_approach_facet_medication_rate.png"),
-  plot = facet_rates_plot,
+  filename = here(
+    "output",
+    "measures_new_approach_facet_medication_rate.png"
+  ),
+  plot = facet_rates_plot_sdc,
   width = 10,
   height = 6,
   dpi = 300
 )
 
-# Save the data used for the prescribing rates graph
+# -----------------------------------------------------------------------------
+# 6. Export controlled CSV
+# -----------------------------------------------------------------------------
+
+rates_monthly_release <- rates_monthly_sdc %>%
+  transmute(
+    interval_start,
+    Setting,
+    condition,
+    numerator = if_else(
+      sdc_required,
+      "[Redacted]",
+      as.character(numerator)
+    ),
+    denominator = if_else(
+      sdc_required,
+      "[Redacted]",
+      as.character(denominator)
+    ),
+    prescribing_rate = if_else(
+      sdc_required,
+      "[Redacted]",
+      as.character(prescribing_rate)
+    )
+  ) %>%
+  arrange(Setting, interval_start, condition)
+
 write_csv(
-  rates_monthly,
-  here("output", "measures_new_approach_facet_medication_rate.csv")
+  rates_monthly_release,
+  here(
+    "output",
+    "measures_new_approach_facet_medication_rate.csv"
+  )
 )
+
+# -----------------------------------------------------------------------------
+# 7. Internal SDC audit
+# -----------------------------------------------------------------------------
+
+sdc_audit <- rates_monthly_sdc %>%
+  group_by(Setting, condition) %>%
+  summarise(
+    total_months = n(),
+    suppressed_months = sum(sdc_required, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(Setting, condition)
+
+print(sdc_audit, n = Inf)
+
+message("SDC-controlled prescribing-rate outputs have been created.")
