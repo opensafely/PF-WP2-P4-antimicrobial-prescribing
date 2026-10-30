@@ -14,15 +14,14 @@ from ehrql import create_dataset, show, days, weeks, months, years, case, when, 
 #  1.Pass parameters via the "project.yaml"
 #  2.The measures framework (best approach) : https://docs.opensafely.org/ehrql/explanation/measures/
 #  Validation consultations (compare the protocol 4 and 2)
-#  Validation medications (compare medications  vs ): a)PF monly report: https://reports.opensafely.org/reports/opensafely-pharmacy-first-monthly-dashboard/#summary-of-medications-recorded-in-pharmacy-first-consultationswhich 
+#  Validation medications (compare medications vs ):  a)PF monly report: https://reports.opensafely.org/reports/opensafely-pharmacy-first-monthly-dashboard/#summary-of-medications-recorded-in-pharmacy-first-consultationswhich 
 #                                                     b)SPAUR report(2025) : https://www.gov.uk/government/publications/english-surveillance-programme-for-antimicrobial-utilisation-and-resistance-espaur-2024-to-2025-report
 #                                                     c)NHSBSA report(2025) : https://www.nhsbsa.nhs.uk/ 
 #                                                     d)Openprescribing (2025): https://openprescribing.net/
 from ehrql.tables.tpp import (patients, practice_registrations, clinical_events, addresses, 
-                              ethnicity_from_sus,
-                              emergency_care_attendances,appointments,medications) # I added medications to be able to assing treatment to the dataset
+                              ethnicity_from_sus,emergency_care_attendances,appointments,medications) # I added medications to be able to assing treatment to the dataset
 # import codelists
-# from analysis import codelists #
+# from analysis import codelists 
 import analysis.codelists as codelists
 #from ehrql.tables.raw.tpp import medications # not sure if it work without permission
 from analysis.pf_variable_library import (get_imd, get_latest_ethnicity, 
