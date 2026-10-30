@@ -14,8 +14,8 @@ practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
   show_col_types = FALSE
 ) %>%
-  mutate(interval_start = as.Date(interval_start)) #%>%
-  #filter(interval_start <= as.Date("2026-02-01"))
+  mutate(interval_start = as.Date(interval_start)) %>%
+  filter(interval_start <= as.Date("2026-02-01"))
 
 # Reference dates
 GP_connect <- as.Date("2025-10-01")
