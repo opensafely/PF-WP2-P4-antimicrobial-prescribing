@@ -20,8 +20,8 @@ from ehrql import create_dataset, show, days, weeks, months, years, case, when, 
 #                                                     d)Openprescribing (2025): https://openprescribing.net/
 from ehrql.tables.tpp import (patients, practice_registrations, clinical_events, addresses, 
                               ethnicity_from_sus,emergency_care_attendances,appointments,medications) # I added medications to be able to assing treatment to the dataset
-# import codelists
-# from analysis import codelists 
+# Import codelists
+# From analysis import codelists 
 import analysis.codelists as codelists
 #from ehrql.tables.raw.tpp import medications # not sure if it work without permission
 from analysis.pf_variable_library import (get_imd, get_latest_ethnicity, 
