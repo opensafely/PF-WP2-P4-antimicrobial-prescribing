@@ -9,7 +9,7 @@ library(ggplot2)
 library(readr)
 library(here)
 library(grid)
-# 2. Read data and define dates
+# 2. Data and dates
 practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
   show_col_types = FALSE
