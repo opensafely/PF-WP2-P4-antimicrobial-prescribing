@@ -373,13 +373,7 @@ annual_plot_data <- annual_sdc %>%
 
 p_monthly <- ggplot(
   monthly_plot_data,
-  aes(
-    x = month,
-    y = percentage,
-    colour = status,
-    group = status
-    )
-    ) +
+  aes(x = month,y = percentage, colour = status,group = status )) +
    #geom_line(linewidth = 0.7,na.rm = TRUE) +
    #geom_point(size = 0.8,na.rm = TRUE) +
    #geom_col(position = "stack",na.rm = TRUE)+
@@ -406,7 +400,7 @@ p_monthly <- ggplot(
     ),
     x = "Month",
     y = "Percentage of practices",
-    colour = "Numerator status"
+    colour = "status"
   ) +
 
   theme_bw() +
@@ -436,8 +430,7 @@ p_annual <- ggplot(
     y = percentage,
     colour = status,
     group = status
-  )
-) +
+    )) +
 
   geom_line(
     linewidth = 0.8,
