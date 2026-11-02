@@ -378,25 +378,15 @@ p_monthly <- ggplot(
     y = percentage,
     colour = status,
     group = status
-  )
-) +
-
-  geom_line(
-    linewidth = 0.7,
-    na.rm = TRUE
-  ) +
-
-  geom_point(
-    size = 0.8,
-    na.rm = TRUE
-  ) +
-
-  facet_wrap(
-    ~ measure,
-    scales = "fixed"
-  ) +
-
-  scale_y_continuous(
+    )
+    ) +
+   #geom_line(linewidth = 0.7,na.rm = TRUE) +
+   #geom_point(size = 0.8,na.rm = TRUE) +
+   geom_col(position = "stack",na.rm = TRUE)+
+   geom_vline(xintercept = as.numeric(PF_start_date),linetype = "dashed",colour = "blue",linewidth = 0.7) +
+   geom_vline(xintercept = as.numeric(GP_connect_date),linetype = "dashed",colour = "red",linewidth = 0.7) +
+   facet_wrap( ~ measure,scales = "fixed") +
+   scale_y_continuous(
     limits = c(0, 100),
     breaks = seq(0, 100, 20),
     labels = label_percent(scale = 1)
