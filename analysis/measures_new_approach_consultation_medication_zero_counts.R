@@ -42,6 +42,7 @@ data <- read_csv(
   ) %>%
   filter(
     #grepl("^(gp|pf)_medication_", measure)
+    !grepl("all_conditions$", measure),
     grepl("^gp_medication_", measure)
   ) %>%
   mutate(
