@@ -382,7 +382,8 @@ p_monthly <- ggplot(
     ) +
    #geom_line(linewidth = 0.7,na.rm = TRUE) +
    #geom_point(size = 0.8,na.rm = TRUE) +
-   geom_col(position = "stack",na.rm = TRUE)+
+   #geom_col(position = "stack",na.rm = TRUE)+
+   geom_col(aes(fill = status),position = "stack",na.rm = TRUE) +
    geom_vline(xintercept = as.numeric(PF_start_date),linetype = "dashed",colour = "blue",linewidth = 0.7) +
    geom_vline(xintercept = as.numeric(GP_connect_date),linetype = "dashed",colour = "red",linewidth = 0.7) +
    facet_wrap( ~ measure,scales = "fixed") +
