@@ -39,7 +39,11 @@ GP_connect_date <- as.Date("2025-10-01")
 data <- read_csv(
   here("output", "measures_new_approach_consultation_and_medication.csv"),
   show_col_types = FALSE
-) %>%
+  ) %>%
+  filter(
+    #grepl("^(gp|pf)_medication_", measure)
+    grepl("^gp_medication_", measure)
+  ) %>%
   mutate(
     interval_start = as.Date(interval_start),
     interval_end   = as.Date(interval_end),
@@ -50,7 +54,6 @@ data <- read_csv(
 # -----------------------------------------------------------------------------
 # 4. Monthly practice-level classification
 # -----------------------------------------------------------------------------
-
 monthly_practice <- data %>%
   group_by(measure, practice, month, year) %>%
   summarise(
