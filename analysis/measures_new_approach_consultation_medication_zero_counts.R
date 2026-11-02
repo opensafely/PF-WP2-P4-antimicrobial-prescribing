@@ -403,8 +403,8 @@ p_monthly <- ggplot(
   ) +
 
   scale_x_date(
-    date_breaks = "6 months",
-    date_labels = "%b\n%Y"
+    date_breaks = "2 months",
+    date_labels = "%Y-%m"
   ) +
 
   labs(
