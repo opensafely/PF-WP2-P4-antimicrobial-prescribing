@@ -23,11 +23,17 @@
 #     Graph A in some months but not to Graph B, or vice versa.
 #
 # Disclosure control:
+#   - Every practice-level numerator and denominator is rounded with
+#     OpenSAFELY midpoint-6 rounding BEFORE any rate is calculated
+#     (monthly: section 4; annual: section 6, after summing raw months).
+#     All plotted rates, medians, means and IQRs therefore derive only from
+#     midpoint-6 values, so no point or summary reveals a count of 1-6.
 #   - Monthly summary statistics are suppressed when fewer than
 #     min_practices practices contribute.
 #   - All released practice counts (CSV and figure labels) are rounded
-#     using OpenSAFELY midpoint-6 rounding.
-#   - Detailed practice-level CSVs are not written to output.
+#     using OpenSAFELY midpoint-6 rounding (columns suffixed _midpoint6).
+#   - The only practice-level CSV is the underlying data for Graph B,
+#     with midpoint-6 values and an anonymous index instead of practice IDs.
 # ------------------------------------------------------------------------------
 
 # 1. Packages -----------------------------------------------------------------
@@ -226,9 +232,12 @@ rates_practice <- raw_data %>%
     .groups = "drop"
   ) %>%
   mutate(
+    # SDC: midpoint-6 rounding of practice-month counts before the rate
+    numerator_midpoint6 = roundmid_any(numerator),
+    denominator_midpoint6 = roundmid_any(denominator),
     prescribing_rate = if_else(
       denominator >= min_denom,
-      1000 * numerator / denominator,
+      1000 * numerator_midpoint6 / denominator_midpoint6,
       NA_real_
     )
   )
@@ -294,7 +303,8 @@ if (n_suppressed_months > 0) {
 
 # Released version: rounded counts, suppression flag kept for transparency.
 rates_practice_summary_release <- rates_practice_summary %>%
-  mutate(n_practices = roundmid_any(n_practices))
+  mutate(n_practices = roundmid_any(n_practices)) %>%
+  rename(n_practices_midpoint6 = n_practices)
 
 write_csv(
   rates_practice_summary_release,
@@ -324,9 +334,13 @@ rates_practice_annual_all <- rates_practice %>%
     .groups = "drop"
   ) %>%
   mutate(
+    # SDC: sum RAW monthly numerators first, then midpoint-6 round the
+    # annual total and the mean denominator before the rate
+    annual_numerator_midpoint6 = roundmid_any(annual_numerator),
+    mean_denominator_midpoint6 = roundmid_any(mean_denominator),
     annual_rate = if_else(
       n_months == 12 & mean_denominator >= min_denom,
-      1000 * annual_numerator / mean_denominator,
+      1000 * annual_numerator_midpoint6 / mean_denominator_midpoint6,
       NA_real_
     )
   )
@@ -351,7 +365,8 @@ print(annual_diagnostics, n = Inf)
 
 # Released version: rounded counts.
 annual_diagnostics_release <- annual_diagnostics %>%
-  mutate(across(starts_with("practices_"), roundmid_any))
+  mutate(across(starts_with("practices_"), roundmid_any)) %>%
+  rename_with(~ paste0(.x, "_midpoint6"), starts_with("practices_"))
 
 write_csv(
   annual_diagnostics_release,
@@ -397,11 +412,34 @@ annual_summary <- rates_practice_year %>%
       ~ if_else(suppressed, NA_real_, .x)
     ),
     n_practices = roundmid_any(n_practices)
-  )
+  ) %>%
+  rename(n_practices_midpoint6 = n_practices)
 
 write_csv(
   annual_summary,
   file.path(output_dir, "practice_rate_annual_summary.csv")
+)
+
+# Underlying data for Graph B (required for release of the figure):
+# midpoint-6 numerators/denominators, derived rates, anonymous practice index.
+graph_b_data <- rates_practice_year %>%
+  group_by(Setting, condition) %>%
+  mutate(practice_index = dense_rank(practice)) %>%
+  ungroup() %>%
+  transmute(
+    Setting,
+    condition,
+    practice_index,
+    year,
+    annual_numerator_midpoint6,
+    mean_denominator_midpoint6,
+    annual_rate_midpoint6_derived = round(annual_rate, 4)
+  ) %>%
+  arrange(Setting, condition, practice_index, year)
+
+write_csv(
+  graph_b_data,
+  file.path(output_dir, "practice_rate_graph_b_data.csv")
 )
 
 
@@ -487,6 +525,8 @@ plot_practice_trend <- function(cond, setting) {
     scale_y_continuous(
       expand = expansion(mult = c(0, 0.05))
     ) +
+
+    expand_limits(y = 0) +
     
     labs(
       title = paste0("Monthly ", setting, " prescribing across GP practices"),
@@ -615,6 +655,8 @@ plot_practice_change <- function(cond, setting) {
     scale_y_continuous(
       expand = expansion(mult = c(0.02, 0.22))
     ) +
+
+    expand_limits(y = 0) +
     
     labs(
       title = "Change across GP practices",
