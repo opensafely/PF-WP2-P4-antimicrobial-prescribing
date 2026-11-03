@@ -920,12 +920,12 @@ actions:
       csv_2: output/zero_counts/annual_zero_nonzero_summary_SDC.csv
       figure_3: output/zero_counts/monthly_zero_nonzero_faceted_SDC.png
       figure_4: output/zero_counts/annual_zero_nonzero_faceted_SDC.png
-      figure_3: output/zero_counts/monthly_zero_nonzero_uti_SDC.png
-      figure_4: output/zero_counts/annual_zero_nonzero_uti_SDC.png
-      figure_5: output/zero_counts/monthly_zero_nonzero_sinusitis_SDC.png
-      figure_6: output/zero_counts/annual_zero_nonzero_sinusitis_SDC.png
-      figure_7: output/zero_counts/monthly_zero_nonzero_otitis_media_SDC.png
-      figure_8: output/zero_counts/annual_zero_nonzero_otitis_media_SDC.png
+      figure_5: output/zero_counts/monthly_zero_nonzero_uti_SDC.png
+      figure_6: output/zero_counts/annual_zero_nonzero_uti_SDC.png
+      figure_7: output/zero_counts/monthly_zero_nonzero_sinusitis_SDC.png
+      figure_8: output/zero_counts/annual_zero_nonzero_sinusitis_SDC.png
+      figure_9: output/zero_counts/monthly_zero_nonzero_otitis_media_SDC.png
+      figure_10: output/zero_counts/annual_zero_nonzero_otitis_media_SDC.png
       figure_9: output/zero_counts/monthly_zero_nonzero_sore_throat_SDC.png
       figure_10: output/zero_counts/annual_zero_nonzero_sore_throat_SDC.png
       figure_11: output/zero_counts/monthly_zero_nonzero_impetigo_SDC.png
