@@ -108,7 +108,7 @@ if (!file.exists(input_file)) {
 raw_data <- read_csv(input_file, show_col_types = FALSE) %>%
   mutate(interval_start = as.Date(interval_start)) %>%
   filter(
-    interval_start >= as.Date("2022-02-01"),  # i just want the PF period
+    interval_start >= as.Date("2022-02-01"),  # i just want whole period PF period
     interval_start < as.Date("2026-02-01")
   )
 
