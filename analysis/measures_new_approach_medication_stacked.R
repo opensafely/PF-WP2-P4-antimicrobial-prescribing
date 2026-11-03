@@ -1,6 +1,6 @@
 
 # Monthly and annual medication counts by condition and setting
-# Statistical disclosure control (OpenSAFELY guidelines):
+# Statistical disclosure control follows OpenSAFELY guidelines:
 #   1. Counts <= 7 are redacted (shown as "[REDACTED]" in CSVs).
 #   2. All remaining counts are rounded to the nearest 5.
 #   3. Annual totals are computed from raw monthly data, then protected.
@@ -8,7 +8,6 @@
 #      are NA whenever either count is redacted, so no released value can be
 #      used to back-calculate a redacted one.
 #   5. Every figure is drawn from protected values, not raw counts.
-# SDC is applied in: sdc_count(), sdc_label(), summarise_annual(), release_annual().
 
 library(tidyverse)
 library(here)
@@ -16,14 +15,14 @@ library(scales)
 library(lubridate)
 
 # -----------------------------------------------------------------------------
-# 0. SDC helpers
+# 0. SDC 
 # -----------------------------------------------------------------------------
 
 sdc_threshold <- 7
 sdc_base <- 5
 
 # Numeric protected count: NA if redacted (1-7), zero kept as zero,
-# everything else rounded to the nearest 5. Integer counts never fall on a .5
+# Everything else rounded to the nearest 5. Integer counts never fall on a .5
 # tie when divided by 5, so round() is unambiguous here.
 sdc_count <- function(x, threshold = sdc_threshold, base = sdc_base) {
   case_when(
@@ -33,13 +32,12 @@ sdc_count <- function(x, threshold = sdc_threshold, base = sdc_base) {
     TRUE ~ round(x / base) * base
   )
 }
-
-# Flag for counts that were redacted (as opposed to genuinely missing)
+# Flag for counts that were redacted
 sdc_redacted <- function(x, threshold = sdc_threshold) {
   !is.na(x) & x > 0 & x <= threshold
 }
 
-# Character version for release: "[REDACTED]" or the rounded count
+# Version for release: "[REDACTED]" or the rounded count
 sdc_label <- function(x) {
   if_else(sdc_redacted(x), "[REDACTED]", as.character(sdc_count(x)))
 }
@@ -63,7 +61,7 @@ measures_new_approach <- read_csv(
 GP_connect <- as.Date("2025-10-01")
 PF_start   <- as.Date("2024-02-01")
 
-# Structural information only (no counts) goes to the log
+# For information only (no counts) goes to the log
 message("Number of rows: ", nrow(measures_new_approach))
 message("Number of columns: ", ncol(measures_new_approach))
 message(
