@@ -1,13 +1,26 @@
-
 # Prescribing rates with Statistical Disclosure Control (SDC)
+#
+# SDC rules (OpenSAFELY guidance for rates; all settings, all dates):
+#   1. Numerators and denominators rounded to MIDPOINT 6:
+#      0 -> 0, 1-6 -> 3, 7-12 -> 9, 13-18 -> 15, ...
+#      (no separate redaction needed: values 1-6 are never released)
+#   2. Rates calculated ONLY from the midpoint-6 numerator and denominator
+#   3. Naming convention: rounded columns end in _midpoint6, values derived
+#      from them end in _midpoint6_derived
+# Midpoint 6 rounding is applied in: roundmid_any() and section 3.
 
 library(tidyverse)
 library(here)
 library(patchwork)
 
-# -----------------------------------------------------------------------------
+# 0. SDC helper: midpoint 6 rounding (from the OpenSAFELY SDC documentation)
+
+roundmid_any <- function(x, to = 6) {
+  # like round_any, but centers on (integer) midpoint of the rounding points
+  ceiling(x / to) * to - (floor(to / 2) * (x != 0))
+}
+
 # 1. Data
-# -----------------------------------------------------------------------------
 
 measures_new_approach <- read_csv(
   here("output", "measures_new_approach_medication.csv"),
@@ -36,10 +49,8 @@ measure_pattern <- paste0(
   ")$"
 )
 
-# -----------------------------------------------------------------------------
-# 2. Monthly prescribing rates
+# 2. Monthly numerators and denominators (raw)
 #    Aggregate numerators and denominators before calculating rates
-# -----------------------------------------------------------------------------
 
 rates_monthly <- measures_new_approach %>%
   filter(str_detect(measure, measure_pattern)) %>%
@@ -66,63 +77,39 @@ rates_monthly <- measures_new_approach %>%
       shingles       = "Shingles",
       impetigo       = "Impetigo",
       all_conditions = "All PF conditions"
-    ),
-    prescribing_rate = if_else(
-      denominator > 0,
-      1000 * numerator / denominator,
-      NA_real_
     )
   )
 
-# -----------------------------------------------------------------------------
-# 3. Apply SDC
-#
-# GP: all dates
-# PF: from February 2024 onwards
-# Suppression threshold: numerator < 8
-# -----------------------------------------------------------------------------
+# 3. Apply SDC: midpoint 6 rounding, then calculate rates
+#    Raw numerators, denominators and rates are never plotted or written out.
 
 rates_monthly_sdc <- rates_monthly %>%
   mutate(
-    sdc_required = numerator < 8 &
-      (
-        Setting == "GP" |
-          (
-            Setting == "PF" &
-              interval_start >= PF_start
-          )
-      ),
-    numerator_sdc = if_else(
-      sdc_required,
-      NA_real_,
-      as.numeric(numerator)
+    numerator_midpoint6   = roundmid_any(numerator),
+    denominator_midpoint6 = roundmid_any(denominator),
+
+    prescribing_rate_midpoint6_derived = if_else(
+      denominator_midpoint6 > 0,
+      1000 * numerator_midpoint6 / denominator_midpoint6,
+      NA_real_
     ),
-    denominator_sdc = if_else(
-      sdc_required,
-      NA_real_,
-      as.numeric(denominator)
-    ),
-    prescribing_rate_sdc = if_else(
-      sdc_required,
-      NA_real_,
-      prescribing_rate
-    )
+
+    # Months whose true numerator was 1-6 (released as 3), for the audit only
+    low_numerator = numerator > 0 & numerator <= 6
   )
 
 message(
-  "Number of monthly cells suppressed: ",
-  sum(rates_monthly_sdc$sdc_required, na.rm = TRUE)
+  "Number of monthly cells with numerator 1-6 (released as 3): ",
+  sum(rates_monthly_sdc$low_numerator, na.rm = TRUE)
 )
 
-# -----------------------------------------------------------------------------
 # 4. Plot monthly prescribing rates after SDC
-# -----------------------------------------------------------------------------
 
 facet_rates_plot_sdc <- ggplot(
   rates_monthly_sdc,
   aes(
     x = interval_start,
-    y = prescribing_rate_sdc,
+    y = prescribing_rate_midpoint6_derived,
     group = Setting,
     color = Setting,
     shape = Setting
@@ -167,9 +154,7 @@ facet_rates_plot_sdc <- ggplot(
 
 print(facet_rates_plot_sdc)
 
-# -----------------------------------------------------------------------------
 # 5. Save controlled plot
-# -----------------------------------------------------------------------------
 
 ggsave(
   filename = here(
@@ -182,30 +167,16 @@ ggsave(
   dpi = 300
 )
 
-# -----------------------------------------------------------------------------
-# 6. Export controlled CSV
-# -----------------------------------------------------------------------------
+# 6. Export controlled CSV (midpoint 6 numerators/denominators and derived rates)
 
 rates_monthly_release <- rates_monthly_sdc %>%
   transmute(
     interval_start,
     Setting,
     condition,
-    numerator = if_else(
-      sdc_required,
-      "[Redacted]",
-      as.character(numerator)
-    ),
-    denominator = if_else(
-      sdc_required,
-      "[Redacted]",
-      as.character(denominator)
-    ),
-    prescribing_rate = if_else(
-      sdc_required,
-      "[Redacted]",
-      as.character(prescribing_rate)
-    )
+    numerator_midpoint6,
+    denominator_midpoint6,
+    prescribing_rate_midpoint6_derived = round(prescribing_rate_midpoint6_derived, 4)
   ) %>%
   arrange(Setting, interval_start, condition)
 
@@ -217,19 +188,25 @@ write_csv(
   )
 )
 
-# -----------------------------------------------------------------------------
-# 7. Internal SDC audit
-# -----------------------------------------------------------------------------
+# 7. Internal SDC audit (month counts only)
 
 sdc_audit <- rates_monthly_sdc %>%
   group_by(Setting, condition) %>%
   summarise(
     total_months = n(),
-    suppressed_months = sum(sdc_required, na.rm = TRUE),
+    low_numerator_months = sum(low_numerator, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   arrange(Setting, condition)
 
 print(sdc_audit, n = Inf)
+
+# Every released non-zero value must be 3, 9, 15, ... (i.e. 3 mod 6)
+stopifnot(
+  all(rates_monthly_sdc$numerator_midpoint6 %in% 0 |
+        rates_monthly_sdc$numerator_midpoint6 %% 6 == 3, na.rm = TRUE),
+  all(rates_monthly_sdc$denominator_midpoint6 %in% 0 |
+        rates_monthly_sdc$denominator_midpoint6 %% 6 == 3, na.rm = TRUE)
+)
 
 message("SDC-controlled prescribing-rate outputs have been created.")
