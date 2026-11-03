@@ -928,7 +928,9 @@ actions:
    needs: [generate_measures_new_approach_consultation_and_medication]
    outputs:
     moderately_sensitive:
-      csv: output/distribution/*.csv
+      csv: output/distribution/A_D1_D2_practice_month_sdc.csv
+      csv_2: output/distribution/A_national_mean_sdc.csv
+      csv_3: output/distribution/F_histogram_bins_sdc.csv
       figure_1: output/distribution/GP_PF/consultations/impetigo/A_spaghetti.png
       figure_2: output/distribution/GP_PF/consultations/impetigo/D1_baseline_heatmap.png
       figure_3: output/distribution/GP_PF/consultations/impetigo/D2_yoy_heatmap.png
