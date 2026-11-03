@@ -916,12 +916,12 @@ actions:
    needs: [generate_measures_new_approach_consultation_and_medication]
    outputs:
     moderately_sensitive:
-      csv_1: output/zero_counts/monthly_zero_nonzero_summary_SDC.csv
-      csv_2: output/zero_counts/annual_zero_nonzero_summary_SDC.csv
-      figure_3: output/zero_counts/monthly_zero_nonzero_faceted_SDC.png
-      figure_4: output/zero_counts/annual_zero_nonzero_faceted_SDC.png
-    
-      
+      figures: output/zero_counts/*_SDC.png
+      tables: output/zero_counts/*_SDC.csv
+      # csv_1: output/zero_counts/monthly_zero_nonzero_summary_SDC.csv
+      # csv_2: output/zero_counts/annual_zero_nonzero_summary_SDC.csv
+      # figure_3: output/zero_counts/monthly_zero_nonzero_faceted_SDC.png
+      # figure_4: output/zero_counts/annual_zero_nonzero_faceted_SDC.png
 
   process_measures_new_approach_medication_distribution_soai:
    run: r:v2 analysis/measures_new_approach_medication_distribution_soai.R
