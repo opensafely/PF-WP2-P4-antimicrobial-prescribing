@@ -249,7 +249,7 @@ if (nrow(rates_practice) == 0) {
   )
 }
 
-# Confirm that each practice-month-setting-condition combination is unique.
+# Confirmation of practice-month-setting-condition combination is unique.
 stopifnot(
   !anyDuplicated(
     rates_practice[
