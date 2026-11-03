@@ -10,9 +10,10 @@
 #   3. Because every series (GP, PF, GP + PF, each condition, all_conditions)
 #      is rounded independently, differencing series (e.g. GP+PF minus GP)
 #      only recovers a range, not a redacted value.
-#   4. Underlying data for every figure is written next to it, using
-#      [REDACTED] and an anonymous rank instead of the practice ID.
-# SDC is applied in: sdc_count(), period_value(), make_panel_plots().
+#   4. Underlying data for all figures is written to THREE combined CSVs,
+#      using [REDACTED] and an anonymous rank instead of the practice ID.
+#      Practice counts (national n_gp, histogram bin counts) are also protected.
+# SDC is applied in: sdc_count(), period_value(), make_panel_plots(), section 5.
 
 library(tidyverse)
 library(lubridate)
@@ -319,7 +320,9 @@ make_panel_plots <- function(dat, label, y_lab) {
     transmute(gp_id, change = Y4 - Y3,
       comparison = "Mean Year 4 minus Mean Year 3")
 
-  p_F <- ggplot(bind_rows(F_month, F_year), aes(change)) +
+  F_data <- bind_rows(F_month, F_year)
+
+  p_F <- ggplot(F_data, aes(change)) +
     geom_histogram(bins = 60, fill = "#4775A8", colour = "white") +
     geom_vline(xintercept = 0, colour = "red", linetype = "dashed", linewidth = 0.8) +
     facet_wrap(~ comparison, ncol = 1) +
@@ -340,12 +343,17 @@ make_panel_plots <- function(dat, label, y_lab) {
       change_yoy
     )
 
-  hist_data <- layer_data(p_F) %>%
-    transmute(
-      comparison = levels(factor(bind_rows(F_month, F_year)$comparison))[PANEL],
-      xmin, xmax,
-      n_practices = count
-    )
+  hist_data <- if (nrow(F_data) > 0) {
+    layer_data(p_F) %>%
+      transmute(
+        comparison = levels(factor(F_data$comparison))[PANEL],
+        xmin, xmax,
+        n_practices = count
+      )
+  } else {
+    tibble(comparison = character(), xmin = numeric(),
+      xmax = numeric(), n_practices = numeric())
+  }
 
   list(
     plots = list(A = p_A, D1 = p_D1, D2 = p_D2, F = p_F),
@@ -354,7 +362,7 @@ make_panel_plots <- function(dat, label, y_lab) {
 }
 
 # -----------------------------------------------------------------------------
-# 4. Loop over all 48 series and save (192 graphs + underlying data)
+# 4. Loop over all 48 series: save 192 graphs and collect underlying data
 # -----------------------------------------------------------------------------
 
 combos <- expand_grid(
@@ -363,7 +371,7 @@ combos <- expand_grid(
   condition = c(conditions, "all_conditions")
 )
 
-pwalk(combos, function(version, measure, condition) {
+results <- pmap(combos, function(version, measure, condition) {
 
   dat <- series %>%
     filter(.data$version == !!version,
@@ -372,7 +380,7 @@ pwalk(combos, function(version, measure, condition) {
 
   if (nrow(dat) == 0) {
     message("Skipping (no data): ", version, " / ", measure, " / ", condition)
-    return(invisible(NULL))
+    return(NULL)
   }
 
   label <- paste(condition_labels[[condition]],
@@ -392,9 +400,44 @@ pwalk(combos, function(version, measure, condition) {
   ggsave(file.path(path, "D2_yoy_heatmap.png"),      plots$D2, width = 13, height = 12, dpi = heatmap_dpi)
   ggsave(file.path(path, "F_yoy_distribution.png"),  plots$F,  width = 12, height = 8,  dpi = 300)
 
-  write_csv(res$data$panel,    file.path(path, "A_D1_D2_practice_month_sdc.csv"))
-  write_csv(res$data$national, file.path(path, "A_national_mean_sdc.csv"))
-  write_csv(res$data$hist,     file.path(path, "F_histogram_bins_sdc.csv"))
-
   message("Saved: ", label)
-})
+
+  # Tag each table with its series so they can be stacked
+  tag <- function(x) {
+    x %>% mutate(
+      setting   = setting_labels[[version]],
+      measure   = measure_labels[[measure]],
+      condition = condition_labels[[condition]],
+      .before = 1
+    )
+  }
+
+  list(
+    panel    = tag(res$data$panel),
+    national = tag(res$data$national),
+    hist     = tag(res$data$hist)
+  )
+}) %>%
+  compact()
+
+# -----------------------------------------------------------------------------
+# 5. Combine and write three CSVs (SDC on practice counts applied here)
+# -----------------------------------------------------------------------------
+
+all_panel <- map_dfr(results, "panel")
+
+all_national <- map_dfr(results, "national") %>%
+  mutate(n_gp = sdc_count(n_gp))                 # practice counts rounded
+
+all_hist <- map_dfr(results, "hist") %>%
+  mutate(n_practices = sdc_count(n_practices))   # bin counts <= 7 redacted, rest rounded to 5
+
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+write_csv(all_panel,    file.path(out_dir, "A_D1_D2_practice_month_sdc.csv"))
+write_csv(all_national, file.path(out_dir, "A_national_mean_sdc.csv"))
+write_csv(all_hist,     file.path(out_dir, "F_histogram_bins_sdc.csv"), na = "[REDACTED]")
+
+cat("Panel rows:",     nrow(all_panel),    "\n")
+cat("National rows:",  nrow(all_national), "\n")
+cat("Histogram rows:", nrow(all_hist),     "\n")
