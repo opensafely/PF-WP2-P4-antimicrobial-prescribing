@@ -1,25 +1,41 @@
-
-# =============================================================================
 # Monthly medication counts by condition and setting
-# Statistical Disclosure Control (SDC)
+# Statistical Disclosure Control (SDC) - OpenSAFELY guidance
 #
-# SDC rules:
-#   GP: redact counts < 8 for all dates
-#   PF: redact counts < 8 from February 2024 onwards
+# SDC rules (all settings, all dates):
+#   1. Counts <= 7 redacted ("[REDACTED]"); zeros retained
+#   2. All remaining counts rounded to the nearest 5
+# Same rule as the other medication scripts, so released files are consistent
+# and rounding protects against differencing (e.g. All PF conditions minus
+# the individual conditions).
 #
 # Outputs:
 #   - Controlled monthly CSV
 #   - Controlled monthly line plot (PNG)
-# =============================================================================
 
 library(tidyverse)
 library(here)
 library(lubridate)
 library(scales)
 
-# -----------------------------------------------------------------------------
+# 0. SDC helpers
+
+sdc_threshold <- 7
+sdc_base <- 5
+
+sdc_count <- function(x, threshold = sdc_threshold, base = sdc_base) {
+  case_when(
+    is.na(x) ~ NA_real_,
+    x == 0 ~ 0,
+    x <= threshold ~ NA_real_,
+    TRUE ~ round(x / base) * base
+  )
+}
+
+sdc_redacted <- function(x, threshold = sdc_threshold) {
+  !is.na(x) & x > 0 & x <= threshold
+}
+
 # 1. Read data
-# -----------------------------------------------------------------------------
 
 measures_new_approach <- read_csv(
   here("output", "measures_new_approach_medication.csv"),
@@ -33,12 +49,8 @@ measures_new_approach <- read_csv(
 GP_connect <- as.Date("2025-10-01")
 PF_start   <- as.Date("2024-02-01")
 
-message(
-  "Number of rows: ", nrow(measures_new_approach)
-)
-message(
-  "Number of columns: ", ncol(measures_new_approach)
-)
+message("Number of rows: ", nrow(measures_new_approach))
+message("Number of columns: ", ncol(measures_new_approach))
 message(
   "Date range: ",
   min(measures_new_approach$interval_start, na.rm = TRUE),
@@ -46,9 +58,7 @@ message(
   max(measures_new_approach$interval_start, na.rm = TRUE)
 )
 
-# -----------------------------------------------------------------------------
 # 2. Define conditions
-# -----------------------------------------------------------------------------
 
 conditions <- c(
   "uti",
@@ -67,9 +77,7 @@ measure_pattern <- paste0(
   ")$"
 )
 
-# -----------------------------------------------------------------------------
 # 3. Monthly medication counts by condition and setting
-# -----------------------------------------------------------------------------
 
 numerators_monthly <- measures_new_approach %>%
   filter(
@@ -104,44 +112,29 @@ numerators_monthly <- measures_new_approach %>%
     )
   )
 
-# Keep original numeric data unchanged for analysis.
-# -----------------------------------------------------------------------------
-# 4. Apply SDC
-# -----------------------------------------------------------------------------
+# Keep original numeric data unchanged for analysis (never written out).
+# 4. Apply SDC: redact <= 7, round the rest to the nearest 5
 
 numerators_monthly_sdc <- numerators_monthly %>%
   mutate(
-    sdc_required = medication_count < 8 &
-      (
-        Setting == "GP" |
-          (
-            Setting == "PF" &
-              interval_start >= PF_start
-          )
-      ),
-    medication_count_sdc = if_else(
-      sdc_required,
-      NA_real_,
-      as.numeric(medication_count)
-    )
+    sdc_required = sdc_redacted(medication_count),
+    medication_count_sdc = sdc_count(medication_count)
   )
 
-# Report the number of cells flagged for suppression
+# Report the number of cells redacted
 message(
-  "Number of monthly cells flagged for SDC: ",
+  "Number of monthly cells redacted: ",
   sum(numerators_monthly_sdc$sdc_required, na.rm = TRUE)
 )
 
-# -----------------------------------------------------------------------------
-# 5. Export controlled monthly CSV
-# -----------------------------------------------------------------------------
+# 5. Export controlled monthly CSV (rounded counts only)
 
 monthly_release <- numerators_monthly_sdc %>%
   mutate(
     medication_count = if_else(
       sdc_required,
-      "[Redacted]",
-      as.character(medication_count)
+      "[REDACTED]",
+      as.character(medication_count_sdc)
     )
   ) %>%
   select(
@@ -164,9 +157,7 @@ write_csv(
   )
 )
 
-# -----------------------------------------------------------------------------
 # 6. Plot controlled monthly medication counts
-# -----------------------------------------------------------------------------
 
 facet_numerators_plot_sdc <- ggplot(
   numerators_monthly_sdc,
@@ -213,7 +204,7 @@ facet_numerators_plot_sdc <- ggplot(
     title = "Monthly medication counts by condition and setting",
     subtitle = paste(
       "Statistical disclosure control applied:",
-      "GP all dates; PF from February 2024"
+      "counts \u22647 redacted; all other counts rounded to the nearest 5"
     ),
     x = "Month",
     y = "Medication count",
@@ -239,9 +230,7 @@ facet_numerators_plot_sdc <- ggplot(
 
 print(facet_numerators_plot_sdc)
 
-# -----------------------------------------------------------------------------
 # 7. Save controlled PNG
-# -----------------------------------------------------------------------------
 
 ggsave(
   filename = here(
@@ -254,9 +243,7 @@ ggsave(
   dpi = 300
 )
 
-# -----------------------------------------------------------------------------
-# 8. SDC audit summary (for internal review)
-# -----------------------------------------------------------------------------
+# 8. SDC audit summary (for internal review; month counts only)
 
 sdc_audit <- numerators_monthly_sdc %>%
   group_by(Setting, condition) %>%
@@ -268,5 +255,9 @@ sdc_audit <- numerators_monthly_sdc %>%
   arrange(Setting, condition)
 
 print(sdc_audit, n = Inf)
+
+stopifnot(
+  all(numerators_monthly_sdc$medication_count_sdc %% sdc_base == 0, na.rm = TRUE)
+)
 
 message("SDC-controlled monthly CSV and PNG have been created.")
