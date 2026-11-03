@@ -1,22 +1,10 @@
 
-
-# ------------------------------------------------------------------------------
 # ZERO vs NON-ZERO NUMERATOR ANALYSIS
 # Monthly and annual practice-level analysis
 # Statistical Disclosure Control (SDC)
-#
-# SDC:
-#   Threshold = 8
-#   GP = all dates
-#   PF = from 2024-02-01
-#   Suppressed CSV values = "[Redacted]"
-#   Suppressed plot values = NA
-#   Remaining counts rounded to nearest 5
-#
-# Output: output/zero_counts/
-#------------------------------------------------------------------------------
 
 # 1. Packages
+
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -25,6 +13,7 @@ library(lubridate)
 library(here)
 library(scales)
 library(stringr)
+
 # 2. SDC parameters
 
 SDC_THRESHOLD <- 8
@@ -33,31 +22,84 @@ REDACTED <- "[Redacted]"
 
 PF_start_date <- as.Date("2024-02-01")
 GP_connect_date <- as.Date("2025-10-01")
-#---------------------------------------------------------------------------
-# 3. Read data
-# --------------------------------------------------------------------------
-data <- read_csv(
-  here("output", "measures_new_approach_consultation_and_medication.csv"),
-  show_col_types = FALSE
-  ) %>%
+
+# 3. Read and prepare data
+measures_new_approach_consultation_and_medication<-read_csv(here("output",
+"measures_new_approach_consultation_and_medication.csv"))
+
+data <- measures_new_approach_consultation_and_medication %>%
   filter(
-    #grepl("^(gp|pf)_medication_", measure)
-    !grepl("all_conditions$", measure),
-    grepl("^gp_medication_", measure)
+    grepl("^(gp|pf)_medication_", measure)
   ) %>%
   mutate(
     interval_start = as.Date(interval_start),
     interval_end   = as.Date(interval_end),
     month          = as.Date(month),
-    year           = lubridate::year(interval_start)
+    year           = lubridate::year(interval_start),
+    # Extract setting
+    setting = case_when(
+      grepl("^gp_", measure) ~ "GP",
+      grepl("^pf_", measure) ~ "PF",
+      TRUE ~ NA_character_
+    ),
+
+    # Extract condition
+    condition = case_when(
+      grepl("_all_conditions$", measure) ~ "all_conditions",
+      grepl("_uti$", measure) ~ "uti",
+      grepl("_sinusitis$", measure) ~ "sinusitis",
+      grepl("_otitismedia$", measure) ~ "otitis_media",
+      grepl("_sorethroat$", measure) ~ "sore_throat",
+      grepl("_impetigo$", measure) ~ "impetigo",
+      grepl("_insectbite$", measure) ~ "insect_bite",
+      grepl("_shingles$", measure) ~ "shingles",
+      grepl("_acutebronchitis_control$", measure) ~ "acutebronchitis_control",
+      grepl("_conjunctivitisallergic_control$", measure) ~ "conjunctivitisallergic_control",
+      grepl("_vulvovaginalcandidiasis_control$", measure) ~ "vulvovaginalcandidiasis_control",
+      TRUE ~ NA_character_
+    ),
+
+    # Convert to factors
+    setting = factor(
+      setting,
+      levels = c("GP", "PF")
+    ),
+
+    condition = factor(
+      condition,
+      levels = c(
+        "uti",
+        "sinusitis",
+        "otitis_media",
+        "sore_throat",
+        "impetigo",
+        "insect_bite",
+        "shingles",
+        "acutebronchitis_control",
+        "conjunctivitisallergic_control",
+        "vulvovaginalcandidiasis_control",
+        "all_conditions"
+      )
+    )
   )
 
-# -----------------------------------------------------------------------------
+# Check extracted variables
+
+data %>%
+  count(setting, condition)
+
+# Check unmatched measures
+
+data %>%
+  filter(is.na(condition)) %>%
+  count(measure)
+
 # 4. Monthly practice-level classification
-# -----------------------------------------------------------------------------
+
 monthly_practice <- data %>%
-  group_by(measure, practice, month, year) %>%
+  group_by(setting, condition, measure, practice, month, year) %>%
   summarise(
+
     numerator = if (all(is.na(numerator))) {
       NA_real_
     } else {
@@ -71,8 +113,10 @@ monthly_practice <- data %>%
     },
 
     .groups = "drop"
+
   ) %>%
   mutate(
+
     zero = if_else(
       is.na(numerator),
       NA_integer_,
@@ -91,16 +135,16 @@ monthly_practice <- data %>%
       numerator > 0 ~ "non_zero",
       TRUE ~ NA_character_
     )
+
   )
 
-# -----------------------------------------------------------------------------
 # 5. Monthly summary
-# -----------------------------------------------------------------------------
 
 monthly_summary <- monthly_practice %>%
   filter(!is.na(numerator_status)) %>%
-  group_by(measure, month) %>%
+  group_by(setting, condition, measure, month) %>%
   summarise(
+
     zero_count = sum(zero),
     non_zero_count = sum(non_zero),
 
@@ -113,18 +157,19 @@ monthly_summary <- monthly_practice %>%
       100 * non_zero_count / total_practices,
 
     .groups = "drop"
-  ) %>%
-  arrange(measure, month)
 
-# -----------------------------------------------------------------------------
+  ) %>%
+  arrange(setting, condition, month)
+
 # 6. Annual practice-level classification
-# -----------------------------------------------------------------------------
+
 # Annual numerator is the sum of monthly numerators for each practice.
 # A practice is classified as zero only if its annual numerator is zero.
 
 annual_practice <- monthly_practice %>%
-  group_by(measure, practice, year) %>%
+  group_by(setting, condition, measure, practice, year) %>%
   summarise(
+
     numerator = if (all(is.na(numerator))) {
       NA_real_
     } else {
@@ -138,8 +183,10 @@ annual_practice <- monthly_practice %>%
     },
 
     .groups = "drop"
+
   ) %>%
   mutate(
+
     zero = if_else(
       is.na(numerator),
       NA_integer_,
@@ -158,15 +205,16 @@ annual_practice <- monthly_practice %>%
       numerator > 0 ~ "non_zero",
       TRUE ~ NA_character_
     )
+
   )
 
-# -----------------------------------------------------------------------------
 # 7. Annual summary
-#----------------------------------------------------------------------------
+
 annual_summary <- annual_practice %>%
   filter(!is.na(numerator_status)) %>%
-  group_by(measure, year) %>%
+  group_by(setting, condition, measure, year) %>%
   summarise(
+
     zero_count = sum(zero),
     non_zero_count = sum(non_zero),
 
@@ -179,12 +227,11 @@ annual_summary <- annual_practice %>%
       100 * non_zero_count / total_practices,
 
     .groups = "drop"
-  ) %>%
-  arrange(measure, year)
 
-# -----------------------------------------------------------------------------
-# 8. SDC FUNCTION
-# -----------------------------------------------------------------------------
+  ) %>%
+  arrange(setting, condition, year)
+
+# 8. SDC function
 
 apply_sdc <- function(df, period_date) {
 
@@ -192,28 +239,29 @@ apply_sdc <- function(df, period_date) {
     mutate(
 
       # Identify measures subject to SDC
+
       sdc_applies = case_when(
 
-        str_starts(measure, "gp_") ~ TRUE,
+        setting == "GP" ~ TRUE,
 
-        str_starts(measure, "pf_") &
+        setting == "PF" &
           period_date >= PF_START ~ TRUE,
 
         TRUE ~ FALSE
+
       ),
 
       # Primary suppression:
       # If either category has fewer than 8 practices,
       # suppress BOTH categories and their derived statistics.
+
       suppress_cell = sdc_applies &
         (
           zero_count < SDC_THRESHOLD |
-          non_zero_count < SDC_THRESHOLD
+            non_zero_count < SDC_THRESHOLD
         ),
 
-      # ---------------------------------------------------------
       # Controlled counts for CSV
-      # ---------------------------------------------------------
 
       zero_count_sdc = case_when(
 
@@ -224,6 +272,7 @@ apply_sdc <- function(df, period_date) {
         ),
 
         TRUE ~ as.character(zero_count)
+
       ),
 
       non_zero_count_sdc = case_when(
@@ -235,11 +284,10 @@ apply_sdc <- function(df, period_date) {
         ),
 
         TRUE ~ as.character(non_zero_count)
+
       ),
 
-      # ---------------------------------------------------------
       # Controlled total practice count
-      # ---------------------------------------------------------
 
       total_practices_sdc = case_when(
 
@@ -250,11 +298,10 @@ apply_sdc <- function(df, period_date) {
         ),
 
         TRUE ~ as.character(total_practices)
+
       ),
 
-      # ---------------------------------------------------------
       # Controlled percentages
-      # ---------------------------------------------------------
 
       zero_percentage_sdc = case_when(
 
@@ -264,6 +311,7 @@ apply_sdc <- function(df, period_date) {
           round(zero_percentage / 5) * 5,
 
         TRUE ~ zero_percentage
+
       ),
 
       non_zero_percentage_sdc = case_when(
@@ -274,13 +322,14 @@ apply_sdc <- function(df, period_date) {
           round(non_zero_percentage / 5) * 5,
 
         TRUE ~ non_zero_percentage
+
       )
+
     )
+
 }
 
-# -----------------------------------------------------------------------------
 # 9. Apply SDC to monthly results
-# -----------------------------------------------------------------------------
 
 monthly_sdc <- apply_sdc(
   monthly_summary,
@@ -288,8 +337,11 @@ monthly_sdc <- apply_sdc(
 )
 
 # CSV export dataset
+
 monthly_export <- monthly_sdc %>%
   select(
+    setting,
+    condition,
     measure,
     month,
     zero_count = zero_count_sdc,
@@ -299,9 +351,7 @@ monthly_export <- monthly_sdc %>%
     non_zero_percentage = non_zero_percentage_sdc
   )
 
-# -----------------------------------------------------------------------------
 # 10. Apply SDC to annual results
-# -----------------------------------------------------------------------------
 
 annual_sdc <- apply_sdc(
   annual_summary,
@@ -309,8 +359,11 @@ annual_sdc <- apply_sdc(
 )
 
 # CSV export dataset
+
 annual_export <- annual_sdc %>%
   select(
+    setting,
+    condition,
     measure,
     year,
     zero_count = zero_count_sdc,
@@ -320,12 +373,12 @@ annual_export <- annual_sdc %>%
     non_zero_percentage = non_zero_percentage_sdc
   )
 
-# -----------------------------------------------------------------------------
 # 11. Monthly plotting data
-# -----------------------------------------------------------------------------
 
 monthly_plot_data <- monthly_sdc %>%
   select(
+    setting,
+    condition,
     measure,
     month,
     zero_percentage = zero_percentage_sdc,
@@ -337,19 +390,21 @@ monthly_plot_data <- monthly_sdc %>%
     values_to = "percentage"
   ) %>%
   mutate(
+
     status = recode(
       status,
       zero_percentage = "Zero",
       non_zero_percentage = "Non-zero"
     )
+
   )
 
-# -----------------------------------------------------------------------------
 # 12. Annual plotting data
-# -----------------------------------------------------------------------------
 
 annual_plot_data <- annual_sdc %>%
   select(
+    setting,
+    condition,
     measure,
     year,
     zero_percentage = zero_percentage_sdc,
@@ -361,28 +416,53 @@ annual_plot_data <- annual_sdc %>%
     values_to = "percentage"
   ) %>%
   mutate(
+
     status = recode(
       status,
       zero_percentage = "Zero",
       non_zero_percentage = "Non-zero"
     )
+
   )
 
-# -----------------------------------------------------------------------------
 # 13. Monthly faceted plot
-# -----------------------------------------------------------------------------
 
 p_monthly <- ggplot(
   monthly_plot_data,
-  aes(x = month,y = percentage, colour = status,group = status )) +
-   #geom_line(linewidth = 0.7,na.rm = TRUE) +
-   #geom_point(size = 0.8,na.rm = TRUE) +
-   #geom_col(position = "stack",na.rm = TRUE)+
-   geom_col(aes(fill = status),position = "stack",na.rm = TRUE) +
-   geom_vline(xintercept = as.numeric(PF_start_date),linetype = "dashed",colour = "blue",linewidth = 0.7) +
-   geom_vline(xintercept = as.numeric(GP_connect_date),linetype = "dashed",colour = "red",linewidth = 0.7) +
-   facet_wrap( ~ measure,scales = "fixed") +
-   scale_y_continuous(
+  aes(
+    x = month,
+    y = percentage,
+    colour = status,
+    group = status
+  )
+) +
+
+  geom_col(
+    aes(fill = status),
+    position = "stack",
+    na.rm = TRUE
+  ) +
+
+  geom_vline(
+    xintercept = as.numeric(PF_start_date),
+    linetype = "dashed",
+    colour = "blue",
+    linewidth = 0.7
+  ) +
+
+  geom_vline(
+    xintercept = as.numeric(GP_connect_date),
+    linetype = "dashed",
+    colour = "red",
+    linewidth = 0.7
+  ) +
+
+  facet_grid(
+    setting ~ condition,
+    scales = "fixed"
+  ) +
+
+  scale_y_continuous(
     limits = c(0, 100),
     breaks = seq(0, 100, 20),
     labels = label_percent(scale = 1)
@@ -401,7 +481,8 @@ p_monthly <- ggplot(
     ),
     x = "Month",
     y = "Percentage of practices",
-    colour = "status"
+    colour = "Numerator status",
+    fill = "Numerator status"
   ) +
 
   theme_bw() +
@@ -420,9 +501,7 @@ p_monthly <- ggplot(
     panel.grid.minor = element_blank()
   )
 
-# -----------------------------------------------------------------------------
 # 14. Annual faceted plot
-# -----------------------------------------------------------------------------
 
 p_annual <- ggplot(
   annual_plot_data,
@@ -431,7 +510,8 @@ p_annual <- ggplot(
     y = percentage,
     colour = status,
     group = status
-    )) +
+  )
+) +
 
   geom_line(
     linewidth = 0.8,
@@ -442,21 +522,23 @@ p_annual <- ggplot(
     size = 2,
     na.rm = TRUE
   ) +
+
   geom_vline(
-  xintercept = as.numeric(PF_start_date),
-  linetype = "dashed",
-  colour = "blue",
-  linewidth = 0.7
-  ) +
-  geom_vline(
-  xintercept = as.numeric(GP_connect_date),
-  linetype = "dashed",
-  colour = "red",
-  linewidth = 0.7
+    xintercept = as.numeric(PF_start_date),
+    linetype = "dashed",
+    colour = "blue",
+    linewidth = 0.7
   ) +
 
-  facet_wrap(
-    ~ measure,
+  geom_vline(
+    xintercept = as.numeric(GP_connect_date),
+    linetype = "dashed",
+    colour = "red",
+    linewidth = 0.7
+  ) +
+
+  facet_grid(
+    setting ~ condition,
     scales = "fixed"
   ) +
 
@@ -478,7 +560,8 @@ p_annual <- ggplot(
     ),
     x = "Year",
     y = "Percentage of practices",
-    colour = "Numerator status"
+    colour = "Numerator status",
+    fill = "Numerator status"
   ) +
 
   theme_bw() +
@@ -493,9 +576,7 @@ p_annual <- ggplot(
     panel.grid.minor = element_blank()
   )
 
-# -----------------------------------------------------------------------------
 # 15. Output directory
-# -----------------------------------------------------------------------------
 
 output_folder <- here(
   "output",
@@ -508,9 +589,7 @@ dir.create(
   showWarnings = FALSE
 )
 
-# -----------------------------------------------------------------------------
 # 16. Export SDC-controlled CSV files
-# -----------------------------------------------------------------------------
 
 write_csv(
   monthly_export,
@@ -528,9 +607,7 @@ write_csv(
   )
 )
 
-# -----------------------------------------------------------------------------
 # 17. Export SDC-controlled PNG figures
-# -----------------------------------------------------------------------------
 
 ggsave(
   filename = file.path(
@@ -538,8 +615,8 @@ ggsave(
     "monthly_zero_nonzero_faceted_SDC.png"
   ),
   plot = p_monthly,
-  width = 18,
-  height = 12,
+  width = 22,
+  height = 14,
   dpi = 300
 )
 
@@ -549,21 +626,17 @@ ggsave(
     "annual_zero_nonzero_faceted_SDC.png"
   ),
   plot = p_annual,
-  width = 18,
-  height = 12,
+  width = 22,
+  height = 14,
   dpi = 300
 )
 
-# -----------------------------------------------------------------------------
 # 18. Display plots
-# -----------------------------------------------------------------------------
 
 print(p_monthly)
 print(p_annual)
 
-# -----------------------------------------------------------------------------
 # 19. SDC summary and completion message
-# -----------------------------------------------------------------------------
 
 cat("\n============================================\n")
 cat("ZERO / NON-ZERO ANALYSIS COMPLETED\n")
