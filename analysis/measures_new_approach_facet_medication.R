@@ -220,7 +220,7 @@ facet_numerators_plot_sdc <- ggplot(
   theme(
     legend.position = "bottom",
     axis.text.x = element_text(
-      angle = 0,
+      angle = 45,
       hjust = 1
     ),
     strip.text = element_text(
