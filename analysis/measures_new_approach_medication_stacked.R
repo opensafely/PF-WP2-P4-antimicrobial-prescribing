@@ -8,7 +8,7 @@
 #      are NA whenever either count is redacted, so no released value can be
 #      used to back-calculate a redacted one.
 #   5. Every figure is drawn from protected values, not raw counts.
-
+# Packages used
 library(tidyverse)
 library(here)
 library(scales)
@@ -19,8 +19,7 @@ library(lubridate)
 sdc_threshold <- 7
 sdc_base <- 5
 # Numeric protected count: NA if redacted (1-7), zero kept as zero,
-# Everything else rounded to the nearest 5. Integer counts never fall on a .5
-# tie when divided by 5, so round() is unambiguous here.
+# Everything else rounded to the nearest 5.
 sdc_count <- function(x, threshold = sdc_threshold, base = sdc_base) {
   case_when(
     is.na(x) ~ NA_real_,
