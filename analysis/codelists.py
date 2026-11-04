@@ -474,6 +474,7 @@ pf_consultation_events_dict = {
     "pf_consultation_services_combined": pf_consultation_cp_minorillness + pf_consultation_service + pf_consultation_cp_service,
     # "pf_consultation_services_combined": pf_consultation_service + pf_consultation_cp_service,
 }
+ #NHS Community Pharmacist Consultation Service???
  
 uti_code = ["1090711000000102"] # one code in CPs,multiple codes in GPs
 sinusitis_code = ["15805002"]
