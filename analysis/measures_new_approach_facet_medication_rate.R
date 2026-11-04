@@ -13,7 +13,7 @@ library(tidyverse)
 library(here)
 library(patchwork)
 
-# 0. SDC helper: midpoint 6 rounding (from the OpenSAFELY SDC documentation)
+# 0. SDC : midpoint 6 rounding (from the OpenSAFELY SDC documentation)
 
 roundmid_any <- function(x, to = 6) {
   # like round_any, but centers on (integer) midpoint of the rounding points
