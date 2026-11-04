@@ -1,5 +1,5 @@
 
-# Monthly and annual medication counts by condition and setting
+# This code shows monthly and annual medication counts by condition and setting
 # Statistical disclosure control follows OpenSAFELY guidelines:
 #   1. Counts <= 7 are redacted (shown as "[REDACTED]" in CSVs).
 #   2. All remaining counts are rounded to the nearest 5.
@@ -13,14 +13,11 @@ library(tidyverse)
 library(here)
 library(scales)
 library(lubridate)
-
 # -----------------------------------------------------------------------------
 # 0. SDC 
 # -----------------------------------------------------------------------------
-
 sdc_threshold <- 7
 sdc_base <- 5
-
 # Numeric protected count: NA if redacted (1-7), zero kept as zero,
 # Everything else rounded to the nearest 5. Integer counts never fall on a .5
 # tie when divided by 5, so round() is unambiguous here.
