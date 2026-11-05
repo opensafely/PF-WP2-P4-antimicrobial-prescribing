@@ -548,7 +548,7 @@ plot_practice_trend <- function(cond, setting) {
     )
 }
 
-# 8. Graph B: Year 1 versus Year 2 --------------------------------------------
+# 8. Graph B: Year 1 versus Year 2 (This will be removed for SDC purpuse) --------------------------------------------
 
 plot_practice_change <- function(cond, setting) {
   
@@ -733,7 +733,7 @@ output_file <- here(
 #
   
   #ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
-  ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
+   ggsave(filename = output_file,plot = p,width = 9, height = 5.5,units = "in",dpi = 300,bg = "white")
 }
 
 # 11. Final quality checks -----------------------------------------------------
