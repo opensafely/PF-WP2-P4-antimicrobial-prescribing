@@ -507,7 +507,7 @@ plot_practice_trend <- function(cond, setting) {
     ) +
     
     scale_colour_manual(
-      values = c(Median = "#2C4A6E", Mean = "#C0392B"),
+      values = c(Median = "black", Mean = "#C0392B"),  #Median = "#2C4A6E"
       name = NULL
     ) +
     
