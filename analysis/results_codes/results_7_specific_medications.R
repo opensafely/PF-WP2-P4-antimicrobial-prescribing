@@ -1,7 +1,6 @@
 
-
 # Pharmacy First: first-second-line antibiotic prescribing by setting and condition
-# 1.Statistical Disclosure Control (SDC)
+# 1.Statistical Disclosure Control :(SDC)
 # 1.Packages
 library(dplyr)
 library(tidyr)
@@ -20,7 +19,7 @@ practice_level_data_by_practice_only <- read_csv(
 # Reference dates
 GP_connect <- as.Date("2025-10-01")
 PF_start   <- as.Date("2024-02-01")
-
+#
 # SDC dates and threshold
 SDC_THRESHOLD <- 8                     # Redacted if less or equal to 7
 SDC_PF_START  <- as.Date("2024-02-01") # This will help to check small count in Post PF
