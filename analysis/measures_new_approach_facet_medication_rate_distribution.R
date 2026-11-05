@@ -475,7 +475,7 @@ plot_practice_trend <- function(cond, setting) {
     
     geom_ribbon(
       aes(ymin = q1, ymax = q3),
-      fill = "#baaf9f",
+      fill = #80BDC9 , #"#baaf9f",
       alpha = 0.5,
       na.rm = TRUE
     ) +
@@ -507,7 +507,7 @@ plot_practice_trend <- function(cond, setting) {
     ) +
     
     scale_colour_manual(
-      values = c(Median = "#2C4A6E", Mean = "#C0392B"),
+      values = c(Median = "black", Mean = "#C0392B"),  #Median = "#2C4A6E"
       name = NULL
     ) +
     
@@ -548,7 +548,7 @@ plot_practice_trend <- function(cond, setting) {
     )
 }
 
-# 8. Graph B: Year 1 versus Year 2 --------------------------------------------
+# 8. Graph B: Year 1 versus Year 2 (This will be removed for SDC purpuse) --------------------------------------------
 
 plot_practice_change <- function(cond, setting) {
   
@@ -679,9 +679,10 @@ plot_practice_change <- function(cond, setting) {
 plot_practice_figure <- function(cond, setting) {
   
   p1 <- plot_practice_trend(cond, setting)
-  p2 <- plot_practice_change(cond, setting)
+  #p2 <- plot_practice_change(cond, setting)
   
-  p1 + p2 +
+  #p1 + p2 + # i want one graph instead the two
+  p1 + 
     plot_layout(widths = c(2.4, 1)) +
     plot_annotation(
       title = paste0(cond, ": ", setting, " prescribing rates by GP practice"),
@@ -731,15 +732,8 @@ output_file <- here(
   )
 #
   
-  ggsave(
-    filename = output_file,
-    plot = p,
-    width = 12,
-    height = 5.5,
-    units = "in",
-    dpi = 300,
-    bg = "white"
-  )
+  #ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
+   ggsave(filename = output_file,plot = p,width = 9, height = 5.5,units = "in",dpi = 300,bg = "white")
 }
 
 # 11. Final quality checks -----------------------------------------------------
