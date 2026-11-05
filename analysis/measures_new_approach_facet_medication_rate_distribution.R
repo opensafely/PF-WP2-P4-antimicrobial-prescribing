@@ -544,7 +544,8 @@ plot_practice_trend <- function(cond, setting) {
       legend.position = "bottom",
       axis.text.x = element_text(angle = 45, hjust = 1),
       plot.subtitle = element_text(size = 9),
-      plot.title = element_text(face = "bold")
+      plot.title = element_text(face = "bold"),
+      panel.border = element_rect(colour = "#0085A1",fill = NA,linewidth = 0.7)
     )
 }
 
@@ -733,7 +734,7 @@ output_file <- here(
 #
   
   #ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
-   ggsave(filename = output_file,plot = p,width = 9, height = 5.5,units = "in",dpi = 300,bg = "white")
+   ggsave(filename = output_file,plot = p,width = 12, height = 5.5,units = "in",dpi = 300,bg = "white")
 }
 
 # 11. Final quality checks -----------------------------------------------------
