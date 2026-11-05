@@ -277,7 +277,7 @@ to_long <- function(df, time_var) {
 monthly_plot_data <- to_long(monthly_sdc, month)
 annual_plot_data  <- to_long(annual_sdc, year)
 
-status_colours <- c(Zero = "#be6363", `Non-zero` = "#2cb89e")
+status_colours <- c(Zero = "#BDBDBD", `Non-zero` = "#2C7FB8")
 
 # Intervention dates as decimal years for the annual x-axis
 PF_start_year   <- year(PF_start_date) + (month(PF_start_date) - 1) / 12
