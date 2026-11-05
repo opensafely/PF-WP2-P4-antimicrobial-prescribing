@@ -679,9 +679,10 @@ plot_practice_change <- function(cond, setting) {
 plot_practice_figure <- function(cond, setting) {
   
   p1 <- plot_practice_trend(cond, setting)
-  p2 <- plot_practice_change(cond, setting)
+  #p2 <- plot_practice_change(cond, setting)
   
-  p1 + p2 +
+  #p1 + p2 + # i want one graph instead the two
+  p1 + 
     plot_layout(widths = c(2.4, 1)) +
     plot_annotation(
       title = paste0(cond, ": ", setting, " prescribing rates by GP practice"),
@@ -731,15 +732,8 @@ output_file <- here(
   )
 #
   
-  ggsave(
-    filename = output_file,
-    plot = p,
-    width = 12,
-    height = 5.5,
-    units = "in",
-    dpi = 300,
-    bg = "white"
-  )
+  #ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
+  ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
 }
 
 # 11. Final quality checks -----------------------------------------------------
