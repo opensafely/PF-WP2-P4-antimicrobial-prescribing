@@ -686,16 +686,16 @@ plot_practice_figure <- function(cond, setting) {
   p1 + 
     plot_layout(widths = c(2.4, 1)) +
     plot_annotation(
-      title = paste0(cond, ": ", setting, " prescribing rates by GP practice"),
+      title = paste0(" Prescribing rates by GP practice for ", cond, ": ", setting, ),
       caption = paste0(
-        "Year 1 = Feb 2024 to Jan 2025; Year 2 = Feb 2025 to Jan 2026. ",
+        #"Year 1 = Feb 2024 to Jan 2025; Year 2 = Feb 2025 to Jan 2026. ",
         "Blue dashed line = Pharmacy First launch; ",
-        "black dashed line = GP Connect introduction.\n",
-        "Monthly rates require that month's denominator >= ", min_denom,
-        "; monthly summaries shown only when >= ", min_practices,
-        " practices contribute. ",
-        "Comparisons require 12 months in each year ",
-        "and mean monthly denominator >= ", min_denom, "."
+        "black dashed line = GP Connect introduction.\n"#,
+        #"Monthly rates require that month's denominator >= ", min_denom,
+        #"; monthly summaries shown only when >= ", min_practices,
+        #" practices contribute. ",
+        #"Comparisons require 12 months in each year ",
+        #"and mean monthly denominator >= ", min_denom, "."
       ),
       theme = theme(
         plot.title = element_text(face = "bold", size = 14),
