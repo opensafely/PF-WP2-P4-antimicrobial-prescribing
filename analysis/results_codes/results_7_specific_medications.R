@@ -266,7 +266,7 @@ for (condition_name in names(condition_names)) {
 
     gp_condition_plot <- make_antibiotic_plot(
       gp_data,
-      paste0("GP antibiotic prescribing: ", condition_name)
+      paste0("GP antibiotic prescribing for  ", condition_name)
     )
 
     print(gp_condition_plot)
@@ -293,7 +293,7 @@ for (condition_name in names(condition_names)) {
 
     pf_condition_plot <- make_antibiotic_plot(
       pf_data,
-      paste0("Pharmacy First antibiotic prescribing: ", condition_name)
+      paste0("Pharmacy First antibiotic prescribing for ", condition_name)
     )
 
     print(pf_condition_plot)
