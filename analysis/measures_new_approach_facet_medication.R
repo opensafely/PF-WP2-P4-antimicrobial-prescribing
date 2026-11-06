@@ -19,8 +19,8 @@ library(scales)
 
 # 0. SDC helpers
 
-sdc_threshold <- 7
-sdc_base <- 5
+sdc_threshold <- 8 # Threshold for redaction
+sdc_base <- 5      # Nearest 5
 
 sdc_count <- function(x, threshold = sdc_threshold, base = sdc_base) {
   case_when(
@@ -118,7 +118,7 @@ numerators_monthly <- measures_new_approach %>%
 numerators_monthly_sdc <- numerators_monthly %>%
   mutate(
     sdc_required = sdc_redacted(medication_count),
-    medication_count_sdc = sdc_count(medication_count)
+    medication_count_sdc = sdc_count(medication_count)  # Redacted
   )
 
 # Report the number of cells redacted
@@ -201,7 +201,7 @@ facet_numerators_plot_sdc <- ggplot(
     labels = comma
   ) +
   labs(
-    title = "Monthly medication counts by condition and setting",
+    title = "Monthly medication counts across general practices  by condition and settings",
     subtitle = paste(
       "Statistical disclosure control applied:",
       "counts \u22647 redacted; all other counts rounded to the nearest 5"
@@ -216,17 +216,31 @@ facet_numerators_plot_sdc <- ggplot(
       "dashed black line: GP Connect implementation."
     )
   ) +
-  theme_bw() +
   theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(
-      angle = 45,
-      hjust = 1
-    ),
-    strip.text = element_text(
-      face = "bold"
-    )
-  )
+  # White panel background with a thin black frame
+    panel.background = element_rect(fill = "white", colour = NA),
+    panel.border     = element_rect(fill = NA, colour = "black", linewidth = 0.4),
+    # Light dashed grid lines like in the example
+    panel.grid.major = element_line(colour = "grey85", linetype = "dashed", linewidth = 0.3),
+    panel.grid.minor = element_blank(),
+    # White around the panels and behind the legend keys
+    plot.background  = element_rect(fill = "white", colour = NA),
+    legend.key       = element_rect(fill = "white", colour = NA),
+  # Facet title background and text
+  strip.background = element_rect(
+    fill = "#037A92",
+    colour = "#037A92"
+  ),
+  strip.text = element_text(
+    colour = "white",
+    face = "bold"
+  ),
+
+  # Legend and axes
+  legend.position = "bottom",
+  axis.text.x = element_text(angle = 45, hjust = 1)
+)   
+
 
 print(facet_numerators_plot_sdc)
 
