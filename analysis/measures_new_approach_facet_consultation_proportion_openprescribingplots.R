@@ -294,7 +294,7 @@ plot_gp_condition <- function(condition_name) {
     geom_vline(
       xintercept = PF_start,
       colour = "grey45",
-      linewidth = 0.5
+      linewidth = 0.5,linetype="dashed"
     ) +
 
     geom_vline(
