@@ -1,7 +1,7 @@
-# =============================================================================
+#--------------------------------------------------------------------------------#
 # Proportion of consultations with a medication issued:
 # deciles across practices + pooled proportion, GP vs Pharmacy First
-# =============================================================================
+# -------------------------------------------------------------------------------#
 library(tidyverse)
 library(here)
 library(scales)
@@ -44,9 +44,9 @@ apply_sdc <- function(x) {
 output_dir <- here("output", "proportion_medication_deciles")
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
-# -----------------------------------------------------------------------------
-# 3. Practice x month x setting x condition (wide -> long)
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------- #
+# 3. Long format                                                                #
+# ----------------------------------------------------------------------------- #
 practice_month_all <- practice_level_data_by_practice_only |>
   select(practice, interval_start,
          matches("^(gp|pf)_(medication|consultation)_")) |>
@@ -74,9 +74,9 @@ practice_month <- practice_month_all |>
   filter(!is.na(n_consultations), n_consultations >= min_denominator) |>
   mutate(proportion = n_medication / n_consultations)
 
-# -----------------------------------------------------------------------------
-# 4a. Deciles across practices (unweighted), per setting-condition-month
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# 4a. Deciles across practices  per setting-condition-month  (unweighted)      #
+# -----------------------------------------------------------------------------#
 
 eligible_practice_month <- practice_month |>
   group_by(setting, condition, month) |>
