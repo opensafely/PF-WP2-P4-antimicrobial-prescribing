@@ -14,8 +14,8 @@ library(here)
 #    measure, interval_start, interval_end, ratio, numerator, denominator
 #    (plus any group_by columns, if added later)
 # -----------------------------------------------------------------------------
-measures_new_approach <- read_csv(
-  here("output", "measures_new_approach_consultation.csv"),
+data <- read_csv(
+  here("output", "measures_new_approach_consultation_and_medication.csv"),
   show_col_types = FALSE
 ) %>%
   mutate(interval_start = as.Date(interval_start))
@@ -25,17 +25,17 @@ GP_connect <- as.Date("2025-10-01")
 PF_start <- as.Date("2024-02-01")
 
 
-message("Number of rows: ", nrow(measures_new_approach))
-message("Number of columns: ", ncol(measures_new_approach))
+message("Number of rows: ", nrow(data))
+message("Number of columns: ", ncol(data))
 
 message(
   "Date range: ",
-  min(measures_new_approach$interval_start, na.rm = TRUE),
+  min(data$interval_start, na.rm = TRUE),
   " to ",
-  max(measures_new_approach$interval_start, na.rm = TRUE)
+  max(data$interval_start, na.rm = TRUE)
 )
 
-print(head(measures_new_approach))
+print(head(data))
 
 
 
@@ -56,7 +56,7 @@ conditions <- c(
 #    Summing by month and measure gives one total per month even if the
 #    measures are later split by group_by (e.g. practice, age band).
 # -----------------------------------------------------------------------------
-numerators_monthly <- measures_new_approach %>%
+numerators_monthly <- data %>%
   filter(
     str_detect(
       measure,
