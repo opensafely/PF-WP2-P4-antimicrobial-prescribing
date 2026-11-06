@@ -37,6 +37,26 @@ message(
 
 print(head(data))
 
+output_dir <- here("output", "consultations_counts")
+dir.create(
+  output_dir,
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+# -----------------------------------------------------------------------------#
+# SDC function                                                                 #
+# Redact counts < 8, retain zeros, round remaining counts to nearest 5         #
+# -----------------------------------------------------------------------------#
+
+apply_sdc <- function(x) {
+  case_when(
+    is.na(x) ~ NA_real_,
+    x == 0 ~ 0,
+    x < 8 ~ NA_real_,
+    TRUE ~ round(x / 5) * 5
+  )
+}
+
 
 
 # Conditions to include
@@ -80,6 +100,8 @@ numerators_monthly <- data %>%
     regex = "^(gp|pf)_consultation_(.*)$"
   ) %>%
   mutate(
+    # Apply SDC
+    consultation_count = apply_sdc(consultation_count),
     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
@@ -146,7 +168,8 @@ facet_numerators_plot
 # 4. Save as PNG
 # -----------------------------------------------------------------------------
 ggsave(
-  filename = here("output", "measures_new_approach_facet_consultation.png"),
+  #filename = here("output", "measures_new_approach_facet_consultation.png"),
+  filename = file.path(output_dir, "measures_new_approach_facet_consultation.png"),
   plot = facet_numerators_plot,
   width = 10,
   height = 6,
@@ -180,6 +203,8 @@ numerators_controls <- data %>%
     regex = "^(gp|pf)_consultation_(.*)$"
   ) %>%
   mutate(
+    # Apply SDC
+    consultation_count = apply_sdc(consultation_count),
     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
@@ -277,13 +302,79 @@ theme(
 facet_controls_plot
 
 ggsave(
-  filename = here("output", "measures_new_approach_facet_consultation_with_controls.png"),
+  filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),
   plot = facet_controls_plot,
   width = 10,
   height = 6,
   dpi = 300
 )
 
+#
+# -----------------------------------------------------------------------------
+# SDC validation
+# -----------------------------------------------------------------------------
+
+sdc_check <- bind_rows(
+  numerators_monthly %>% mutate(dataset = "PF conditions"),
+  numerators_controls %>% mutate(dataset = "Controls")
+) %>%
+  summarise(
+    total_rows = n(),
+    suppressed = sum(is.na(consultation_count)),
+    retained_zeros = sum(consultation_count == 0, na.rm = TRUE),
+    rounded_counts = sum(
+      !is.na(consultation_count) &
+        consultation_count > 0
+    ),
+    non_multiple_of_5 = sum(
+      !is.na(consultation_count) &
+        consultation_count > 0 &
+        consultation_count %% 5 != 0
+    )
+  )
+
+print(sdc_check)
+
+
+# -----------------------------------------------------------------------------
+# 7. Export two separate SDC-protected CSV files
+# -----------------------------------------------------------------------------
+
+# SDC formatting function for CSV export
+format_sdc_export <- function(df) {
+  df %>%
+    mutate(
+      consultation_count = case_when(
+        is.na(consultation_count) ~ "[Redacted]",
+        consultation_count == 0 ~ "0",
+        consultation_count < 8 ~ "[Redacted]",
+        TRUE ~ as.character(round(consultation_count / 5) * 5)
+      )
+    ) %>%
+    select(
+      interval_start,
+      condition,
+      Setting,
+      consultation_count
+    ) %>%
+    arrange(condition, Setting, interval_start)
+}
+
+# CSV 1: PF conditions
+consultation_sdc <- format_sdc_export(numerators_monthly)
+
+write_csv(
+  consultation_sdc,
+  file.path(output_dir, "measures_new_approach_consultation_SDC.csv")
+)
+
+# CSV 2: Control conditions
+consultation_controls_sdc <- format_sdc_export(numerators_controls)
+
+write_csv(
+  consultation_controls_sdc,
+  file.path(output_dir, "measures_new_approach_consultation_controls_SDC.csv")
+)
 
 
 
