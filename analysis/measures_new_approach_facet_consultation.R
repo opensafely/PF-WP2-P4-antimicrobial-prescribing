@@ -363,7 +363,7 @@ consultation_sdc <- format_sdc_export(numerators_monthly)
 
 write_csv(
   consultation_sdc,
-  file.path(output_dir, "measures_new_approach_consultation_SDC.csv")
+  file.path(output_dir, "measures_new_approach_facet_consultation_SDC.csv")
 )
 
 # CSV 2: Control conditions
@@ -371,7 +371,7 @@ consultation_controls_sdc <- format_sdc_export(numerators_controls)
 
 write_csv(
   consultation_controls_sdc,
-  file.path(output_dir, "measures_new_approach_consultation_controls_SDC.csv")
+  file.path(output_dir, "measures_new_approach_facet_consultation_controls_SDC.csv")
 )
 
 
