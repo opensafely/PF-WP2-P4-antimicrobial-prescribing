@@ -337,7 +337,7 @@ consultation_data_long <- consultation_data %>%
   pivot_longer(
     cols = starts_with("gp_consultation_"),
     names_to = "condition",
-    values_to = "consultations"
+    values_to = "consultation_count"
   ) %>%
   mutate(
     condition = str_remove(condition, "^gp_consultation_"),
@@ -364,12 +364,17 @@ consultation_data_long <- consultation_data %>%
   ) %>%
   arrange(interval_start, condition)
 
-   #
+  #Apply the SDC funcution to the consultations counts
+  consultation_data_long<- consultation_data_long%>%
+  mutate(Setting="GP")%>%  # Here i created the Setting colum to be able to use the sdc fx
+  mutate(cosultaion_count = apply_sdc(consultation_count, Setting, interval_start))
+   #Plotting 2
   facet_controls_plot_2 <- ggplot(
-  consultation_data_long,
+  consultation_data_long%>%
+   filter(condition_pair != "sorethroat vs acutebronchitis"),
   aes(
     x = interval_start,
-    y = consultations,
+    y = consultation_count,
     group = condition,
     color = condition_type,
     shape = condition_type
@@ -412,20 +417,8 @@ consultation_data_long <- consultation_data %>%
     expand = expansion(mult = c(0, 0.05))
   ) +
 
-  scale_color_manual(
-    values = c(
-      "condition" = "#037A92",
-      "control" = "#D95F02"
-    )
-  ) +
-
-  scale_shape_manual(
-    values = c(
-      "condition" = 16,
-      "control" = 17
-    )
-  ) +
-
+  scale_color_manual(values = c("condition" = "#037A92", "control" = "#D95F02")) +
+  scale_shape_manual(values = c("condition" = 16,"control" = 17)) +
   labs(
     title = "Monthly GP consultations: Pharmacy First conditions and selected controls",
     x = "Month",
@@ -435,43 +428,29 @@ consultation_data_long <- consultation_data %>%
   ) +
 
   theme(
-    panel.background = element_rect(
-      fill = "white",
-      colour = NA
-    ),
-    panel.border = element_rect(
-      fill = NA,
-      colour = "black",
-      linewidth = 0.4
-    ),
-    panel.grid.major = element_line(
-      colour = "grey85",
-      linetype = "dashed",
-      linewidth = 0.3
-    ),
+  # White panel background with a thin black frame
+    panel.background = element_rect(fill = "white", colour = NA),
+    panel.border     = element_rect(fill = NA, colour = "black", linewidth = 0.4),
+    # Light dashed grid lines like in the example
+    panel.grid.major = element_line(colour = "grey85", linetype = "dashed", linewidth = 0.3),
     panel.grid.minor = element_blank(),
-    plot.background = element_rect(
-      fill = "white",
-      colour = NA
-    ),
-    legend.key = element_rect(
-      fill = "white",
-      colour = NA
-    ),
-    strip.background = element_rect(
-      fill = "#037A92",
-      colour = "#037A92"
-    ),
-    strip.text = element_text(
-      colour = "white",
-      face = "bold"
-    ),
-    legend.position = "bottom",
-    axis.text.x = element_text(
-      angle = 45,
-      hjust = 1
-    )
-  )
+    # White around the panels and behind the legend keys
+    plot.background  = element_rect(fill = "white", colour = NA),
+    legend.key       = element_rect(fill = "white", colour = NA),
+  # Facet title background and text
+  strip.background = element_rect(
+    fill = "#037A92",
+    colour = "#037A92"
+  ),
+  strip.text = element_text(
+    colour = "white",
+    face = "bold"
+  ),
+
+  # Legend and axes
+  legend.position = "bottom",
+  axis.text.x = element_text(angle = 45, hjust = 1)
+)
 
 # Display graph
 facet_controls_plot_2
@@ -536,7 +515,8 @@ write_csv(
 )
 
 # CSV 2: Control conditions
-consultation_controls_sdc <- format_sdc_export(numerators_controls)
+#consultation_controls_sdc <- format_sdc_export(numerators_controls)
+consultation_controls_sdc <- format_sdc_export(consultation_data_long)# the new  one
 
 write_csv(
   consultation_controls_sdc,
