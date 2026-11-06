@@ -112,12 +112,13 @@ numerators_monthly <- data %>%
     regex = "^(gp|pf)_consultation_(.*)$"
   ) %>%
   mutate(
-    # Apply SDC
-    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
-    Setting = case_when(
+     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
     ),
+    # Apply SDC
+    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
+    ,
     condition = case_when(
       condition == "uti"            ~ "UTI",
       condition == "sinusitis"      ~ "Sinusitis",
@@ -216,12 +217,13 @@ numerators_controls <- data %>%
     regex = "^(gp|pf)_consultation_(.*)$"
   ) %>%
   mutate(
-    # Apply SDC
-    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
+    
     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
     ),
+    # Apply SDC
+    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
     condition = case_when(
       condition == "uti" ~ "UTI",
       condition == "insectbite" ~ "Insect bites",
