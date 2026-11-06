@@ -836,7 +836,9 @@ actions:
         measures: output/measures_new_approach_consultation.csv
   process_measures_new_approach_facet_consultation:
     run: r:v2 analysis/measures_new_approach_facet_consultation.R
-    needs: [generate_measures_new_approach_consultation_and_medication]
+    needs: 
+        - generate_measures_new_approach_consultation_and_medication
+        - process_measures_to_practice_dataset_by_practice_only
     outputs:
       moderately_sensitive:
         figure_1: output/consultations_counts/measures_new_approach_facet_consultation.png

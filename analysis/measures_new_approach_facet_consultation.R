@@ -315,13 +315,167 @@ theme(
 
 facet_controls_plot
 
-ggsave(
-  filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),
-  plot = facet_controls_plot,
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+#ggsave(filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),plot = facet_controls_plot, width = 10,height = 6,dpi = 300)
+
+
+#
+practice_level_data_by_practice_only <- read_csv(
+  here("output", "practice_level_data_by_practice_only.csv"),
+  show_col_types = FALSE
+) %>%
+  mutate(interval_start = as.Date(interval_start))
+
+consultation_data <- practice_level_data_by_practice_only %>%
+  select(
+    practice,
+    interval_start,
+    contains("gp_consultation")
+  )
+print(consultation_data)
+names(consultation_data)
+consultation_data_long <- consultation_data %>%
+  pivot_longer(
+    cols = starts_with("gp_consultation_"),
+    names_to = "condition",
+    values_to = "consultations"
+  ) %>%
+  mutate(
+    condition = str_remove(condition, "^gp_consultation_"),
+    condition_type = case_when(
+      str_detect(condition, "_control$") ~ "control",
+      TRUE ~ "condition"
+    ),
+    condition_pair = case_when(
+      condition %in% c("uti", "vulvovaginalcandidiasis_control") ~ "uti vs vulvovaginalcandidiasis",
+      condition %in% c("sorethroat", "acutebronchitis_control") ~ "sorethroat vs acutebronchitis",
+      condition %in% c("conjunctivitisallergic_control",
+        "insectbite") ~ "Insectbite vs conjunctivitis_vulvovaginalcandidiasis",
+      TRUE ~ NA_character_
+    )) %>%
+  filter(
+    condition %in% c(
+      "uti",
+      "insectbite",
+      "sorethroat",
+      "acutebronchitis_control",
+      "conjunctivitisallergic_control",
+      "vulvovaginalcandidiasis_control"
+    )
+  ) %>%
+  arrange(interval_start, condition)
+
+   #
+  facet_controls_plot_2 <- ggplot(
+  consultation_data_long,
+  aes(
+    x = interval_start,
+    y = consultations,
+    group = condition,
+    color = condition_type,
+    shape = condition_type
+  )
+) +
+
+  geom_line(linewidth = 0.6) +
+  geom_point(size = 1.0) +
+
+  # GP Connect and Pharmacy First implementation dates
+  geom_vline(
+    xintercept = GP_connect,
+    linetype = "dashed",
+    linewidth = 0.3,
+    color = "grey40"
+  ) +
+
+  geom_vline(
+    xintercept = PF_start,
+    linetype = "dashed",
+    linewidth = 0.3,
+    color = "blue"
+  ) +
+
+  # Separate condition pairs
+  facet_wrap(
+    ~ condition_pair,
+    scales = "free_y",
+    ncol = 2
+  ) +
+
+  scale_x_date(
+    date_labels = "%Y-%m",
+    date_breaks = "2 months"
+  ) +
+
+  scale_y_continuous(
+    limits = c(0, NA),
+    labels = scales::label_comma(),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+
+  scale_color_manual(
+    values = c(
+      "condition" = "#037A92",
+      "control" = "#D95F02"
+    )
+  ) +
+
+  scale_shape_manual(
+    values = c(
+      "condition" = 16,
+      "control" = 17
+    )
+  ) +
+
+  labs(
+    title = "Monthly GP consultations: Pharmacy First conditions and selected controls",
+    x = "Month",
+    y = "Consultations",
+    color = "Condition type",
+    shape = "Condition type"
+  ) +
+
+  theme(
+    panel.background = element_rect(
+      fill = "white",
+      colour = NA
+    ),
+    panel.border = element_rect(
+      fill = NA,
+      colour = "black",
+      linewidth = 0.4
+    ),
+    panel.grid.major = element_line(
+      colour = "grey85",
+      linetype = "dashed",
+      linewidth = 0.3
+    ),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(
+      fill = "white",
+      colour = NA
+    ),
+    legend.key = element_rect(
+      fill = "white",
+      colour = NA
+    ),
+    strip.background = element_rect(
+      fill = "#037A92",
+      colour = "#037A92"
+    ),
+    strip.text = element_text(
+      colour = "white",
+      face = "bold"
+    ),
+    legend.position = "bottom",
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+
+# Display graph
+facet_controls_plot_2
+ggsave(filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),plot = facet_controls_plot_2, width = 10,height = 6,dpi = 300)
 
 # -----------------------------------------------------------------------------
 # SDC validation
