@@ -348,8 +348,7 @@ consultation_data_long <- consultation_data %>%
     condition_pair = case_when(
       condition %in% c("uti", "vulvovaginalcandidiasis_control") ~ "uti vs vulvovaginalcandidiasis",
       condition %in% c("sorethroat", "acutebronchitis_control") ~ "sorethroat vs acutebronchitis",
-      condition %in% c("conjunctivitisallergic_control",
-        "insectbite") ~ "Insectbite vs conjunctivitis_vulvovaginalcandidiasis",
+      condition %in% c("conjunctivitisallergic_control","insectbite") ~ "Insectbite vs conjunctivitis_vulvovaginalcandidiasis",
       TRUE ~ NA_character_
     )) %>%
   filter(
@@ -360,9 +359,9 @@ consultation_data_long <- consultation_data %>%
       "acutebronchitis_control",
       "conjunctivitisallergic_control",
       "vulvovaginalcandidiasis_control"
-    )
-  ) %>%
-  arrange(interval_start, condition)
+    ))
+  # 
+  #%>%arrange(interval_start, condition)
 
   #Apply the SDC funcution to the consultations counts
   consultation_data_long<- consultation_data_long%>%
@@ -377,20 +376,16 @@ consultation_data_long <- consultation_data %>%
     y = consultation_count,
     group = condition,
     color = condition_type,
-    shape = condition_type
-  )
-) +
-
-  geom_line(linewidth = 0.6) +
-  geom_point(size = 1.0) +
-
-  # GP Connect and Pharmacy First implementation dates
-  geom_vline(
+    shape = condition_type)) +
+    geom_line(linewidth = 0.6) +
+    geom_point(size = 1.0) +
+    # GP Connect and Pharmacy First implementation dates
+    geom_vline(
     xintercept = GP_connect,
     linetype = "dashed",
     linewidth = 0.3,
     color = "grey40"
-  ) +
+   ) +
 
   geom_vline(
     xintercept = PF_start,
