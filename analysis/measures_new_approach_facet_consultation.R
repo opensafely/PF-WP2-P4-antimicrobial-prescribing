@@ -105,6 +105,7 @@ facet_numerators_plot <- ggplot(
 ) +
   geom_line(linewidth = 0.5) +
   geom_point(size = 1.5, color = "red") +
+
   geom_vline(xintercept = GP_connect, linetype = "dashed", linewidth = 0.3) +
   geom_vline(xintercept = PF_start, linetype = "dashed", linewidth = 0.3,color = "blue") +
   facet_wrap(
