@@ -16,7 +16,7 @@ library(lubridate)
 # -----------------------------------------------------------------------------
 # 0. SDC 
 # -----------------------------------------------------------------------------
-sdc_threshold <- 7
+sdc_threshold <- 8
 sdc_base <- 5
 # Numeric protected count: NA if redacted (1-7), zero kept as zero,
 # Everything else rounded to the nearest 5.

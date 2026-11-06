@@ -48,14 +48,26 @@ dir.create(
 # Redact counts < 8, retain zeros, round remaining counts to nearest 5         #
 # -----------------------------------------------------------------------------#
 
-apply_sdc <- function(x) {
+PF_start <- as.Date("2024-02-01")
+
+apply_sdc <- function(x, setting, interval_start) {
   case_when(
     is.na(x) ~ NA_real_,
+
+    # PF before launch: retain structural zeros
+    setting == "PF" & interval_start < PF_start & x == 0 ~ 0,
+
+    # Zero counts: retain
     x == 0 ~ 0,
+
+    # Suppress counts from 1 to 7
     x < 8 ~ NA_real_,
+
+    # Round counts >= 8 to nearest 5
     TRUE ~ round(x / 5) * 5
   )
 }
+
 
 
 
@@ -101,7 +113,7 @@ numerators_monthly <- data %>%
   ) %>%
   mutate(
     # Apply SDC
-    consultation_count = apply_sdc(consultation_count),
+    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
@@ -204,7 +216,7 @@ numerators_controls <- data %>%
   ) %>%
   mutate(
     # Apply SDC
-    consultation_count = apply_sdc(consultation_count),
+    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
@@ -342,11 +354,17 @@ print(sdc_check)
 format_sdc_export <- function(df) {
   df %>%
     mutate(
+      consultation_count_sdc = apply_sdc(
+        consultation_count,
+        Setting,
+        interval_start
+      ),
+
       consultation_count = case_when(
-        is.na(consultation_count) ~ "[Redacted]",
+        is.na(consultation_count) ~ NA_character_,
         consultation_count == 0 ~ "0",
-        consultation_count < 8 ~ "[Redacted]",
-        TRUE ~ as.character(round(consultation_count / 5) * 5)
+        is.na(consultation_count_sdc) ~ "[Redacted]",
+        TRUE ~ as.character(consultation_count_sdc)
       )
     ) %>%
     select(
@@ -357,6 +375,7 @@ format_sdc_export <- function(df) {
     ) %>%
     arrange(condition, Setting, interval_start)
 }
+
 
 # CSV 1: PF conditions
 consultation_sdc <- format_sdc_export(numerators_monthly)
