@@ -197,9 +197,7 @@ facet_numerators_plot_sdc <- ggplot(
     date_labels = "%Y-%m",
     date_breaks = "2 months"
   ) +
-  scale_y_continuous(
-    labels = comma
-  ) +
+  scale_y_continuous(labels = comma) +
   labs(
     title = "Monthly medication counts across general practices  by condition and settings",
     subtitle = paste(
@@ -210,10 +208,10 @@ facet_numerators_plot_sdc <- ggplot(
     y = "Medication count",
     color = "Setting",
     shape = "Setting",
-    caption = paste(
-      "Suppressed counts are displayed as gaps.",
-      "Dashed blue line: Pharmacy First launch;",
-      "dashed black line: GP Connect implementation."
+    caption = paste("Statistical disclosure control applied:,
+      counts \u22647 redacted; all other counts rounded to the nearest 5.
+      Suppressed counts are displayed as gaps"."Dashed blue line: Pharmacy First launch;,
+      dashed black line: GP Connect implementation",sep = "\n"
     )
   ) +
   theme(
