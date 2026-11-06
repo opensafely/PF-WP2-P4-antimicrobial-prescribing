@@ -246,7 +246,7 @@ p <- p +
 p
 
 ggsave(file.path(output_dir, "deciles_med_per_consultation.png"), p,
-       width = 16, height = 12, dpi = 200, bg = "white")
+       width = 20, height = 12, dpi = 200, bg = "white")
 
 #SECTION II.By condition
 output_dir_gp <- here("output","proportion_medication_deciles","GP_by_condition")
