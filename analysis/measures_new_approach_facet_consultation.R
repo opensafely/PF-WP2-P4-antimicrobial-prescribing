@@ -111,13 +111,13 @@ numerators_monthly <- data %>%
     into  = c("Setting", "condition"),
     regex = "^(gp|pf)_consultation_(.*)$"
   ) %>%
-  mutate(
-    # Apply SDC
-    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
-    Setting = case_when(
+  mutate( Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
     ),
+    # Apply SDC
+    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
+
     condition = case_when(
       condition == "uti"            ~ "UTI",
       condition == "sinusitis"      ~ "Sinusitis",
@@ -141,7 +141,8 @@ facet_numerators_plot <- ggplot(
   geom_vline(xintercept = PF_start,linetype = "dashed",linewidth = 0.3,color = "blue") +
   facet_wrap(~ condition,scales = "free_y",ncol = 2) +
   scale_x_date(date_labels = "%Y-%m",date_breaks = "2 months") +
-  scale_y_continuous( labels = scales::comma) +
+  #scale_y_continuous( labels = scales::comma) +
+  scale_y_continuous(limits = c(0, NA),labels = scales::label_comma(),expand = expansion(mult = c(0, 0.05)))+
   labs(
     title = "Monthly consultation counts across GP practices by condition: GP versus Pharmacy First",
     x = "Month",
@@ -215,12 +216,13 @@ numerators_controls <- data %>%
     regex = "^(gp|pf)_consultation_(.*)$"
   ) %>%
   mutate(
-    # Apply SDC
-    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
+    
     Setting = case_when(
       Setting == "gp" ~ "GP",
       Setting == "pf" ~ "PF"
     ),
+    # Apply SDC : Here because we are using the GP and PF
+    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
     condition = case_when(
       condition == "uti" ~ "UTI",
       condition == "insectbite" ~ "Insect bites",
@@ -276,7 +278,8 @@ numerators_paired <- bind_rows(
   geom_vline(xintercept = PF_start, linetype = "dashed",linewidth = 0.3,color = "blue") +
   facet_wrap( ~condition_pair ,scales = "free_y", ncol = 2) +
   scale_x_date(date_labels = "%Y-%m",date_breaks = "2 months") +
-  scale_y_continuous(labels = scales::label_comma()) +
+  #scale_y_continuous(labels = scales::label_comma()) +
+  scale_y_continuous(limits = c(0, NA),labels = scales::label_comma(),expand = expansion(mult = c(0, 0.05)))+
   labs(
     title = "Monthly consultations across general practices : PF conditions and selected controls",
     #subtitle = "Comparison across GP and Pharmacy First settings",
