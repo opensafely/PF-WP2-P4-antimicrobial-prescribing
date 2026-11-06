@@ -246,4 +246,4 @@ p <- p +
 p
 
 ggsave(file.path(output_dir, "deciles_med_per_consultation.png"), p,
-       width = 14, height = 14, dpi = 200, bg = "white")
+       width = 16, height = 12, dpi = 200, bg = "white")
