@@ -850,10 +850,17 @@ actions:
     needs: [process_measures_to_practice_dataset_by_practice_only]
     outputs:
       moderately_sensitive:
-        csv_1    : output/proportion_medication_deciles/pooled_med_per_consultation_SDC.csv
+        csv_1   : output/proportion_medication_deciles/pooled_med_per_consultation_SDC.csv
         csv_2    : output/proportion_medication_deciles/deciles_med_per_consultation.csv
-        figure_2: output/proportion_medication_deciles/deciles_med_per_consultation.png
-  
+        figure_1: output/proportion_medication_deciles/deciles_med_per_consultation.png
+        figure_2: output/proportion_medication_deciles/GP_proportion_medication_uti.png
+        figure_3: output/proportion_medication_deciles/GP_proportion_medication_sinusitis.png
+        figure_4: output/proportion_medication_deciles/GP_proportion_medication_insectbite.png
+        figure_5: output/proportion_medication_deciles/GP_proportion_medication_otitismedia.png
+        figure_6: output/proportion_medication_deciles/GP_proportion_medication_sorethroat.png
+        figure_7: output/proportion_medication_deciles/GP_proportion_medication_shingles.png
+        figure_8: output/proportion_medication_deciles/GP_proportion_medication_impetigo.png
+        figure_9: output/proportion_medication_deciles/GP_proportion_medication_all_conditions.png
   #II.MEDICATIONS
   generate_measures_new_approach_medication:
     run: ehrql:v1 generate-measures analysis/measures_new_approach_medication.py

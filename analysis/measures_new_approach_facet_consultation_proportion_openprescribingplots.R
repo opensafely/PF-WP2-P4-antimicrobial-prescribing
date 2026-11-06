@@ -247,3 +247,217 @@ p
 
 ggsave(file.path(output_dir, "deciles_med_per_consultation.png"), p,
        width = 16, height = 12, dpi = 200, bg = "white")
+
+#SECTION II.By condition
+output_dir_gp <- here("output","proportion_medication_deciles","GP_by_condition")
+dir.create(output_dir_gp,recursive = TRUE, showWarnings = FALSE)
+# -----------------------------------------------------------------------------
+# 6. Function: Generate one GP-only graph per condition
+# -----------------------------------------------------------------------------
+
+plot_gp_condition <- function(condition_name) {
+
+  # Convert raw condition name to display label
+  condition_title <- unname(condition_labels[condition_name])
+
+  # Filter GP data using display label
+  deciles_gp <- deciles |>
+    filter(
+      setting == "GP",
+      as.character(condition) == condition_title
+    )
+
+  pooled_gp <- pooled |>
+    filter(
+      setting == "GP",
+      as.character(condition) == condition_title
+    )
+
+  # Diagnostic
+  message(
+    "Condition: ", condition_name,
+    " | Decile rows: ", nrow(deciles_gp),
+    " | Pooled rows: ", nrow(pooled_gp)
+  )
+
+  # Skip conditions without data
+  if (nrow(deciles_gp) == 0 && nrow(pooled_gp) == 0) {
+    message("No GP data available for: ", condition_name)
+    return(NULL)
+  }
+
+  # Generate graph
+  
+  p_gp <- ggplot() +
+
+    # Reference dates
+    geom_vline(
+      xintercept = PF_start,
+      colour = "grey45",
+      linewidth = 0.5
+    ) +
+
+    geom_vline(
+      xintercept = GP_connect,
+      colour = "grey45",
+      linewidth = 0.5,
+      linetype = "dashed"
+    ) +
+
+    # Deciles and median across practices
+    geom_line(
+      data = deciles_gp,
+      aes(
+        x = month,
+        y = value,
+        group = percentile,
+        colour = type,
+        linetype = type,
+        linewidth = type
+      )
+    ) +
+
+    # Pooled proportion
+    geom_line(
+      data = pooled_gp,
+      aes(
+        x = month,
+        y = value,
+        colour = type,
+        linetype = type,
+        linewidth = type
+      )
+    ) +
+
+    # Reference date labels
+    annotate(
+      "text",
+      x = PF_start,
+      y = 0.98,
+      label = "PF launch",
+      hjust = 0,
+      vjust = 1,
+      size = 2.8,
+      colour = "grey35"
+    ) +
+
+    annotate(
+      "text",
+      x = GP_connect,
+      y = 0.90,
+      label = "GP Connect",
+      hjust = 0,
+      vjust = 1,
+      size = 2.8,
+      colour = "grey35"
+    ) +
+
+    scale_colour_manual(
+      values = cols,
+      breaks = lvl,
+      name = NULL
+    ) +
+
+    scale_linetype_manual(
+      values = ltys,
+      breaks = lvl,
+      name = NULL
+    ) +
+
+    scale_linewidth_manual(
+      values = lwds,
+      breaks = lvl,
+      name = NULL
+    ) +
+
+    scale_x_date(
+      date_breaks = "2 months",
+      date_labels = "%Y-%m",
+      expand = expansion(mult = 0.01)
+    ) +
+
+    scale_y_continuous(
+      labels = percent,
+      expand = expansion(mult = c(0, 0.02))
+    ) +
+
+    coord_cartesian(ylim = c(0, 1)) +
+
+    labs(
+      x = NULL,
+      y = "Consultations with medication issued (%)",
+      title = paste0(
+        "Proportion of GP consultations with medication issued: ",
+        condition_title
+      ),
+      subtitle = paste0(
+        "Median and deciles across GP practices with \u2265",
+        min_denominator,
+        " consultations; pooled proportion across all GP practices"
+      )
+    ) +
+
+    theme(
+      panel.background = element_rect(
+        fill = "white",
+        colour = NA
+      ),
+      panel.border = element_rect(
+        fill = NA,
+        colour = "black",
+        linewidth = 0.4
+      ),
+      panel.grid.major = element_line(
+        colour = "grey85",
+        linetype = "dashed",
+        linewidth = 0.3
+      ),
+      panel.grid.minor = element_blank(),
+      plot.background = element_rect(
+        fill = "white",
+        colour = NA
+      ),
+      legend.key = element_rect(
+        fill = "white",
+        colour = NA
+      ),
+      legend.position = "bottom",
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
+    )
+
+  # Save graph
+  filename <- paste0(
+    "GP_proportion_medication_",
+    condition_name,
+    ".png"
+  )
+
+  ggsave(
+    filename = file.path(output_dir, filename), #the initial one
+    plot = p_gp,
+    width = 12,
+    height = 6,
+    dpi = 200,
+    bg = "white"
+  )
+
+  message("Generated: ", filename)
+
+  return(p_gp)
+}
+
+# -----------------------------------------------------------------------------
+# 7. Individual GP graphs for all conditions
+# -----------------------------------------------------------------------------
+
+gp_condition_plots <- setNames(
+  lapply(
+    names(condition_labels),
+    plot_gp_condition
+  ),
+  names(condition_labels)
+)
+
