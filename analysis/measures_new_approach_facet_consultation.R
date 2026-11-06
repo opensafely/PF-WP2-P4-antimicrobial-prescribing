@@ -141,8 +141,7 @@ facet_numerators_plot <- ggplot(
   geom_vline(xintercept = PF_start,linetype = "dashed",linewidth = 0.3,color = "blue") +
   facet_wrap(~ condition,scales = "free_y",ncol = 2) +
   scale_x_date(date_labels = "%Y-%m",date_breaks = "2 months") +
-  #scale_y_continuous( labels = scales::comma) +
-  scale_y_continuous(limits = c(0, NA),labels = scales::label_comma(),expand = expansion(mult = c(0, 0.05)))
+  scale_y_continuous( labels = scales::comma) +
   labs(
     title = "Monthly consultation counts across GP practices by condition: GP versus Pharmacy First",
     x = "Month",
@@ -277,8 +276,7 @@ numerators_paired <- bind_rows(
   geom_vline(xintercept = PF_start, linetype = "dashed",linewidth = 0.3,color = "blue") +
   facet_wrap( ~condition_pair ,scales = "free_y", ncol = 2) +
   scale_x_date(date_labels = "%Y-%m",date_breaks = "2 months") +
-  #scale_y_continuous(labels = scales::label_comma()) +
-  scale_y_continuous(limits = c(0, NA),labels = scales::label_comma(),expand = expansion(mult = c(0, 0.05)))
+  scale_y_continuous(labels = scales::label_comma()) +
   labs(
     title = "Monthly consultations across general practices : PF conditions and selected controls",
     #subtitle = "Comparison across GP and Pharmacy First settings",
@@ -356,17 +354,11 @@ print(sdc_check)
 format_sdc_export <- function(df) {
   df %>%
     mutate(
-      consultation_count_sdc = apply_sdc(
-        consultation_count,
-        Setting,
-        interval_start
-      ),
-
       consultation_count = case_when(
-        is.na(consultation_count) ~ NA_character_,
+        is.na(consultation_count) ~ "[Redacted]",
         consultation_count == 0 ~ "0",
-        is.na(consultation_count_sdc) ~ "[Redacted]",
-        TRUE ~ as.character(consultation_count_sdc)
+        consultation_count < 8 ~ "[Redacted]",
+        TRUE ~ as.character(round(consultation_count / 5) * 5)
       )
     ) %>%
     select(
@@ -377,7 +369,6 @@ format_sdc_export <- function(df) {
     ) %>%
     arrange(condition, Setting, interval_start)
 }
-
 
 # CSV 1: PF conditions
 consultation_sdc <- format_sdc_export(numerators_monthly)
