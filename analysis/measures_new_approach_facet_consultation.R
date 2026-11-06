@@ -516,7 +516,12 @@ write_csv(
 
 # CSV 2: Control conditions
 #consultation_controls_sdc <- format_sdc_export(numerators_controls)
-consultation_controls_sdc <- format_sdc_export(consultation_data_long)# the new  one
+# Here we used the long format (we need to reduce it to not exceed 5000 rows)
+consultation_data_long<-consultation_data_long%>%
+  select(interval_start,condition,Setting,consultation_count)%>%
+  arrange(condition,Setting,interval_start) 
+
+consultation_controls_sdc <- format_sdc_export(consultation_data_long)# the new  one 
 
 write_csv(
   consultation_controls_sdc,
