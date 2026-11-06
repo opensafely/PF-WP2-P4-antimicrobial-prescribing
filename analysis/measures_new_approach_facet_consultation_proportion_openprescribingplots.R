@@ -205,7 +205,7 @@ p <- p +
   scale_colour_manual(values = cols, breaks = lvl, name = NULL) +
   scale_linetype_manual(values = ltys, breaks = lvl, name = NULL) +
   scale_linewidth_manual(values = lwds, breaks = lvl, name = NULL) +
-  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m",
+  scale_x_date(date_breaks = "2 months", date_labels = "%Y-%m",
                expand = expansion(mult = 0.01)) +
   scale_y_continuous(labels = percent, expand = expansion(mult = c(0, 0.02))) +
   coord_cartesian(ylim = c(0, 1)) +
