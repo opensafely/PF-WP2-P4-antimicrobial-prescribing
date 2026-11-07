@@ -116,7 +116,7 @@ numerators_monthly <- data %>%
       Setting == "pf" ~ "PF"
     ),
     # Apply SDC
-    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
+    consultation_count_sdc = apply_sdc(consultation_count, Setting, interval_start),
 
     condition = case_when(
       condition == "uti"            ~ "UTI",
@@ -134,7 +134,7 @@ numerators_monthly <- data %>%
 # 3. Faceted plot
 # -----------------------------------------------------------------------------
 facet_numerators_plot <- ggplot(
-  numerators_monthly,aes(x = interval_start,y = consultation_count,group = Setting,color = Setting,shape = Setting))+
+  numerators_monthly,aes(x = interval_start,y = consultation_count_sdc,group = Setting,color = Setting,shape = Setting))+
   geom_line(linewidth = 0.5) +
   geom_point(size = 1) +
   geom_vline(xintercept = GP_connect,linetype = "dashed",linewidth = 0.3) +
@@ -222,7 +222,7 @@ numerators_controls <- data %>%
       Setting == "pf" ~ "PF"
     ),
     # Apply SDC : Here because we are using the GP and PF
-    consultation_count = apply_sdc(consultation_count, Setting, interval_start),
+    consultation_count_sdc = apply_sdc(consultation_count, Setting, interval_start),
     condition = case_when(
       condition == "uti" ~ "UTI",
       condition == "insectbite" ~ "Insect bites",
@@ -266,7 +266,7 @@ numerators_paired <- bind_rows(
   facet_controls_plot <- ggplot(numerators_paired %>%
     filter(Setting == "GP"),aes(
     x = interval_start,
-    y = consultation_count,
+    y = consultation_count_sdc,
     #group = condition,
     color = condition_type,
     #linetype = condition_type,
@@ -318,12 +318,30 @@ facet_controls_plot
 #ggsave(filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),plot = facet_controls_plot, width = 10,height = 6,dpi = 300)
 
 
-#
+
+# =============================================================================
+# Pharmacy First — Monthly GP consultations and selected control conditions
+# Aggregate practice-level counts, apply SDC, plot and export
+# =============================================================================
+
+library(tidyverse)
+library(here)
+
+# -----------------------------------------------------------------------------
+# 1. Read practice-level data
+# -----------------------------------------------------------------------------
+
 practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
   show_col_types = FALSE
 ) %>%
-  mutate(interval_start = as.Date(interval_start))
+  mutate(
+    interval_start = as.Date(interval_start)
+  )
+
+# -----------------------------------------------------------------------------
+# 2. Select GP consultation variables
+# -----------------------------------------------------------------------------
 
 consultation_data <- practice_level_data_by_practice_only %>%
   select(
@@ -331,8 +349,11 @@ consultation_data <- practice_level_data_by_practice_only %>%
     interval_start,
     contains("gp_consultation")
   )
-print(consultation_data)
-names(consultation_data)
+
+# -----------------------------------------------------------------------------
+# 3. Convert to long format and identify conditions and controls
+# -----------------------------------------------------------------------------
+
 consultation_data_long <- consultation_data %>%
   pivot_longer(
     cols = starts_with("gp_consultation_"),
@@ -340,17 +361,36 @@ consultation_data_long <- consultation_data %>%
     values_to = "consultation_count"
   ) %>%
   mutate(
-    condition = str_remove(condition, "^gp_consultation_"),
+    condition = str_remove(
+      condition,
+      "^gp_consultation_"
+    ),
+
     condition_type = case_when(
       str_detect(condition, "_control$") ~ "control",
       TRUE ~ "condition"
     ),
+
     condition_pair = case_when(
-      condition %in% c("uti", "vulvovaginalcandidiasis_control") ~ "uti vs vulvovaginalcandidiasis",
-      condition %in% c("sorethroat", "acutebronchitis_control") ~ "sorethroat vs acutebronchitis",
-      condition %in% c("conjunctivitisallergic_control","insectbite") ~ "Insectbite vs conjunctivitis_vulvovaginalcandidiasis",
+
+      condition %in% c(
+        "uti",
+        "vulvovaginalcandidiasis_control"
+      ) ~ "UTI vs vulvovaginal candidiasis",
+
+      condition %in% c(
+        "sorethroat",
+        "acutebronchitis_control"
+      ) ~ "Sore throat vs acute bronchitis",
+
+      condition %in% c(
+        "insectbite",
+        "conjunctivitisallergic_control"
+      ) ~ "Insect bite vs allergic conjunctivitis",
+
       TRUE ~ NA_character_
-    )) %>%
+    )
+  ) %>%
   filter(
     condition %in% c(
       "uti",
@@ -359,34 +399,131 @@ consultation_data_long <- consultation_data %>%
       "acutebronchitis_control",
       "conjunctivitisallergic_control",
       "vulvovaginalcandidiasis_control"
-    ))
-  # 
-  #%>%arrange(interval_start, condition)
+    )
+  )
 
-  #Apply the SDC funcution to the consultations counts
-  consultation_data_long<- consultation_data_long%>%
-  mutate(Setting="GP")%>%  # Here i created the Setting colum to be able to use the sdc fx
-  mutate(cosultaion_count = apply_sdc(consultation_count, Setting, interval_start))
-   #Plotting 2
-  facet_controls_plot_2 <- ggplot(
-  consultation_data_long%>%
-   filter(condition_pair != "sorethroat vs acutebronchitis"),
+# -----------------------------------------------------------------------------
+# 4. Aggregate consultations across practices by month and condition
+# -----------------------------------------------------------------------------
+
+consultation_data_monthly <- consultation_data_long %>%
+  group_by(
+    interval_start,
+    condition,
+    condition_type,
+    condition_pair
+  ) %>%
+  summarise(
+    consultation_count = sum(
+      consultation_count,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  ) %>%
+  arrange(
+    condition,
+    interval_start
+  )
+
+# -----------------------------------------------------------------------------
+# 5. Apply statistical disclosure control (SDC)
+# -----------------------------------------------------------------------------
+# SDC is applied once, after aggregation.
+# GP: apply throughout the entire observation period.
+# The apply_sdc() function determines suppression, zero retention
+# and rounding according to the existing project rules.
+
+consultation_data_monthly_sdc <- consultation_data_monthly %>%
+  mutate(
+    Setting = "GP",
+    consultation_count_sdc = apply_sdc(
+      consultation_count,
+      Setting,
+      interval_start
+    )
+  )
+
+# -----------------------------------------------------------------------------
+# 6. Validate SDC
+# -----------------------------------------------------------------------------
+
+sdc_check <- consultation_data_monthly_sdc %>%
+  summarise(
+    total_rows = n(),
+
+    suppressed = sum(
+      is.na(consultation_count_sdc)
+    ),
+
+    retained_zeros = sum(
+      consultation_count_sdc == 0,
+      na.rm = TRUE
+    ),
+
+    rounded_counts = sum(
+      !is.na(consultation_count_sdc) &
+        consultation_count_sdc > 0
+    ),
+
+    non_multiple_of_5 = sum(
+      !is.na(consultation_count_sdc) &
+        consultation_count_sdc > 0 &
+        consultation_count_sdc %% 5 != 0
+    )
+  )
+
+print(sdc_check)
+
+# -----------------------------------------------------------------------------
+# 7. Check uniqueness: one observation per month and condition
+# -----------------------------------------------------------------------------
+
+duplicate_check <- consultation_data_monthly_sdc %>%
+  count(interval_start, condition) %>%
+  filter(n > 1)
+
+print(duplicate_check)
+
+# Expected: zero rows.
+
+# -----------------------------------------------------------------------------
+# 8. Plot monthly GP consultations
+# -----------------------------------------------------------------------------
+
+facet_controls_plot_2 <- ggplot(
+  consultation_data_monthly_sdc %>%
+    filter(
+      condition_pair != "Sore throat vs acute bronchitis"
+    ),
+
   aes(
     x = interval_start,
-    y = consultation_count,
+    y = consultation_count_sdc,
     group = condition,
     color = condition_type,
-    shape = condition_type)) +
-    geom_line(linewidth = 0.6) +
-    geom_point(size = 1.0) +
-    # GP Connect and Pharmacy First implementation dates
-    geom_vline(
+    shape = condition_type
+  )
+) +
+
+  geom_line(
+    linewidth = 0.6,
+    na.rm = TRUE
+  ) +
+
+  geom_point(
+    size = 1.0,
+    na.rm = TRUE
+  ) +
+
+  # GP Connect implementation date
+  geom_vline(
     xintercept = GP_connect,
     linetype = "dashed",
     linewidth = 0.3,
     color = "grey40"
-   ) +
+  ) +
 
+  # Pharmacy First launch date
   geom_vline(
     xintercept = PF_start,
     linetype = "dashed",
@@ -394,7 +531,7 @@ consultation_data_long <- consultation_data %>%
     color = "blue"
   ) +
 
-  # Separate condition pairs
+  # Separate condition comparisons
   facet_wrap(
     ~ condition_pair,
     scales = "free_y",
@@ -409,119 +546,229 @@ consultation_data_long <- consultation_data %>%
   scale_y_continuous(
     limits = c(0, NA),
     labels = scales::label_comma(),
-    expand = expansion(mult = c(0, 0.05))
+    expand = expansion(
+      mult = c(0, 0.05)
+    )
   ) +
 
-  scale_color_manual(values = c("condition" = "#037A92", "control" = "#D95F02")) +
-  scale_shape_manual(values = c("condition" = 16,"control" = 17)) +
+  scale_color_manual(
+    values = c(
+      "condition" = "#037A92",
+      "control" = "#D95F02"
+    )
+  ) +
+
+  scale_shape_manual(
+    values = c(
+      "condition" = 16,
+      "control" = 17
+    )
+  ) +
+
   labs(
-    title = "Monthly GP consultations: Pharmacy First conditions and selected controls",
+    title = paste(
+      "Monthly GP consultations:",
+      "Pharmacy First conditions and selected controls"
+    ),
+
     x = "Month",
     y = "Consultations",
+
     color = "Condition type",
-    shape = "Condition type"
+    shape = "Condition type",
+
+    caption = paste(
+      "Statistical disclosure control applied:",
+      "counts 1–7 suppressed; positive counts rounded to nearest 5.",
+      "Zero counts retained.",
+      "Suppressed counts are displayed as gaps.",
+      "Dashed blue line: Pharmacy First launch;",
+      "dashed grey line: GP Connect implementation."
+    )
   ) +
 
   theme(
-  # White panel background with a thin black frame
-    panel.background = element_rect(fill = "white", colour = NA),
-    panel.border     = element_rect(fill = NA, colour = "black", linewidth = 0.4),
-    # Light dashed grid lines like in the example
-    panel.grid.major = element_line(colour = "grey85", linetype = "dashed", linewidth = 0.3),
-    panel.grid.minor = element_blank(),
-    # White around the panels and behind the legend keys
-    plot.background  = element_rect(fill = "white", colour = NA),
-    legend.key       = element_rect(fill = "white", colour = NA),
-  # Facet title background and text
-  strip.background = element_rect(
-    fill = "#037A92",
-    colour = "#037A92"
-  ),
-  strip.text = element_text(
-    colour = "white",
-    face = "bold"
-  ),
-
-  # Legend and axes
-  legend.position = "bottom",
-  axis.text.x = element_text(angle = 45, hjust = 1)
-)
-
-# Display graph
-facet_controls_plot_2
-ggsave(filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),plot = facet_controls_plot_2, width = 10,height = 6,dpi = 300)
-
-# -----------------------------------------------------------------------------
-# SDC validation
-# -----------------------------------------------------------------------------
-
-sdc_check <- bind_rows(
-  numerators_monthly %>% mutate(dataset = "PF conditions"),
-  numerators_controls %>% mutate(dataset = "Controls")
-) %>%
-  summarise(
-    total_rows = n(),
-    suppressed = sum(is.na(consultation_count)),
-    retained_zeros = sum(consultation_count == 0, na.rm = TRUE),
-    rounded_counts = sum(
-      !is.na(consultation_count) &
-        consultation_count > 0
+    # Panel background and border
+    panel.background = element_rect(
+      fill = "white",
+      colour = NA
     ),
-    non_multiple_of_5 = sum(
-      !is.na(consultation_count) &
-        consultation_count > 0 &
-        consultation_count %% 5 != 0
+
+    panel.border = element_rect(
+      fill = NA,
+      colour = "black",
+      linewidth = 0.4
+    ),
+
+    # Grid lines
+    panel.grid.major = element_line(
+      colour = "grey85",
+      linetype = "dashed",
+      linewidth = 0.3
+    ),
+
+    panel.grid.minor = element_blank(),
+
+    # Plot background
+    plot.background = element_rect(
+      fill = "white",
+      colour = NA
+    ),
+
+    legend.key = element_rect(
+      fill = "white",
+      colour = NA
+    ),
+
+    # Facet titles
+    strip.background = element_rect(
+      fill = "#037A92",
+      colour = "#037A92"
+    ),
+
+    strip.text = element_text(
+      colour = "white",
+      face = "bold"
+    ),
+
+    # Legend and axes
+    legend.position = "bottom",
+
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
     )
   )
 
-print(sdc_check)
-
-
 # -----------------------------------------------------------------------------
-# 7. Export two separate SDC-protected CSV files
+# 9. Display graph
 # -----------------------------------------------------------------------------
 
-# SDC formatting function for CSV export
+print(facet_controls_plot_2)
+
+# -----------------------------------------------------------------------------
+# 10. Save graph
+# -----------------------------------------------------------------------------
+
+ggsave(
+  filename = file.path(
+    output_dir,
+    "measures_new_approach_facet_consultation_with_controls.png"
+  ),
+
+  plot = facet_controls_plot_2,
+
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+
+# -----------------------------------------------------------------------------
+# 11. Format SDC-protected data for CSV export
+# -----------------------------------------------------------------------------
+# IMPORTANT:
+# SDC has already been applied in section 5.
+# Do not suppress or round the values a second time.
+
 format_sdc_export <- function(df) {
+
   df %>%
     mutate(
-      consultation_count = case_when(
-        is.na(consultation_count) ~ "[Redacted]",
-        consultation_count == 0 ~ "0",
-        consultation_count < 8 ~ "[Redacted]",
-        TRUE ~ as.character(round(consultation_count / 5) * 5)
+      consultation_count_sdc = case_when(
+        is.na(consultation_count_sdc) ~ "[Redacted]",
+
+        consultation_count_sdc == 0 ~ "0",
+
+        TRUE ~ as.character(consultation_count_sdc)
       )
     ) %>%
     select(
       interval_start,
       condition,
       Setting,
-      consultation_count
+      consultation_count_sdc
     ) %>%
-    arrange(condition, Setting, interval_start)
+    arrange(
+      condition,
+      Setting,
+      interval_start
+    )
 }
 
-# CSV 1: PF conditions
-consultation_sdc <- format_sdc_export(numerators_monthly)
+
+
+
+# -----------------------------------------------------------------------------
+# Export PF conditions — SDC-protected CSV
+# -----------------------------------------------------------------------------
+
+consultation_sdc <- format_sdc_export(
+  numerators_monthly
+)
 
 write_csv(
   consultation_sdc,
-  file.path(output_dir, "measures_new_approach_facet_consultation_SDC.csv")
+  file.path(
+    output_dir,
+    "measures_new_approach_facet_consultation_SDC.csv"
+  )
 )
 
-# CSV 2: Control conditions
-#consultation_controls_sdc <- format_sdc_export(numerators_controls)
-# Here we used the long format (we need to reduce it to not exceed 5000 rows)
-consultation_data_long<-consultation_data_long%>%
-  select(interval_start,condition,Setting,consultation_count)%>%
-  arrange(condition,Setting,interval_start) 
 
-consultation_controls_sdc <- format_sdc_export(consultation_data_long)# the new  one 
+# -----------------------------------------------------------------------------
+# 12. Export control conditions
+# -----------------------------------------------------------------------------
+
+consultation_controls_sdc <- format_sdc_export(
+  consultation_data_monthly_sdc
+)
 
 write_csv(
   consultation_controls_sdc,
-  file.path(output_dir, "measures_new_approach_facet_consultation_controls_SDC.csv")
+  file.path(
+    output_dir,
+    "measures_new_approach_facet_consultation_controls_SDC.csv"
+  )
 )
+
+# -----------------------------------------------------------------------------
+# 13. Final SDC checks
+# -----------------------------------------------------------------------------
+
+final_sdc_check <- consultation_data_monthly_sdc %>%
+  group_by(condition, condition_type) %>%
+  summarise(
+    total_months = n(),
+
+    suppressed_months = sum(
+      is.na(consultation_count_sdc)
+    ),
+
+    zero_months = sum(
+      consultation_count_sdc == 0,
+      na.rm = TRUE
+    ),
+
+    nonzero_months = sum(
+      !is.na(consultation_count_sdc) &
+        consultation_count_sdc > 0
+    ),
+
+    non_multiple_of_5 = sum(
+      !is.na(consultation_count_sdc) &
+        consultation_count_sdc > 0 &
+        consultation_count_sdc %% 5 != 0
+    ),
+
+    .groups = "drop"
+  )
+
+print(final_sdc_check)
+
+# =============================================================================
+# END
+# =============================================================================
+
 
 
 
