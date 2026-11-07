@@ -1398,7 +1398,7 @@ actions:
         practice_level_data: output/practice_level_data_by_practice_only.csv
   
   #Region
-  #step 1
+  #step_1
   generate_patient_measures_for_region:
     run: ehrql:v1 generate-measures analysis/practice_variables/measures_region_Arnaud.py --output output/region_measures.csv
     outputs:
