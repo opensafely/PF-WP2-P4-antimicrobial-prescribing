@@ -567,8 +567,8 @@ facet_controls_plot_2 <- ggplot(
 
   labs(
     title = paste(
-      "Monthly GP consultations:",
-      "Pharmacy First conditions and selected controls"
+      "Monthly  consultations accross general practices:",
+      "PF conditions vs selected potential controls"
     ),
 
     x = "Month",
