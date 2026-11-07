@@ -1397,7 +1397,8 @@ actions:
       moderately_sensitive:
         practice_level_data: output/practice_level_data_by_practice_only.csv
   
-  # Region_step 1
+  # Region
+  #step 1
   generate_patient_measures_for_region:
     run: ehrql:v1 generate-measures analysis/practice_variables/measures_region_Arnaud.py --output output/region_measures.csv
     outputs:
@@ -1405,12 +1406,12 @@ actions:
         measure_tables: output/region_measures.csv
   
   # region-level data step 2.0: aggregate patient measures to practice-level data only!!!!
-  process_measures_to_practice_dataset_by_practice_only: # i added _Arnaud to the script name .py  
-    run: python:v2 analysis/practice_variables/process_measures_to_practice_dataset_Arnaud_by_practice_only.py --output output/practice_level_data_by_practice_only.csv
-    needs: [generate_patient_measures_for_practices]
+  process_measures_to_region_dataset_by_region_only: # i added _Arnaud to the script name .py  
+    run: python:v2 analysis/practice_variables/process_measures_to_region_dataset_Arnaud_by_region_only.py --output output/practice_level_data_by_practice_only.csv
+    needs: [generate_patient_measures_for_region]
     outputs:
       moderately_sensitive:
-        practice_level_data: output/practice_level_data_by_practice_only.csv
+        practice_level_data: output/region_level_data_by_region_only.csv
 
   # May be the code below ill no longer excute
   # practice-level data step 2.1: aggregate patient measures to practice-level data
