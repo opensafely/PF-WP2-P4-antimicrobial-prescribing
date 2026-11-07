@@ -701,7 +701,31 @@ plot_practice_figure <- function(cond, setting) {
         plot.title = element_text(face = "bold", size = 14),
         plot.caption = element_text(size = 8, hjust = 0)
       )
-    )
+    )+
+     theme(
+  # White panel background with a thin black frame
+    panel.background = element_rect(fill = "white", colour = NA),
+    panel.border     = element_rect(fill = NA, colour = "black", linewidth = 0.4),
+    # Light dashed grid lines like in the example
+    panel.grid.major = element_line(colour = "grey85", linetype = "dashed", linewidth = 0.3),
+    panel.grid.minor = element_blank(),
+    # White around the panels and behind the legend keys
+    plot.background  = element_rect(fill = "white", colour = NA),
+    legend.key       = element_rect(fill = "white", colour = NA),
+  # Facet title background and text
+  strip.background = element_rect(
+    fill = "#037A92",
+    colour = "#037A92"
+  ),
+  strip.text = element_text(
+    colour = "white",
+    face = "bold"
+  ),
+
+  # Legend and axes
+  legend.position = "bottom",
+  axis.text.x = element_text(angle = 45, hjust = 1)
+)   
 }
 
 # 10. Generate figures ---------------------------------------------------------
