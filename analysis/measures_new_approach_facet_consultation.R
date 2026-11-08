@@ -553,14 +553,14 @@ facet_controls_plot_2 <- ggplot(
 
   scale_color_manual(
     values = c(
-      "condition" = "#037A92",
+      "PFcondition" = "#037A92",
       "control" = "#D95F02"
     )
   ) +
 
   scale_shape_manual(
     values = c(
-      "condition" = 16,
+      "PFcondition" = 16,
       "control" = 17
     )
   ) +
@@ -579,7 +579,7 @@ facet_controls_plot_2 <- ggplot(
 
     caption = paste(
   paste(
-    "Statistical disclosure control applied:",
+    "SDC applied:",
     "counts 1–7 suppressed; positive counts rounded to nearest 5.",
     "Zero counts retained.",
     "Suppressed counts are displayed as gaps."
