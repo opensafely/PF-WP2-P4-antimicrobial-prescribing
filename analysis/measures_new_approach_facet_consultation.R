@@ -368,7 +368,7 @@ consultation_data_long <- consultation_data %>%
 
     condition_type = case_when(
       str_detect(condition, "_control$") ~ "control",
-      TRUE ~ "condition"
+      TRUE ~ "PF condition"
     ),
 
     condition_pair = case_when(
@@ -578,13 +578,17 @@ facet_controls_plot_2 <- ggplot(
     shape = "Condition type",
 
     caption = paste(
-      "Statistical disclosure control applied:",
-      "counts 1–7 suppressed; positive counts rounded to nearest 5.",
-      "Zero counts retained.",
-      "Suppressed counts are displayed as gaps.",
-      "Dashed blue line: Pharmacy First launch;",
-      "dashed grey line: GP Connect implementation."
-    )
+  paste(
+    "Statistical disclosure control applied:",
+    "counts 1–7 suppressed; positive counts rounded to nearest 5.",
+    "Zero counts retained.",
+    "Suppressed counts are displayed as gaps."
+  ),
+  paste(
+    "Dashed blue line: Pharmacy First launch;",
+    "dashed grey line: GP Connect implementation."
+  ),
+  sep = "\n")
   ) +
 
   theme(
