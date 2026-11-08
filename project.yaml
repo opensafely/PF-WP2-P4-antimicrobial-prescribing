@@ -931,6 +931,9 @@ actions:
       practice_rate_pf_shingles: output/practice_level_change/practice_rate_pf_shingles.png
       practice_rate_pf_impetigo: output/practice_level_change/practice_rate_pf_impetigo.png
       practice_rate_pf_all_pf_conditions: output/practice_level_change/practice_rate_pf_all_pf_conditions.png
+      
+      #median_iqr figures 
+      median_iqr: output/practice_level_change/median_iqr_*.png
 
   process_measures_new_approach_consultation_medication_zero_counts:
    run: r:v2 analysis/measures_new_approach_consultation_medication_zero_counts.R

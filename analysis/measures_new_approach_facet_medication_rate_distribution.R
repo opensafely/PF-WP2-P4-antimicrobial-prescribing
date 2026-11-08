@@ -792,3 +792,142 @@ cat(output_dir, "\n")
 
 cat("\nAnnual eligibility diagnostics (unrounded, log only):\n")
 print(annual_diagnostics, n = Inf)
+
+
+
+
+##  Section : Plotting IQR/median
+
+# 8. Plotting monthly median and IQR across GP practices -----------------------
+
+plot_practice_iqr_median <- function(cond, setting) {
+
+  d <- rates_practice_summary %>%
+    filter(
+      condition == cond,
+      Setting == setting
+    )
+
+  if (nrow(d) == 0 || all(is.na(d$median))) {
+    return(
+      empty_panel(
+        paste0("No releasable monthly summary data\n", cond, " / ", setting),
+        paste("Monthly median and IQR:", cond, "/", setting)
+      )
+    )
+  }
+
+  ggplot(d, aes(x = interval_start)) +
+
+    # Interquartile range
+    geom_ribbon(
+      aes(ymin = q1, ymax = q3),
+      fill = "#80BDC9",
+      alpha = 0.5,
+      na.rm = TRUE
+    ) +
+
+    # Median
+    geom_line(
+      aes(y = median),
+      colour = "black",
+      linewidth = 0.8,
+      na.rm = TRUE
+    ) +
+
+    # Pharmacy First launch
+    geom_vline(
+      xintercept = PF_start,
+      linetype = "dashed",
+      linewidth = 0.3,
+      colour = "blue"
+    ) +
+
+    # GP Connect introduction
+    geom_vline(
+      xintercept = GP_connect,
+      linetype = "dashed",
+      linewidth = 0.3,
+      colour = "grey40"
+    ) +
+
+    scale_x_date(
+      date_labels = "%Y-%m",
+      date_breaks = "2 months",
+      expand = expansion(mult = c(0.01, 0.02))
+    ) +
+
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.05))
+    ) +
+
+    expand_limits(y = 0) +
+
+    labs(
+      title = paste0(
+        "Monthly median prescribing rate: ",
+        cond, " (", setting, ")"
+      ),
+      subtitle = "Solid line = median; shaded area = interquartile range (IQR)",
+      x = "Month",
+      y = "Prescribing rate per 1,000 eligible population",
+      caption = paste(
+        "Blue dashed line: Pharmacy First launch;",
+        "grey dashed line: GP Connect introduction."
+      )
+    ) +
+
+    theme_bw() +
+
+    theme(
+      plot.title = element_text(face = "bold", size = 13),
+      plot.subtitle = element_text(size = 9),
+      plot.caption = element_text(size = 8, hjust = 0),
+      panel.border = element_rect(
+        colour = "#0085A1",
+        fill = NA,
+        linewidth = 0.7
+      ),
+      panel.grid.major = element_line(
+        colour = "grey85",
+        linetype = "dashed",
+        linewidth = 0.3
+      ),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+}
+
+
+for (i in seq_len(nrow(practice_figs))) {
+
+  cond <- practice_figs$condition[i]
+  setting <- practice_figs$Setting[i]
+
+  message("Generating median/IQR figure: ", cond, " / ", setting)
+
+  p <- plot_practice_iqr_median(cond, setting)
+
+  file_stub <- str_replace_all(
+    tolower(cond), "[^a-z0-9]+", "_"
+  )
+
+  output_file <- file.path(
+    output_dir,
+    paste0(
+      "practice_rate_iqr_median_",
+      tolower(setting), "_", file_stub, ".png"
+    )
+  )
+
+  ggsave(
+    filename = output_file,
+    plot = p,
+    width = 12,
+    height = 5.5,
+    units = "in",
+    dpi = 300,
+    bg = "white"
+  )
+}
+
