@@ -208,11 +208,10 @@ facet_numerators_plot_sdc <- ggplot(
     y = "Medication count",
     color = "Setting",
     shape = "Setting",
-    caption = paste("Statistical disclosure control applied:,
-      counts \u22647 redacted; all other counts rounded to the nearest 5.
-      Suppressed counts are displayed as gaps"."Dashed blue line: Pharmacy First launch;,
-      dashed black line: GP Connect implementation",sep = "\n"
-    )
+    caption = paste(
+  "Statistical disclosure control applied: counts 1-7 redacted; all other counts rounded to the nearest 5. Suppressed counts are displayed as gaps.",
+  "Dashed blue line: Pharmacy First launch; dashed black line: GP Connect implementation.",
+  sep = "\n")
   ) +
   theme(
   # White panel background with a thin black frame
