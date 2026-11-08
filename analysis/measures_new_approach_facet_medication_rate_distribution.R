@@ -529,7 +529,7 @@ plot_practice_trend <- function(cond, setting) {
     expand_limits(y = 0) +
     
     labs(
-      title = paste0("Monthly ", setting, " prescribing across GP practices"),
+      #title = paste0("Monthly ", setting, " prescribing across GP practices"),
       subtitle = paste(
         "Median (solid), mean (dashed);",
         "shaded area = IQR"
@@ -684,7 +684,7 @@ plot_practice_figure <- function(cond, setting) {
   
   #p1 + p2 + # i want one graph instead the two
   #p1 + p2+ plot_layout(widths = c(2.4, 1)) +
-  p1 +plot_annotation(title = paste0(" Prescribing rates by GP practice for ", cond, ": ", setting),
+  p1 +plot_annotation(title = paste0(" Prescribing rates by general practice for ", cond, ": ", setting),
      caption = paste0(
         #"Year 1 = Feb 2024 to Jan 2025; Year 2 = Feb 2025 to Jan 2026. ",
         "Blue dashed line = Pharmacy First launch; ",
