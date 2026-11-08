@@ -368,7 +368,7 @@ consultation_data_long <- consultation_data %>%
 
     condition_type = case_when(
       str_detect(condition, "_control$") ~ "control",
-      TRUE ~ "PF condition"
+      TRUE ~ "PFcondition"
     ),
 
     condition_pair = case_when(
