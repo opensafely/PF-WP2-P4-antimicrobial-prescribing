@@ -1,3 +1,4 @@
+
 # ------------------------------------------------------------------------------
 # PRACTICE-LEVEL PRESCRIBING RATE ANALYSIS
 #
@@ -5,8 +6,8 @@
 #   Monthly median (solid line), mean (dashed line), and IQR (shaded area)
 #   across GP practices.
 #
-# Graph B:
-# Year 1 versus Year 2 annual prescribing rates for each practice.
+# Additional graph:
+#   Monthly relative variation = IQR / median.
 #
 # Year 1: February 2024 to January 2025
 # Year 2: February 2025 to January 2026
@@ -14,27 +15,23 @@
 # Annual rate:
 #   Sum of monthly numerators / mean monthly denominator * 1,000
 #
-# Eligibility rules (note: these differ by design):
-#   - Monthly (Graph A): a practice-month rate is calculated only when that
-#     month's denominator >= min_denom.
-#   - Annual (Graph B): a practice-year rate is calculated only when the
-#     practice has 12 months of data in that year AND its MEAN monthly
-#     denominator >= min_denom. A practice can therefore contribute to
-#     Graph A in some months but not to Graph B, or vice versa.
+# Eligibility:
+#   Monthly: raw monthly denominator >= min_denom, and numerator and
+#   denominator must not be suppressed by SDC.
+#   Annual: 12 months of data, raw mean monthly denominator >= min_denom,
+#   and annual numerator and mean denominator must not be suppressed.
 #
-# Disclosure control:
-#   - Every practice-level numerator and denominator is rounded with
-#     OpenSAFELY midpoint-6 rounding BEFORE any rate is calculated
-#     (monthly: section 4; annual: section 6, after summing raw months).
-#     All plotted rates, medians, means and IQRs therefore derive only from
-#     midpoint-6 values, so no point or summary reveals a count of 1-6.
-#   - Monthly summary statistics are suppressed when fewer than
-#     min_practices practices contribute.
-#   - All released practice counts (CSV and figure labels) are rounded
-#     using OpenSAFELY midpoint-6 rounding (columns suffixed _midpoint6).
-#   - The only practice-level CSV is the underlying data for Graph B,
-#     with midpoint-6 values and an anonymous index instead of practice IDs.
+# Statistical disclosure control:
+#   - Zero counts retained as zero.
+#   - Counts 1-7 suppressed and displayed as "Redacted" in CSV files.
+#   - Counts >=8 rounded to the nearest 5.
+#   - SDC is applied to counts before calculating rates.
+#   - Numeric NA values are used internally for suppressed counts.
+#   - CSV count columns are converted to character so that "Redacted"
+#     is displayed explicitly.
+#   - No practice-level CSV is exported.
 # ------------------------------------------------------------------------------
+
 
 # 1. Packages -----------------------------------------------------------------
 
@@ -47,17 +44,20 @@ library(purrr)
 library(here)
 library(patchwork)
 
-#2. Settings-----------------------------------------------------------------
-practice_var <- "practice"
-min_denom <- 1         ##100       # This helps for SDC 
-min_practices <- 1     #10    # minimum contributing practices for a monthly summary
 
-#Pharmacy First launch
+# 2. Settings -----------------------------------------------------------------
+
+practice_var <- "practice"
+
+min_denom <- 1
+min_practices <- 1
+
+# Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
 
-#Year boundaries
+# Year boundaries
 year2_start <- as.Date("2025-02-01")
-year2_end <- as.Date("2026-02-01")   # exclusive upper bound
+year2_end <- as.Date("2026-02-01")  # exclusive upper bound
 
 # GP Connect introduction
 GP_connect <- as.Date("2025-10-01")
@@ -74,45 +74,101 @@ conditions <- c(
   "all_conditions"
 )
 
-#Output directory
-#output_dir <- here("output")
+# Output directory
 output_dir <- here("output", "practice_level_change")
+
 dir.create(
- output_dir,
- recursive = TRUE,
+  output_dir,
+  recursive = TRUE,
   showWarnings = FALSE
-  )
-# Disclosure helper: OpenSAFELY midpoint-6 rounding.
-# Values 1-6 become 3, 7-12 become 9, etc.; 0 stays 0.
-roundmid_any <- function(x, to = 6) {
-  ifelse(
-    is.na(x),
-    NA_real_,
-    ceiling(x / to) * to - (floor(to / 2) * (x != 0))
+)
+
+
+# 3. Statistical disclosure control ------------------------------------------
+
+# Numeric SDC function for calculations:
+#   0       = 0
+#   1-7     = NA (suppressed)
+#   >=8     = rounded to nearest 5
+#   NA      = NA
+#
+# Rounding uses half-up rounding.
+
+apply_sdc <- function(x) {
+
+  case_when(
+    is.na(x) ~ NA_real_,
+    x == 0 ~ 0,
+    x > 0 & x < 8 ~ NA_real_,
+    TRUE ~ floor(x / 5 + 0.5) * 5
   )
 }
 
-#3. Read and validate input data ---------------------------------------------
+
+# Export function:
+# Converts suppressed values to the explicit label "Redacted".
+# The output is character because it contains both numbers and text.
+
+apply_sdc_export <- function(x) {
+
+  case_when(
+    is.na(x) ~ "Redacted",
+    x == 0 ~ "0",
+    x > 0 & x < 8 ~ "Redacted",
+    TRUE ~ as.character(floor(x / 5 + 0.5) * 5)
+  )
+}
+
+
+# Safe sum: avoids returning zero when all observations are missing.
+
+safe_sum <- function(x) {
+
+  if (all(is.na(x))) {
+    NA_real_
+  } else {
+    sum(x, na.rm = TRUE)
+  }
+}
+
+
+# Safe quantile
+
+safe_quantile <- function(x, p) {
+
+  if (all(is.na(x))) {
+    NA_real_
+  } else {
+    as.numeric(quantile(x, p, na.rm = TRUE))
+  }
+}
+
+
+# 4. Read and validate input data ---------------------------------------------
 
 input_file <- here(
-  "output",  
+  "output",
   "measures_new_approach_consultation_and_medication.csv"
-  )
+)
 
 if (!file.exists(input_file)) {
- stop("Input file not found: ", input_file)
+  stop("Input file not found: ", input_file)
 }
 
-#raw_data <- read_csv(input_file,show_col_types = FALSE)
-
-raw_data <- read_csv(input_file, show_col_types = FALSE) %>%
-  mutate(interval_start = as.Date(interval_start)) %>%
+raw_data <- read_csv(
+  input_file,
+  show_col_types = FALSE
+) %>%
+  mutate(
+    interval_start = as.Date(interval_start)
+  ) %>%
   filter(
-    interval_start >= as.Date("2022-02-01"),  # i just want whole period PF period
+    interval_start >= as.Date("2022-02-01"),
     interval_start < as.Date("2026-02-01")
   )
 
-#raw_data <- read_csv("C:/Users/arnau/Downloads/measures_new_approach_consultation_and_medication (2).csv")
+
+# Required columns
 
 required_columns <- c(
   "interval_start",
@@ -134,6 +190,9 @@ if (length(missing_columns) > 0) {
   )
 }
 
+
+# Standardise variables
+
 raw_data <- raw_data %>%
   mutate(
     interval_start = as.Date(interval_start),
@@ -142,46 +201,58 @@ raw_data <- raw_data %>%
     denominator = as.numeric(denominator)
   )
 
+
 if (anyNA(raw_data$interval_start)) {
   stop("Some interval_start values could not be converted to dates.")
 }
 
-if (any(raw_data$numerator < 0, na.rm = TRUE) ||
-    any(raw_data$denominator < 0, na.rm = TRUE)) {
+if (
+  any(raw_data$numerator < 0, na.rm = TRUE) ||
+  any(raw_data$denominator < 0, na.rm = TRUE)
+) {
   stop("Numerators and denominators must not be negative.")
 }
 
-if (anyNA(raw_data$numerator) || anyNA(raw_data$denominator)) {
+if (
+  anyNA(raw_data$numerator) ||
+  anyNA(raw_data$denominator)
+) {
   warning(
     "Missing numerator or denominator values found. ",
     "They will be handled during aggregation."
   )
 }
 
-# Data coverage check: both years need 12 months for Graph B.
+
+# Data coverage check
+
 min_month <- min(raw_data$interval_start)
 max_month <- max(raw_data$interval_start)
-last_required_month <- seq(year2_end, by = "-1 month", length.out = 2)[2]
+
+last_required_month <- seq(
+  year2_end,
+  by = "-1 month",
+  length.out = 2
+)[2]
 
 message("Data coverage: ", min_month, " to ", max_month)
 
 if (min_month > PF_start) {
   warning(
-    "Data start (", min_month, ") is after Year 1 start (", PF_start, "). ",
-    "No practice will have 12 months in Year 1."
+    "Data start (", min_month, ") is after Year 1 start (",
+    PF_start, ")."
   )
 }
 
 if (max_month < last_required_month) {
   warning(
     "Data end (", max_month, ") is before the last month of Year 2 (",
-    last_required_month, "). ",
-    "No practice will have 12 months in Year 2, so Graph B panels ",
-    "will show placeholders."
+    last_required_month, ")."
   )
 }
 
-# 4. Select GP and Pharmacy First medication measures -------------------------
+
+# 5. Select GP and Pharmacy First medication measures -------------------------
 
 measure_pattern <- paste0(
   "^(gp|pf)_medication_(",
@@ -189,24 +260,29 @@ measure_pattern <- paste0(
   ")$"
 )
 
+
 rates_practice <- raw_data %>%
+
   filter(
     str_detect(measure, measure_pattern),
     !is.na(practice),
     practice != ""
   ) %>%
+
   extract(
     measure,
     into = c("setting_code", "condition_code"),
     regex = "^(gp|pf)_medication_(.*)$",
     remove = FALSE
   ) %>%
+
   mutate(
     Setting = recode(
       setting_code,
       gp = "GP",
       pf = "PF"
     ),
+
     condition = recode(
       condition_code,
       uti = "UTI",
@@ -220,27 +296,38 @@ rates_practice <- raw_data %>%
       .default = condition_code
     )
   ) %>%
+
   group_by(
     interval_start,
     practice,
     Setting,
     condition
   ) %>%
+
   summarise(
-    numerator = sum(numerator, na.rm = TRUE),
-    denominator = sum(denominator, na.rm = TRUE),
+    numerator = safe_sum(numerator),
+    denominator = safe_sum(denominator),
     .groups = "drop"
   ) %>%
+
   mutate(
-    # SDC: midpoint-6 rounding of practice-month counts before the rate
-    numerator_midpoint6 = roundmid_any(numerator),
-    denominator_midpoint6 = roundmid_any(denominator),
+
+    # Apply SDC before calculating the prescribing rate
+    numerator_nearest5 = apply_sdc(numerator),
+    denominator_nearest5 = apply_sdc(denominator),
+
     prescribing_rate = if_else(
-      denominator >= min_denom,
-      1000 * numerator_midpoint6 / denominator_midpoint6,
+      !is.na(numerator_nearest5) &
+        !is.na(denominator_nearest5) &
+        denominator >= min_denom &
+        denominator_nearest5 > 0,
+
+      1000 * numerator_nearest5 / denominator_nearest5,
+
       NA_real_
     )
   )
+
 
 if (nrow(rates_practice) == 0) {
   stop(
@@ -249,7 +336,9 @@ if (nrow(rates_practice) == 0) {
   )
 }
 
-# Confirmation of practice-month-setting-condition combination is unique.
+
+# Confirm unique practice-month-setting-condition combinations
+
 stopifnot(
   !anyDuplicated(
     rates_practice[
@@ -258,574 +347,735 @@ stopifnot(
   )
 )
 
+
 message("Practice-level observations: ", nrow(rates_practice))
+
 message(
   "Distinct practices: ",
   n_distinct(rates_practice$practice)
 )
 
-# 5. Graph A data: monthly distribution across practices ----------------------
 
-safe_quantile <- function(x, p) {
-  if (all(is.na(x))) NA_real_ else as.numeric(quantile(x, p, na.rm = TRUE))
-}
+# 6. Graph A data: monthly distribution across practices ----------------------
 
 rates_practice_summary <- rates_practice %>%
-  group_by(interval_start, Setting, condition) %>%
+
+  group_by(
+    interval_start,
+    Setting,
+    condition
+  ) %>%
+
   summarise(
+
     n_practices = sum(!is.na(prescribing_rate)),
+
     median = safe_quantile(prescribing_rate, 0.50),
+
     mean = if (all(is.na(prescribing_rate))) {
       NA_real_
     } else {
       mean(prescribing_rate, na.rm = TRUE)
     },
+
     q1 = safe_quantile(prescribing_rate, 0.25),
+
     q3 = safe_quantile(prescribing_rate, 0.75),
+
     .groups = "drop"
   ) %>%
-  # Suppress summaries based on too few practices.
+
   mutate(
+
+    # Suppress summaries based on too few contributing practices
     suppressed = n_practices < min_practices,
+
     across(
       c(median, mean, q1, q3),
       ~ if_else(suppressed, NA_real_, .x)
     )
   )
 
-n_suppressed_months <- sum(rates_practice_summary$suppressed)
+
+n_suppressed_months <- sum(
+  rates_practice_summary$suppressed
+)
+
 if (n_suppressed_months > 0) {
+
   message(
-    "Monthly summaries suppressed (< ", min_practices, " practices): ",
+    "Monthly summaries suppressed (< ",
+    min_practices,
+    " practices): ",
     n_suppressed_months
   )
 }
 
-# Released version: rounded counts, suppression flag kept for transparency.
+
+# 7. Export monthly summary ---------------------------------------------------
+
 rates_practice_summary_release <- rates_practice_summary %>%
-  mutate(n_practices = roundmid_any(n_practices)) %>%
-  rename(n_practices_midpoint6 = n_practices)
+
+  mutate(
+    n_practices_nearest5 = apply_sdc_export(n_practices)
+  ) %>%
+
+  select(
+    interval_start,
+    Setting,
+    condition,
+    n_practices_nearest5,
+    median,
+    mean,
+    q1,
+    q3,
+    suppressed
+  )
+
 
 write_csv(
   rates_practice_summary_release,
-  file.path(output_dir, "practice_rate_monthly_summary.csv")
+  file.path(
+    output_dir,
+    "practice_rate_monthly_summary.csv"
+  )
 )
 
-# 6. Graph B data: annual rates per practice ----------------------------------
+
+# 8. Annual data and aggregated annual summary -------------------------------
 
 rates_practice_annual_all <- rates_practice %>%
+
   mutate(
     year = case_when(
+
       interval_start >= PF_start &
         interval_start < year2_start ~ "Year 1",
-      
+
       interval_start >= year2_start &
         interval_start < year2_end ~ "Year 2",
-      
+
       TRUE ~ NA_character_
     )
   ) %>%
+
   filter(!is.na(year)) %>%
-  group_by(practice, Setting, condition, year) %>%
+
+  group_by(
+    practice,
+    Setting,
+    condition,
+    year
+  ) %>%
+
   summarise(
+
     n_months = n_distinct(interval_start),
-    mean_denominator = mean(denominator, na.rm = TRUE),
-    annual_numerator = sum(numerator, na.rm = TRUE),
+
+    mean_denominator = if (all(is.na(denominator))) {
+      NA_real_
+    } else {
+      mean(denominator, na.rm = TRUE)
+    },
+
+    annual_numerator = safe_sum(numerator),
+
     .groups = "drop"
   ) %>%
+
   mutate(
-    # SDC: sum RAW monthly numerators first, then midpoint-6 round the
-    # annual total and the mean denominator before the rate
-    annual_numerator_midpoint6 = roundmid_any(annual_numerator),
-    mean_denominator_midpoint6 = roundmid_any(mean_denominator),
+
+    # Aggregate raw monthly counts first, then apply SDC
+    annual_numerator_nearest5 = apply_sdc(annual_numerator),
+
+    mean_denominator_nearest5 = apply_sdc(mean_denominator),
+
     annual_rate = if_else(
-      n_months == 12 & mean_denominator >= min_denom,
-      1000 * annual_numerator_midpoint6 / mean_denominator_midpoint6,
+
+      n_months == 12 &
+        mean_denominator >= min_denom &
+        !is.na(annual_numerator_nearest5) &
+        !is.na(mean_denominator_nearest5) &
+        mean_denominator_nearest5 > 0,
+
+      1000 * annual_numerator_nearest5 /
+        mean_denominator_nearest5,
+
       NA_real_
     )
   )
 
-# Diagnostic table: inspect missing months and denominator eligibility.
+
+# 9. Annual eligibility diagnostics -------------------------------------------
+
 annual_diagnostics <- rates_practice_annual_all %>%
-  group_by(Setting, condition, year) %>%
+
+  group_by(
+    Setting,
+    condition,
+    year
+  ) %>%
+
   summarise(
+
     practices_with_data = n_distinct(practice),
-    practices_with_12_months = n_distinct(practice[n_months == 12]),
-    practices_with_mean_denominator_100_or_more = n_distinct(
-      practice[mean_denominator >= min_denom]
+
+    practices_with_12_months = n_distinct(
+      practice[n_months == 12]
     ),
+
+    practices_with_mean_denominator_eligible = n_distinct(
+      practice[
+        !is.na(mean_denominator) &
+          mean_denominator >= min_denom
+      ]
+    ),
+
     practices_meeting_both_criteria = n_distinct(
-      practice[n_months == 12 & mean_denominator >= min_denom]
+      practice[
+        n_months == 12 &
+          !is.na(mean_denominator) &
+          mean_denominator >= min_denom
+      ]
     ),
+
     .groups = "drop"
   )
 
+
 message("\nAnnual eligibility diagnostics (unrounded, log only):")
-print(annual_diagnostics, n = Inf)
 
-# Released version: rounded counts.
-annual_diagnostics_release <- annual_diagnostics %>%
-  mutate(across(starts_with("practices_"), roundmid_any)) %>%
-  rename_with(~ paste0(.x, "_midpoint6"), starts_with("practices_"))
-
-write_csv(
-  annual_diagnostics_release,
-  file.path(output_dir, "practice_rate_annual_diagnostics.csv")
+print(
+  annual_diagnostics,
+  n = Inf
 )
 
 
-# Keep only practice-years that meet the annual eligibility criteria.
+# Export diagnostics with nearest-5 SDC
+
+annual_diagnostics_release <- annual_diagnostics %>%
+
+  mutate(
+    across(
+      starts_with("practices_"),
+      apply_sdc_export
+    )
+  ) %>%
+
+  rename_with(
+    ~ paste0(.x, "_nearest5"),
+    starts_with("practices_")
+  )
+
+
+write_csv(
+  annual_diagnostics_release,
+  file.path(
+    output_dir,
+    "practice_rate_annual_diagnostics.csv"
+  )
+)
+
+
+# 10. Aggregated annual summary -----------------------------------------------
+
+# Keep practice-years that meet the annual eligibility criteria
+
 rates_practice_annual_eligible <- rates_practice_annual_all %>%
+
   filter(!is.na(annual_rate))
 
-# Keep only practices with eligible data in BOTH years.
+
+# Keep practices with eligible data in BOTH years
+
 eligible_practices_both_years <- rates_practice_annual_eligible %>%
-  group_by(practice, Setting, condition) %>%
+
+  group_by(
+    practice,
+    Setting,
+    condition
+  ) %>%
+
   summarise(
     n_years = n_distinct(year),
     .groups = "drop"
   ) %>%
+
   filter(n_years == 2) %>%
-  select(practice, Setting, condition)
+
+  select(
+    practice,
+    Setting,
+    condition
+  )
+
 
 rates_practice_year <- rates_practice_annual_eligible %>%
+
   semi_join(
     eligible_practices_both_years,
     by = c("practice", "Setting", "condition")
   )
 
-# Aggregated annual summary only; do not export practice-level rows.
+
+# Aggregated annual summary only.
+# No practice-level CSV is exported.
+
 annual_summary <- rates_practice_year %>%
-  group_by(Setting, condition, year) %>%
+
+  group_by(
+    Setting,
+    condition,
+    year
+  ) %>%
+
   summarise(
+
     n_practices = n_distinct(practice),
-    median_annual_rate = median(annual_rate, na.rm = TRUE),
-    mean_annual_rate = mean(annual_rate, na.rm = TRUE),
-    q1_annual_rate = as.numeric(quantile(annual_rate, 0.25, na.rm = TRUE)),
-    q3_annual_rate = as.numeric(quantile(annual_rate, 0.75, na.rm = TRUE)),
+
+    median_annual_rate = median(
+      annual_rate,
+      na.rm = TRUE
+    ),
+
+    mean_annual_rate = mean(
+      annual_rate,
+      na.rm = TRUE
+    ),
+
+    q1_annual_rate = as.numeric(
+      quantile(annual_rate, 0.25, na.rm = TRUE)
+    ),
+
+    q3_annual_rate = as.numeric(
+      quantile(annual_rate, 0.75, na.rm = TRUE)
+    ),
+
     .groups = "drop"
   ) %>%
+
   mutate(
+
     suppressed = n_practices < min_practices,
+
     across(
-      c(median_annual_rate, mean_annual_rate, q1_annual_rate, q3_annual_rate),
+      c(
+        median_annual_rate,
+        mean_annual_rate,
+        q1_annual_rate,
+        q3_annual_rate
+      ),
       ~ if_else(suppressed, NA_real_, .x)
     ),
-    n_practices = roundmid_any(n_practices)
+
+    n_practices_nearest5 = apply_sdc_export(n_practices)
   ) %>%
-  rename(n_practices_midpoint6 = n_practices)
+
+  select(
+    Setting,
+    condition,
+    year,
+    n_practices_nearest5,
+    median_annual_rate,
+    mean_annual_rate,
+    q1_annual_rate,
+    q3_annual_rate,
+    suppressed
+  )
+
 
 write_csv(
   annual_summary,
-  file.path(output_dir, "practice_rate_annual_summary.csv")
-)
-
-# Underlying data for Graph B (required for release of the figure):
-# midpoint-6 numerators/denominators, derived rates, anonymous practice index.
-graph_b_data <- rates_practice_year %>%
-  group_by(Setting, condition) %>%
-  mutate(practice_index = dense_rank(practice)) %>%
-  ungroup() %>%
-  transmute(
-    Setting,
-    condition,
-    practice_index,
-    year,
-    annual_numerator_midpoint6,
-    mean_denominator_midpoint6,
-    annual_rate_midpoint6_derived = round(annual_rate, 4)
-  ) %>%
-  arrange(Setting, condition, practice_index, year)
-
-write_csv(
-  graph_b_data,
-  file.path(output_dir, "practice_rate_graph_b_data.csv")
+  file.path(
+    output_dir,
+    "practice_rate_annual_summary.csv"
+  )
 )
 
 
-# 7. Graph A: monthly prescribing trend ---------------------------------------
+# 11. Common plotting function ------------------------------------------------
 
 empty_panel <- function(label, title) {
+
   ggplot() +
-    annotate("text", x = 1, y = 1, label = label, size = 3.5) +
+
+    annotate(
+      "text",
+      x = 1,
+      y = 1,
+      label = label,
+      size = 3.5
+    ) +
+
     xlim(0, 2) +
+
     ylim(0, 2) +
-    labs(title = title, x = NULL, y = NULL) +
+
+    labs(
+      title = title,
+      x = NULL,
+      y = NULL
+    ) +
+
     theme_void()
 }
 
+
+# 12. Graph A: monthly prescribing trend --------------------------------------
+
 plot_practice_trend <- function(cond, setting) {
-  
+
   d <- rates_practice_summary %>%
+
     filter(
       condition == cond,
       Setting == setting
     )
-  
+
+
   if (nrow(d) == 0 || all(is.na(d$median))) {
+
     return(
       empty_panel(
-        paste0("No releasable monthly summary data\n", cond, " / ", setting),
+        paste0(
+          "No releasable monthly summary data\n",
+          cond, " / ", setting
+        ),
         paste("Monthly trend:", cond, "/", setting)
       )
     )
   }
-  
-  ggplot(d, aes(x = interval_start)) +
-    
+
+
+  ggplot(
+    d,
+    aes(x = interval_start)
+  ) +
+
+    # IQR ribbon
     geom_ribbon(
-      aes(ymin = q1, ymax = q3),
-      fill ="#80BDC9" , #"#baaf9f",
+      aes(
+        ymin = q1,
+        ymax = q3
+      ),
+      fill = "#80BDC9",
       alpha = 0.5,
       na.rm = TRUE
     ) +
-    
+
+    # Median
     geom_line(
-      aes(y = median, colour = "Median", linetype = "Median"),
+      aes(
+        y = median,
+        colour = "Median",
+        linetype = "Median"
+      ),
       linewidth = 0.7,
       na.rm = TRUE
     ) +
-    
+
+    # Mean
     geom_line(
-      aes(y = mean, colour = "Mean", linetype = "Mean"),
+      aes(
+        y = mean,
+        colour = "Mean",
+        linetype = "Mean"
+      ),
       linewidth = 0.7,
       na.rm = TRUE
     ) +
-    
+
+    # Pharmacy First launch
     geom_vline(
       xintercept = PF_start,
       linetype = "dashed",
       linewidth = 0.2,
       colour = "blue"
     ) +
-    
+
+    # GP Connect introduction
     geom_vline(
       xintercept = GP_connect,
       linetype = "dashed",
       linewidth = 0.2,
       colour = "black"
     ) +
-    
+
     scale_colour_manual(
-      values = c(Median = "black", Mean = "#C0392B"),  #Median = "#2C4A6E"
+      values = c(
+        Median = "black",
+        Mean = "#C0392B"
+      ),
       name = NULL
     ) +
-    
+
     scale_linetype_manual(
-      values = c(Median = "solid", Mean = "dashed"),
+      values = c(
+        Median = "solid",
+        Mean = "dashed"
+      ),
       name = NULL
     ) +
-    
+
     scale_x_date(
       date_labels = "%Y-%m",
       date_breaks = "2 months",
-      expand = expansion(mult = c(0.01, 0.02))
+      expand = expansion(
+        mult = c(0.01, 0.02)
+      )
     ) +
-    
+
     scale_y_continuous(
-      expand = expansion(mult = c(0, 0.05))
+      expand = expansion(
+        mult = c(0, 0.05)
+      )
     ) +
 
     expand_limits(y = 0) +
-    
+
     labs(
-      #title = paste0("Monthly ", setting, " prescribing across GP practices"),
+
       subtitle = paste(
         "Median (solid), mean (dashed);",
         "shaded area = IQR"
       ),
+
       x = "Month",
+
       y = "Prescribing rate per 1,000 eligible population"
     ) +
-    
+
     theme_bw() +
-    
+
     theme(
+
       legend.position = "bottom",
-      axis.text.x = element_text(angle = 45, hjust = 1),
+
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      ),
+
       plot.subtitle = element_text(size = 9),
+
       plot.title = element_text(face = "bold"),
-      panel.border = element_rect(colour = "#0085A1",fill = NA,linewidth = 0.7)
+
+      panel.border = element_rect(
+        colour = "#0085A1",
+        fill = NA,
+        linewidth = 0.7
+      )
     )
 }
 
-# 8. Graph B: Year 1 versus Year 2 (This will be removed for SDC purpuse) --------------------------------------------
 
-plot_practice_change <- function(cond, setting) {
-  
-  d <- rates_practice_year %>%
-    filter(
-      condition == cond,
-      Setting == setting
-    )
-  
-  if (nrow(d) == 0) {
-    return(
-      empty_panel(
-        paste0(
-          "No complete annual comparisons\n",
-          cond, " / ", setting,
-          "\nCheck annual eligibility diagnostics"
-        ),
-        "Change across GP practices"
-      )
-    )
-  }
-  
-  wide <- d %>%
-    select(practice, year, annual_rate) %>%
-    pivot_wider(
-      names_from = year,
-      values_from = annual_rate
-    )
-  
-  if (!"Year 1" %in% names(wide)) wide[["Year 1"]] <- NA_real_
-  if (!"Year 2" %in% names(wide)) wide[["Year 2"]] <- NA_real_
-  
-  wide <- wide %>%
-    filter(!is.na(`Year 1`), !is.na(`Year 2`))
-  
-  if (nrow(wide) < min_practices) {
-    return(
-      empty_panel(
-        paste0(
-          "Fewer than ", min_practices,
-          " practices with both years\n",
-          cond, " / ", setting
-        ),
-        "Change across GP practices"
-      )
-    )
-  }
-  
-  n_up <- sum(wide$`Year 2` > wide$`Year 1`)
-  n_down <- sum(wide$`Year 2` < wide$`Year 1`)
-  n_same <- sum(wide$`Year 2` == wide$`Year 1`)
-  n_tot <- nrow(wide)
-  
-  # Rounded counts for release.
-  lab <- paste0(
-    "Practices: ", roundmid_any(n_tot),
-    "\nIncreased: ", roundmid_any(n_up),
-    " | Decreased: ", roundmid_any(n_down),
-    " | Unchanged: ", roundmid_any(n_same),
-    "\n(counts rounded, midpoint 6)"
-  )
-  
-  d_plot <- d %>%
-    filter(practice %in% wide$practice) %>%
-    mutate(year = factor(year, levels = c("Year 1", "Year 2")))
-  
-  ggplot(
-    d_plot,
-    aes(x = year, y = annual_rate, group = practice)
-  ) +
-    
-    geom_line(
-      colour = "grey65",
-      alpha = 0.3,
-      linewidth = 0.25
-    ) +
-    
-    geom_point(
-      data = filter(d_plot, year == "Year 1"),
-      colour = "#ea0b1a",
-      size = 1.1,
-      alpha = 0.65
-    ) +
-    
-    geom_point(
-      data = filter(d_plot, year == "Year 2"),
-      colour = "#c222e6",
-      shape = 17,
-      size = 1.2,
-      alpha = 0.65
-    ) +
-    
-    annotate(
-      "label",
-      x = 1.5,
-      y = Inf,
-      label = lab,
-      vjust = 1.15,
-      size = 2.8,
-      label.size = 0.2,
-      fill = "grey95"
-    ) +
-    
-    scale_y_continuous(
-      expand = expansion(mult = c(0.02, 0.22))
-    ) +
-
-    expand_limits(y = 0) +
-    
-    labs(
-      title = "Change across GP practices",
-      subtitle = "Red circle = 2024; Purple triangle = 2025",
-      x = NULL,
-      y = "Prescribing rate per 1,000 average eligible population"
-    ) +
-    
-    theme_bw() +
-    
-    theme(
-      plot.subtitle = element_text(size = 9),
-      plot.title = element_text(face = "bold"),
-      axis.text.x = element_text(size = 10)
-    )
-}
-
-# 9. Combine Graphs A and B ----------------------------------------------------
+# 13. Combine Graph A ----------------------------------------------------------
 
 plot_practice_figure <- function(cond, setting) {
-  
-  p1 <- plot_practice_trend(cond, setting)
-  #p2 <- plot_practice_change(cond, setting)
-  
-  #p1 + p2 + # i want one graph instead the two
-  #p1 + p2+ plot_layout(widths = c(2.4, 1)) +
-  p1 +plot_annotation(title = paste0(" Prescribing rates by general practice for ", cond, ": ", setting),
-     caption = paste0(
-        #"Year 1 = Feb 2024 to Jan 2025; Year 2 = Feb 2025 to Jan 2026. ",
-        "Blue dashed line = Pharmacy First launch; ",
-        "black dashed line = GP Connect introduction.\n"#,
-        #"Monthly rates require that month's denominator >= ", min_denom,
-        #"; monthly summaries shown only when >= ", min_practices,
-        #" practices contribute. ",
-        #"Comparisons require 12 months in each year ",
-        #"and mean monthly denominator >= ", min_denom, "."
-      ),
-      theme = theme(
-        plot.title = element_text(face = "bold", size = 14),
-        plot.caption = element_text(size = 8, hjust = 0)
-      )
-    )+
-     theme(
-  # White panel background with a thin black frame
-    panel.background = element_rect(fill = "white", colour = NA),
-    panel.border     = element_rect(fill = NA, colour = "black", linewidth = 0.4),
-    # Light dashed grid lines like in the example
-    panel.grid.major = element_line(colour = "grey85", linetype = "dashed", linewidth = 0.3),
-    panel.grid.minor = element_blank(),
-    # White around the panels and behind the legend keys
-    plot.background  = element_rect(fill = "white", colour = NA),
-    legend.key       = element_rect(fill = "white", colour = NA),
-  # Facet title background and text
-  strip.background = element_rect(
-    fill = "#037A92",
-    colour = "#037A92"
-  ),
-  strip.text = element_text(
-    colour = "white",
-    face = "bold"
-  ),
 
-  # Legend and axes
-  legend.position = "bottom",
-  axis.text.x = element_text(angle = 45, hjust = 1)
-)   
+  p1 <- plot_practice_trend(
+    cond,
+    setting
+  )
+
+  p1 +
+
+    plot_annotation(
+
+      title = paste0(
+        "Prescribing rates by general practice for ",
+        cond,
+        ": ",
+        setting
+      ),
+
+      caption = paste0(
+        "Blue dashed line = Pharmacy First launch; ",
+        "black dashed line = GP Connect introduction.\n",
+        "Statistical disclosure control: counts 1-7 redacted; ",
+        "remaining positive counts rounded to nearest 5; ",
+        "zero counts retained."
+      ),
+
+      theme = theme(
+
+        plot.title = element_text(
+          face = "bold",
+          size = 14
+        ),
+
+        plot.caption = element_text(
+          size = 8,
+          hjust = 0
+        )
+      )
+    ) +
+
+    theme(
+
+      panel.background = element_rect(
+        fill = "white",
+        colour = NA
+      ),
+
+      panel.border = element_rect(
+        fill = NA,
+        colour = "black",
+        linewidth = 0.4
+      ),
+
+      panel.grid.major = element_line(
+        colour = "grey85",
+        linetype = "dashed",
+        linewidth = 0.3
+      ),
+
+      panel.grid.minor = element_blank(),
+
+      plot.background = element_rect(
+        fill = "white",
+        colour = NA
+      ),
+
+      legend.key = element_rect(
+        fill = "white",
+        colour = NA
+      ),
+
+      strip.background = element_rect(
+        fill = "#037A92",
+        colour = "#037A92"
+      ),
+
+      strip.text = element_text(
+        colour = "white",
+        face = "bold"
+      ),
+
+      legend.position = "bottom",
+
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
+    )
 }
 
-# 10. Generate figures ---------------------------------------------------------
+
+# 14. Generate monthly trend figures ------------------------------------------
 
 practice_figs <- rates_practice %>%
-  distinct(condition, Setting) %>%
-  arrange(condition, Setting)
+
+  distinct(
+    condition,
+    Setting
+  ) %>%
+
+  arrange(
+    condition,
+    Setting
+  )
+
 
 for (i in seq_len(nrow(practice_figs))) {
-  
-  cond <- practice_figs$condition[i]
-  setting <- practice_figs$Setting[i]
-  
-  message("Generating figure: ", cond, " / ", setting)
-  
-  p <- plot_practice_figure(cond, setting)
-  
-  file_stub <- str_replace_all(tolower(cond), "[^a-z0-9]+", "_")
-  
-  #output_file <- here(
-   # "output",
-   # paste0("practice_rate_", tolower(setting), "_", file_stub, ".png")
-  #)
 
-output_file <- here(
-  "output",
-  "practice_level_change",
-  paste0("practice_rate_", tolower(setting), "_", file_stub, ".png")
+  cond <- practice_figs$condition[i]
+
+  setting <- practice_figs$Setting[i]
+
+  message(
+    "Generating monthly trend figure: ",
+    cond, " / ", setting
   )
-#
-  
-  #ggsave(filename = output_file, plot = p,width = 12,height = 5.5,units = "in",dpi = 300,bg = "white")
-   ggsave(filename = output_file,plot = p,width = 12, height = 5.5,units = "in",dpi = 300,bg = "white")
+
+  p <- plot_practice_figure(
+    cond,
+    setting
+  )
+
+  file_stub <- str_replace_all(
+    tolower(cond),
+    "[^a-z0-9]+",
+    "_"
+  )
+
+  output_file <- file.path(
+    output_dir,
+    paste0(
+      "practice_rate_",
+      tolower(setting),
+      "_",
+      file_stub,
+      ".png"
+    )
+  )
+
+  ggsave(
+    filename = output_file,
+    plot = p,
+    width = 12,
+    height = 5.5,
+    units = "in",
+    dpi = 300,
+    bg = "white"
+  )
 }
 
-# 11. Final quality checks -----------------------------------------------------
 
-practices_both_years_by_group <- rates_practice_year %>%
-  group_by(Setting, condition) %>%
-  summarise(
-    practices_with_both_years = n_distinct(practice),
-    .groups = "drop"
-  )
-
-cat("\n------------ QUALITY CHECKS--------------------------\n")
-cat("Data coverage:", format(min_month), "to", format(max_month), "\n")
-cat("Practice-month observations:", nrow(rates_practice), "\n")
-cat("Distinct practices:", n_distinct(rates_practice$practice), "\n")
-cat("Monthly summary rows:", nrow(rates_practice_summary), "\n")
-cat(
-  "Monthly summaries suppressed (<", min_practices, "practices):",
-  n_suppressed_months, "\n"
-)
-cat("Eligible practice-year rows:", nrow(rates_practice_annual_eligible), "\n")
-cat(
-  "Distinct practices with both years (any setting/condition):",
-  n_distinct(rates_practice_year$practice), "\n"
-)
-cat("Number of condition-setting figures:", nrow(practice_figs), "\n")
-
-cat("\nPractices with both years, by setting and condition:\n")
-print(practices_both_years_by_group, n = Inf)
-
-cat("\nAggregated output files saved in:\n")
-cat(output_dir, "\n")
-
-cat("\nAnnual eligibility diagnostics (unrounded, log only):\n")
-print(annual_diagnostics, n = Inf)
-
-
-
-
-##  Section : Plotting IQR/median
-
-# 8. Plotting monthly median and IQR across GP practices -----------------------
+# 15. Graph: monthly relative variation (IQR / median) ------------------------
 
 plot_practice_iqr_median <- function(cond, setting) {
 
   d <- rates_practice_summary %>%
+
     filter(
       condition == cond,
       Setting == setting
     ) %>%
+
     mutate(
+
       relative_variation = if_else(
-        !is.na(median) & median > 0 &
-          !is.na(q1) & !is.na(q3),
+
+        !is.na(median) &
+          median > 0 &
+          !is.na(q1) &
+          !is.na(q3),
+
         (q3 - q1) / median,
+
         NA_real_
       )
     )
 
-  if (nrow(d) == 0 || all(is.na(d$relative_variation))) {
+
+  if (
+    nrow(d) == 0 ||
+      all(is.na(d$relative_variation))
+  ) {
+
     return(
       empty_panel(
-        paste0("No releasable monthly variation data\n", cond, " / ", setting),
-        paste("Monthly relative variation:", cond, "/", setting)
+        paste0(
+          "No releasable monthly variation data\n",
+          cond, " / ", setting
+        ),
+        paste(
+          "Monthly relative variation:",
+          cond, "/", setting
+        )
       )
     )
   }
 
-  ggplot(d, aes(x = interval_start, y = relative_variation)) +
+
+  ggplot(
+    d,
+    aes(
+      x = interval_start,
+      y = relative_variation
+    )
+  ) +
 
     # Relative variation (IQR / median)
     geom_line(
@@ -853,22 +1103,33 @@ plot_practice_iqr_median <- function(cond, setting) {
     scale_x_date(
       date_labels = "%Y-%m",
       date_breaks = "2 months",
-      expand = expansion(mult = c(0.01, 0.02))
+      expand = expansion(
+        mult = c(0.01, 0.02)
+      )
     ) +
 
     scale_y_continuous(
       labels = scales::label_percent(),
-      expand = expansion(mult = c(0, 0.05))
+      expand = expansion(
+        mult = c(0, 0.05)
+      )
     ) +
 
     labs(
+
       title = paste0(
         "Monthly relative variation in prescribing rates: ",
         cond, " (", setting, ")"
       ),
-      subtitle = "Relative variation = interquartile range (IQR) / median",
+
+      subtitle = paste(
+        "Relative variation = interquartile range (IQR) / median"
+      ),
+
       x = "Month",
+
       y = "Relative variation (IQR / median)",
+
       caption = paste(
         "Blue dashed line: Pharmacy First launch;",
         "grey dashed line: GP Connect introduction."
@@ -878,42 +1139,73 @@ plot_practice_iqr_median <- function(cond, setting) {
     theme_bw() +
 
     theme(
-      plot.title = element_text(face = "bold", size = 13),
+
+      plot.title = element_text(
+        face = "bold",
+        size = 13
+      ),
+
       plot.subtitle = element_text(size = 9),
-      plot.caption = element_text(size = 8, hjust = 0),
+
+      plot.caption = element_text(
+        size = 8,
+        hjust = 0
+      ),
+
       panel.border = element_rect(
         colour = "#0085A1",
         fill = NA,
         linewidth = 0.7
       ),
+
       panel.grid.major = element_line(
         colour = "grey85",
         linetype = "dashed",
         linewidth = 0.3
       ),
+
       panel.grid.minor = element_blank(),
-      axis.text.x = element_text(angle = 45, hjust = 1)
+
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
     )
 }
+
+
+# 16. Generate relative variation figures -------------------------------------
 
 for (i in seq_len(nrow(practice_figs))) {
 
   cond <- practice_figs$condition[i]
+
   setting <- practice_figs$Setting[i]
 
-  message("Generating median/IQR figure: ", cond, " / ", setting)
+  message(
+    "Generating median/IQR figure: ",
+    cond, " / ", setting
+  )
 
-  p <- plot_practice_iqr_median(cond, setting)
+  p <- plot_practice_iqr_median(
+    cond,
+    setting
+  )
 
   file_stub <- str_replace_all(
-    tolower(cond), "[^a-z0-9]+", "_"
+    tolower(cond),
+    "[^a-z0-9]+",
+    "_"
   )
 
   output_file <- file.path(
     output_dir,
     paste0(
       "practice_rate_iqr_median_",
-      tolower(setting), "_", file_stub, ".png"
+      tolower(setting),
+      "_",
+      file_stub,
+      ".png"
     )
   )
 
@@ -928,3 +1220,93 @@ for (i in seq_len(nrow(practice_figs))) {
   )
 }
 
+
+# 17. Final quality checks -----------------------------------------------------
+
+practices_both_years_by_group <- rates_practice_year %>%
+
+  group_by(
+    Setting,
+    condition
+  ) %>%
+
+  summarise(
+    practices_with_both_years = n_distinct(practice),
+    .groups = "drop"
+  )
+
+
+cat("\n------------ QUALITY CHECKS --------------------------\n")
+
+cat(
+  "Data coverage:",
+  format(min_month),
+  "to",
+  format(max_month),
+  "\n"
+)
+
+cat(
+  "Practice-month observations:",
+  nrow(rates_practice),
+  "\n"
+)
+
+cat(
+  "Distinct practices:",
+  n_distinct(rates_practice$practice),
+  "\n"
+)
+
+cat(
+  "Monthly summary rows:",
+  nrow(rates_practice_summary),
+  "\n"
+)
+
+cat(
+  "Monthly summaries suppressed (< ",
+  min_practices,
+  " practices): ",
+  n_suppressed_months,
+  "\n"
+)
+
+cat(
+  "Eligible practice-year rows:",
+  nrow(rates_practice_annual_eligible),
+  "\n"
+)
+
+cat(
+  "Distinct practices with both years (any setting/condition):",
+  n_distinct(rates_practice_year$practice),
+  "\n"
+)
+
+cat(
+  "Number of condition-setting figures:",
+  nrow(practice_figs),
+  "\n"
+)
+
+cat("\nPractices with both years, by setting and condition:\n")
+
+print(
+  practices_both_years_by_group,
+  n = Inf
+)
+
+cat("\nAggregated output files saved in:\n")
+
+cat(
+  output_dir,
+  "\n"
+)
+
+cat("\nAnnual eligibility diagnostics (unrounded, log only):\n")
+
+print(
+  annual_diagnostics,
+  n = Inf
+)
