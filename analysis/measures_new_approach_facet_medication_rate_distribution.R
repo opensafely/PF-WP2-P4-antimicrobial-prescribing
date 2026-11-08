@@ -683,11 +683,9 @@ plot_practice_figure <- function(cond, setting) {
   #p2 <- plot_practice_change(cond, setting)
   
   #p1 + p2 + # i want one graph instead the two
-  p1 + 
-    plot_layout(widths = c(2.4, 1)) +
-    #plot_annotation(title = paste0(" Prescribing rates by GP practice for ", cond, ": ", setting, ),
-    plot_annotation(title = paste0("Prescribing rates by GP practice for ",cond,": ",year)),
-      caption = paste0(
+  #p1 + p2+ plot_layout(widths = c(2.4, 1)) +
+  p1 +plot_annotation(title = paste0(" Prescribing rates by GP practice for ", cond, ": ", setting),
+     caption = paste0(
         #"Year 1 = Feb 2024 to Jan 2025; Year 2 = Feb 2025 to Jan 2026. ",
         "Blue dashed line = Pharmacy First launch; ",
         "black dashed line = GP Connect introduction.\n"#,
