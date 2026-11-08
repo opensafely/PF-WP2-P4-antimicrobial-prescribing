@@ -806,31 +806,30 @@ plot_practice_iqr_median <- function(cond, setting) {
     filter(
       condition == cond,
       Setting == setting
+    ) %>%
+    mutate(
+      relative_variation = if_else(
+        !is.na(median) & median > 0 &
+          !is.na(q1) & !is.na(q3),
+        (q3 - q1) / median,
+        NA_real_
+      )
     )
 
-  if (nrow(d) == 0 || all(is.na(d$median))) {
+  if (nrow(d) == 0 || all(is.na(d$relative_variation))) {
     return(
       empty_panel(
-        paste0("No releasable monthly summary data\n", cond, " / ", setting),
-        paste("Monthly median and IQR:", cond, "/", setting)
+        paste0("No releasable monthly variation data\n", cond, " / ", setting),
+        paste("Monthly relative variation:", cond, "/", setting)
       )
     )
   }
 
-  ggplot(d, aes(x = interval_start)) +
+  ggplot(d, aes(x = interval_start, y = relative_variation)) +
 
-    # Interquartile range
-    geom_ribbon(
-      aes(ymin = q1, ymax = q3),
-      fill = "#80BDC9",
-      alpha = 0.5,
-      na.rm = TRUE
-    ) +
-
-    # Median
+    # Relative variation (IQR / median)
     geom_line(
-      aes(y = median),
-      colour = "black",
+      colour = "#0085A1",
       linewidth = 0.8,
       na.rm = TRUE
     ) +
@@ -858,19 +857,18 @@ plot_practice_iqr_median <- function(cond, setting) {
     ) +
 
     scale_y_continuous(
+      labels = scales::label_percent(),
       expand = expansion(mult = c(0, 0.05))
     ) +
 
-    expand_limits(y = 0) +
-
     labs(
       title = paste0(
-        "Monthly median prescribing rate: ",
+        "Monthly relative variation in prescribing rates: ",
         cond, " (", setting, ")"
       ),
-      subtitle = "Solid line = median; shaded area = interquartile range (IQR)",
+      subtitle = "Relative variation = interquartile range (IQR) / median",
       x = "Month",
-      y = "Prescribing rate per 1,000 eligible population",
+      y = "Relative variation (IQR / median)",
       caption = paste(
         "Blue dashed line: Pharmacy First launch;",
         "grey dashed line: GP Connect introduction."
@@ -897,7 +895,6 @@ plot_practice_iqr_median <- function(cond, setting) {
       axis.text.x = element_text(angle = 45, hjust = 1)
     )
 }
-
 
 for (i in seq_len(nrow(practice_figs))) {
 

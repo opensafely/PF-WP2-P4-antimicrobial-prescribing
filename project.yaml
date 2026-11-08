@@ -932,8 +932,26 @@ actions:
       practice_rate_pf_impetigo: output/practice_level_change/practice_rate_pf_impetigo.png
       practice_rate_pf_all_pf_conditions: output/practice_level_change/practice_rate_pf_all_pf_conditions.png
       
-      #median_iqr figures 
-      median_iqr: output/practice_level_change/median_iqr_*.png
+      #II.Median/IQR 
+      # figures – GP
+      practice_rate_iqr_median_gp_uti: output/practice_level_change/practice_rate_iqr_median_gp_uti.png
+      practice_rate_iqr_median_gp_sinusitis: output/practice_level_change/practice_rate_iqr_median_gp_sinusitis.png
+      practice_rate_iqr_median_gp_insect_bites: output/practice_level_change/practice_rate_iqr_median_gp_insect_bites.png
+      practice_rate_iqr_median_gp_otitis_media: output/practice_level_change/practice_rate_iqr_median_gp_otitis_media.png
+      practice_rate_iqr_median_gp_sore_throat: output/practice_level_change/practice_rate_iqr_median_gp_sore_throat.png
+      practice_rate_iqr_median_gp_shingles: output/practice_level_change/practice_rate_iqr_median_gp_shingles.png
+      practice_rate_iqr_median_gp_impetigo: output/practice_level_change/practice_rate_iqr_median_gp_impetigo.png
+      practice_rate_iqr_median_gp_all_pf_conditions: output/practice_level_change/practice_rate_iqr_median_gp_all_pf_conditions.png
+
+      # figures – PF
+      practice_rate_iqr_median_pf_uti: output/practice_level_change/practice_rate_iqr_median_pf_uti.png
+      practice_rate_iqr_median_pf_sinusitis: output/practice_level_change/practice_rate_iqr_median_pf_sinusitis.png
+      practice_rate_iqr_median_pf_insect_bites: output/practice_level_change/practice_rate_iqr_median_pf_insect_bites.png
+      practice_rate_iqr_median_pf_otitis_media: output/practice_level_change/practice_rate_iqr_median_pf_otitis_media.png
+      practice_rate_iqr_median_pf_sore_throat: output/practice_level_change/practice_rate_iqr_median_pf_sore_throat.png
+      practice_rate_iqr_median_pf_shingles: output/practice_level_change/practice_rate_iqr_median_pf_shingles.png
+      practice_rate_iqr_median_pf_impetigo: output/practice_level_change/practice_rate_iqr_median_pf_impetigo.png
+      practice_rate_iqr_median_pf_all_pf_conditions: output/practice_level_change/practice_rate_iqr_median_pf_all_pf_conditions.png
 
   process_measures_new_approach_consultation_medication_zero_counts:
    run: r:v2 analysis/measures_new_approach_consultation_medication_zero_counts.R
