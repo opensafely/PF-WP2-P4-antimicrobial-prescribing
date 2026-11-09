@@ -134,7 +134,7 @@ apply_sdc_export <- function(x) {
 
 
 # Safe sum:
-# Avoids returning zero when all observations are missing.
+#This will avoid to return zero when all observations are missing.
 
 safe_sum <- function(x) {
 
@@ -159,7 +159,7 @@ safe_mean <- function(x) {
 
 
 # Safe quantile:
-# Explicitly calls stats::quantile() to avoid recursive function calls.
+# Stats::quantile() will help to avoid recursive function calls.
 
 safe_quantile <- function(x, p) {
 
@@ -190,7 +190,7 @@ if (!file.exists(input_file)) {
 }
 
 
-# Read input data first
+#  Data
 
 raw_data <- read_csv(
   input_file,
@@ -392,8 +392,7 @@ rates_practice <- raw_data %>%
 
   mutate(
 
-    # Apply SDC before calculating prescribing rates
-
+    # SDC before calculating prescribing rates
     numerator_nearest5 = apply_sdc(numerator),
 
     denominator_nearest5 = apply_sdc(denominator),
