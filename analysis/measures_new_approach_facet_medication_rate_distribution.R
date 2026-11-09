@@ -6,30 +6,36 @@
 #   Monthly median (solid line), mean (dashed line), and IQR (shaded area)
 #   across GP practices.
 #
-# Additional graph:
+# Graph B:
 #   Monthly relative variation = IQR / median.
 #
 # Year 1: February 2024 to January 2025
 # Year 2: February 2025 to January 2026
 #
 # Annual rate:
-#   Sum of monthly numerators / mean monthly denominator * 1,000
+#   Sum of annual monthly numerators /
+#   Mean monthly denominator * 1,000
 #
-# Eligibility:
-#   Monthly: raw monthly denominator >= min_denom, and numerator and
-#   denominator must not be suppressed by SDC.
-#   Annual: 12 months of data, raw mean monthly denominator >= min_denom,
-#   and annual numerator and mean denominator must not be suppressed.
+# Monthly eligibility:
+#   - Raw monthly denominator >= min_denom.
+#   - Numerator and denominator must not be suppressed by SDC.
+#   - At least min_practices contributing practices for monthly summaries.
+#
+# Annual eligibility:
+#   - 12 distinct months.
+#   - 12 complete numerator and denominator observations.
+#   - Raw mean monthly denominator >= min_denom.
+#   - Annual numerator and mean denominator must not be suppressed.
+#   - Practices must be eligible in BOTH years for annual comparisons.
 #
 # Statistical disclosure control:
 #   - Zero counts retained as zero.
 #   - Counts 1-7 suppressed and displayed as "Redacted" in CSV files.
-#   - Counts >=8 rounded to the nearest 5.
-#   - SDC is applied to counts before calculating rates.
-#   - Numeric NA values are used internally for suppressed counts.
-#   - CSV count columns are converted to character so that "Redacted"
-#     is displayed explicitly.
-#   - No practice-level CSV is exported.
+#   - Counts >=8 rounded to nearest 5.
+#   - SDC applied before calculating rates.
+#   - Numeric NA values used internally for suppressed counts.
+#   - CSV count columns converted to character.
+#   - No practice-level CSV exported.
 # ------------------------------------------------------------------------------
 
 
@@ -49,18 +55,23 @@ library(patchwork)
 
 practice_var <- "practice"
 
-min_denom <- 10     #1      #
-min_practices <-10   # 1    #  minimum contributing practices for a monthly summary
+min_denom <- 10
+min_practices <- 10
 
 # Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
 
 # Year boundaries
+year1_start <- as.Date("2024-02-01")
 year2_start <- as.Date("2025-02-01")
-year2_end <- as.Date("2026-02-01")  # exclusive upper bound
+year2_end <- as.Date("2026-02-01")  # Exclusive upper bound
 
 # GP Connect introduction
 GP_connect <- as.Date("2025-10-01")
+
+# Input data coverage
+data_start <- as.Date("2022-02-01")
+data_end <- as.Date("2026-02-01")   # Exclusive upper bound
 
 # Condition identifiers used in the input measure names
 conditions <- c(
@@ -86,7 +97,7 @@ dir.create(
 
 # 3. Statistical disclosure control ------------------------------------------
 
-# Numeric SDC function for calculations:
+# Numeric SDC function:
 #   0       = 0
 #   1-7     = NA (suppressed)
 #   >=8     = rounded to nearest 5
@@ -105,9 +116,9 @@ apply_sdc <- function(x) {
 }
 
 
-# Export function:
-# Converts suppressed values to the explicit label "Redacted".
-# The output is character because it contains both numbers and text.
+# Export SDC function:
+# Converts suppressed or missing values to "Redacted".
+# Output is character because it contains both numbers and text.
 
 apply_sdc_export <- function(x) {
 
@@ -115,32 +126,55 @@ apply_sdc_export <- function(x) {
     is.na(x) ~ "Redacted",
     x == 0 ~ "0",
     x > 0 & x < 8 ~ "Redacted",
-    TRUE ~ as.character(floor(x / 5 + 0.5) * 5)
+    TRUE ~ as.character(
+      floor(x / 5 + 0.5) * 5
+    )
   )
 }
 
 
-# Safe sum: avoids returning zero when all observations are missing.
+# Safe sum:
+# Avoids returning zero when all observations are missing.
 
 safe_sum <- function(x) {
 
   if (all(is.na(x))) {
-    NA_real_
-  } else {
-    sum(x, na.rm = TRUE)
+    return(NA_real_)
   }
+
+  sum(x, na.rm = TRUE)
 }
 
 
-# Quantile
+# Safe mean
 
-quantile <- function(x, p) {
+safe_mean <- function(x) {
 
   if (all(is.na(x))) {
-    NA_real_
-  } else {
-    as.numeric(quantile(x, p, na.rm = TRUE))
+    return(NA_real_)
   }
+
+  mean(x, na.rm = TRUE)
+}
+
+
+# Safe quantile:
+# Explicitly calls stats::quantile() to avoid recursive function calls.
+
+safe_quantile <- function(x, p) {
+
+  if (all(is.na(x))) {
+    return(NA_real_)
+  }
+
+  as.numeric(
+    stats::quantile(
+      x,
+      probs = p,
+      na.rm = TRUE,
+      names = FALSE
+    )
+  )
 }
 
 
@@ -155,17 +189,13 @@ if (!file.exists(input_file)) {
   stop("Input file not found: ", input_file)
 }
 
+
+# Read input data first
+
 raw_data <- read_csv(
   input_file,
   show_col_types = FALSE
-) %>%
-  mutate(
-    interval_start = as.Date(interval_start)
-  ) %>%
-  filter(
-    interval_start >= as.Date("2022-02-01"),
-    interval_start < as.Date("2026-02-01")
-  )
+)
 
 
 # Required columns
@@ -184,6 +214,7 @@ missing_columns <- setdiff(
 )
 
 if (length(missing_columns) > 0) {
+
   stop(
     "Missing required columns: ",
     paste(missing_columns, collapse = ", ")
@@ -194,60 +225,105 @@ if (length(missing_columns) > 0) {
 # Standardise variables
 
 raw_data <- raw_data %>%
+
   mutate(
+
     interval_start = as.Date(interval_start),
+
     practice = as.character(.data[[practice_var]]),
+
     numerator = as.numeric(numerator),
+
     denominator = as.numeric(denominator)
   )
 
 
+# Validate dates
+
 if (anyNA(raw_data$interval_start)) {
-  stop("Some interval_start values could not be converted to dates.")
+
+  stop(
+    "Some interval_start values are missing or could not be converted to dates."
+  )
 }
+
+
+# Validate counts
 
 if (
   any(raw_data$numerator < 0, na.rm = TRUE) ||
   any(raw_data$denominator < 0, na.rm = TRUE)
 ) {
-  stop("Numerators and denominators must not be negative.")
+
+  stop(
+    "Numerators and denominators must not be negative."
+  )
 }
+
 
 if (
   anyNA(raw_data$numerator) ||
   anyNA(raw_data$denominator)
 ) {
+
   warning(
     "Missing numerator or denominator values found. ",
-    "They will be handled during aggregation."
+    "They will be handled during aggregation and eligibility checks."
   )
+}
+
+
+# Filter the analysis period
+
+raw_data <- raw_data %>%
+
+  filter(
+    interval_start >= data_start,
+    interval_start < data_end
+  )
+
+
+if (nrow(raw_data) == 0) {
+  stop("No observations found within the specified analysis period.")
 }
 
 
 # Data coverage check
 
 min_month <- min(raw_data$interval_start)
+
 max_month <- max(raw_data$interval_start)
 
-last_required_month <- seq(
-  year2_end,
-  by = "-1 month",
-  length.out = 2
-)[2]
+last_required_month <- as.Date("2026-01-01")
 
-message("Data coverage: ", min_month, " to ", max_month)
+message(
+  "Data coverage: ",
+  min_month,
+  " to ",
+  max_month
+)
 
-if (min_month > PF_start) {
+
+if (min_month > year1_start) {
+
   warning(
-    "Data start (", min_month, ") is after Year 1 start (",
-    PF_start, ")."
+    "Data start (",
+    min_month,
+    ") is after Year 1 start (",
+    year1_start,
+    ")."
   )
 }
 
+
 if (max_month < last_required_month) {
+
   warning(
-    "Data end (", max_month, ") is before the last month of Year 2 (",
-    last_required_month, ")."
+    "Data end (",
+    max_month,
+    ") is before the last required month (",
+    last_required_month,
+    ")."
   )
 }
 
@@ -277,6 +353,7 @@ rates_practice <- raw_data %>%
   ) %>%
 
   mutate(
+
     Setting = recode(
       setting_code,
       gp = "GP",
@@ -305,18 +382,26 @@ rates_practice <- raw_data %>%
   ) %>%
 
   summarise(
+
     numerator = safe_sum(numerator),
+
     denominator = safe_sum(denominator),
+
     .groups = "drop"
   ) %>%
 
   mutate(
 
-    # Apply SDC before calculating the prescribing rate
+    # Apply SDC before calculating prescribing rates
+
     numerator_nearest5 = apply_sdc(numerator),
+
     denominator_nearest5 = apply_sdc(denominator),
 
+    # Monthly prescribing rate per 1,000 eligible population
+
     prescribing_rate_nearest5_derived = if_else(
+
       !is.na(numerator_nearest5) &
         !is.na(denominator_nearest5) &
         denominator >= min_denom &
@@ -330,6 +415,7 @@ rates_practice <- raw_data %>%
 
 
 if (nrow(rates_practice) == 0) {
+
   stop(
     "No matching practice-level medication measures found. ",
     "Check the measure names and conditions vector."
@@ -340,15 +426,25 @@ if (nrow(rates_practice) == 0) {
 # Confirm unique practice-month-setting-condition combinations
 
 stopifnot(
+
   !anyDuplicated(
     rates_practice[
-      c("interval_start", "practice", "Setting", "condition")
+      c(
+        "interval_start",
+        "practice",
+        "Setting",
+        "condition"
+      )
     ]
   )
 )
 
 
-message("Practice-level observations: ", nrow(rates_practice))
+message(
+  "Practice-level observations: ",
+  nrow(rates_practice)
+)
+
 
 message(
   "Distinct practices: ",
@@ -368,39 +464,70 @@ rates_practice_summary <- rates_practice %>%
 
   summarise(
 
-    n_practices = sum(!is.na(prescribing_rate_nearest5_derived)),
+    # Number of practices contributing valid prescribing rates
 
-    median = quantile(prescribing_rate_nearest5_derived, 0.50),
+    n_practices = sum(
+      !is.na(prescribing_rate_nearest5_derived)
+    ),
 
-    mean = if (all(is.na(prescribing_rate_nearest5_derived))) {
-      NA_real_
-    } else {
-      mean(prescribing_rate_nearest5_derived, na.rm = TRUE)
-    },
+    # Median
 
-     #q1 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),
-      q1 = quantile(prescribing_rate_nearest5_derived, 0.25),
-     #q3 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),
-      q3 = quantile(prescribing_rate_nearest5_derived, 0.75),
+    median = safe_quantile(
+      prescribing_rate_nearest5_derived,
+      0.50
+    ),
+
+    # Mean
+
+    mean = safe_mean(
+      prescribing_rate_nearest5_derived
+    ),
+
+    # First quartile
+
+    q1 = safe_quantile(
+      prescribing_rate_nearest5_derived,
+      0.25
+    ),
+
+    # Third quartile
+
+    q3 = safe_quantile(
+      prescribing_rate_nearest5_derived,
+      0.75
+    ),
 
     .groups = "drop"
   ) %>%
 
   mutate(
 
-    # Suppress summaries based on too few contributing practices
+    # Suppress monthly summaries based on too few practices
+
     suppressed = n_practices < min_practices,
 
     across(
-      c(median, mean, q1, q3),
-      ~ if_else(suppressed, NA_real_, .x)
+      c(
+        median,
+        mean,
+        q1,
+        q3
+      ),
+      ~ if_else(
+        suppressed,
+        NA_real_,
+        .x
+      )
     )
   )
 
 
+# Count suppressed monthly summaries
+
 n_suppressed_months <- sum(
   rates_practice_summary$suppressed
 )
+
 
 if (n_suppressed_months > 0) {
 
@@ -418,7 +545,10 @@ if (n_suppressed_months > 0) {
 rates_practice_summary_release <- rates_practice_summary %>%
 
   mutate(
-    n_practices_nearest5 = apply_sdc_export(n_practices)
+
+    n_practices_nearest5 = apply_sdc_export(
+      n_practices
+    )
   ) %>%
 
   select(
@@ -448,9 +578,10 @@ write_csv(
 rates_practice_annual_all <- rates_practice %>%
 
   mutate(
+
     year = case_when(
 
-      interval_start >= PF_start &
+      interval_start >= year1_start &
         interval_start < year2_start ~ "Year 1",
 
       interval_start >= year2_start &
@@ -471,29 +602,52 @@ rates_practice_annual_all <- rates_practice %>%
 
   summarise(
 
+    # Number of distinct months with observations
+
     n_months = n_distinct(interval_start),
 
-    mean_denominator = if (all(is.na(denominator))) {
-      NA_real_
-    } else {
-      mean(denominator, na.rm = TRUE)
-    },
+    # Number of months with both numerator and denominator available
 
-    annual_numerator = safe_sum(numerator),
+    n_valid_months = sum(
+      !is.na(numerator) &
+        !is.na(denominator)
+    ),
+
+    # Mean monthly denominator
+
+    mean_denominator = safe_mean(
+      denominator
+    ),
+
+    # Aggregate raw monthly numerators before applying SDC
+
+    annual_numerator = safe_sum(
+      numerator
+    ),
 
     .groups = "drop"
   ) %>%
 
   mutate(
 
-    # Aggregate raw monthly counts first, then apply SDC
-    annual_numerator_nearest5 = apply_sdc(annual_numerator),
+    # Apply SDC to aggregated annual numerator
 
-    mean_denominator_nearest5 = apply_sdc(mean_denominator),
+    annual_numerator_nearest5 = apply_sdc(
+      annual_numerator
+    ),
+
+    # Apply SDC to mean monthly denominator
+
+    mean_denominator_nearest5 = apply_sdc(
+      mean_denominator
+    ),
+
+    # Annual rate per 1,000 average monthly eligible population
 
     annual_rate = if_else(
 
       n_months == 12 &
+        n_valid_months == 12 &
         mean_denominator >= min_denom &
         !is.na(annual_numerator_nearest5) &
         !is.na(mean_denominator_nearest5) &
@@ -519,11 +673,26 @@ annual_diagnostics <- rates_practice_annual_all %>%
 
   summarise(
 
+    # Practices with at least one observation
+
     practices_with_data = n_distinct(practice),
+
+    # Practices with 12 distinct months
 
     practices_with_12_months = n_distinct(
       practice[n_months == 12]
     ),
+
+    # Practices with 12 complete months
+
+    practices_with_12_complete_months = n_distinct(
+      practice[
+        n_months == 12 &
+          n_valid_months == 12
+      ]
+    ),
+
+    # Practices with eligible raw mean monthly denominator
 
     practices_with_mean_denominator_eligible = n_distinct(
       practice[
@@ -532,11 +701,22 @@ annual_diagnostics <- rates_practice_annual_all %>%
       ]
     ),
 
+    # Practices meeting both completeness and denominator criteria
+
     practices_meeting_both_criteria = n_distinct(
       practice[
         n_months == 12 &
+          n_valid_months == 12 &
           !is.na(mean_denominator) &
           mean_denominator >= min_denom
+      ]
+    ),
+
+    # Practices with a releasable annual rate after SDC
+
+    practices_with_releasable_annual_rate = n_distinct(
+      practice[
+        !is.na(annual_rate)
       ]
     ),
 
@@ -544,7 +724,10 @@ annual_diagnostics <- rates_practice_annual_all %>%
   )
 
 
-message("\nAnnual eligibility diagnostics (unrounded, log only):")
+message(
+  "\nAnnual eligibility diagnostics (unrounded, log only):"
+)
+
 
 print(
   annual_diagnostics,
@@ -557,6 +740,7 @@ print(
 annual_diagnostics_release <- annual_diagnostics %>%
 
   mutate(
+
     across(
       starts_with("practices_"),
       apply_sdc_export
@@ -578,16 +762,18 @@ write_csv(
 )
 
 
-# 10. Aggregated annual summary -----------------------------------------------
+# 10. Annual comparison: same practices in both years ------------------------
 
-# Keep practice-years that meet the annual eligibility criteria
+# Keep practice-years meeting all annual eligibility criteria
 
 rates_practice_annual_eligible <- rates_practice_annual_all %>%
 
-  filter(!is.na(annual_rate))
+  filter(
+    !is.na(annual_rate)
+  )
 
 
-# Keep practices with eligible data in BOTH years
+# Identify practices eligible in BOTH years for each condition and setting
 
 eligible_practices_both_years <- rates_practice_annual_eligible %>%
 
@@ -598,11 +784,15 @@ eligible_practices_both_years <- rates_practice_annual_eligible %>%
   ) %>%
 
   summarise(
+
     n_years = n_distinct(year),
+
     .groups = "drop"
   ) %>%
 
-  filter(n_years == 2) %>%
+  filter(
+    n_years == 2
+  ) %>%
 
   select(
     practice,
@@ -611,13 +801,21 @@ eligible_practices_both_years <- rates_practice_annual_eligible %>%
   )
 
 
+# Retain only practices eligible in both years
+
 rates_practice_year <- rates_practice_annual_eligible %>%
 
   semi_join(
     eligible_practices_both_years,
-    by = c("practice", "Setting", "condition")
+    by = c(
+      "practice",
+      "Setting",
+      "condition"
+    )
   )
 
+
+# 11. Aggregated annual summary -----------------------------------------------
 
 # Aggregated annual summary only.
 # No practice-level CSV is exported.
@@ -644,19 +842,22 @@ annual_summary <- rates_practice_year %>%
       na.rm = TRUE
     ),
 
-    q1_annual_rate = as.numeric(
-      #stats::quantile(annual_rate, probs = 0.25, na.rm = TRUE) 
-      quantile(annual_rate, 0.25, na.rm = TRUE)
+    q1_annual_rate = safe_quantile(
+      annual_rate,
+      0.25
     ),
-    q3_annual_rate = as.numeric(
-      #stats::quantile(annual_rate, probs = 0.75, na.rm = TRUE) 
-      quantile(annual_rate, 0.75, na.rm = TRUE)
+
+    q3_annual_rate = safe_quantile(
+      annual_rate,
+      0.75
     ),
 
     .groups = "drop"
   ) %>%
 
   mutate(
+
+    # Suppress summaries based on too few practices
 
     suppressed = n_practices < min_practices,
 
@@ -667,10 +868,18 @@ annual_summary <- rates_practice_year %>%
         q1_annual_rate,
         q3_annual_rate
       ),
-      ~ if_else(suppressed, NA_real_, .x)
+      ~ if_else(
+        suppressed,
+        NA_real_,
+        .x
+      )
     ),
 
-    n_practices_nearest5 = apply_sdc_export(n_practices)
+    # Apply SDC to the number of contributing practices
+
+    n_practices_nearest5 = apply_sdc_export(
+      n_practices
+    )
   ) %>%
 
   select(
@@ -695,7 +904,7 @@ write_csv(
 )
 
 
-# 11. Common plotting function ------------------------------------------------
+# 12. Common plotting function ------------------------------------------------
 
 empty_panel <- function(label, title) {
 
@@ -723,7 +932,7 @@ empty_panel <- function(label, title) {
 }
 
 
-# 12. Graph A: monthly prescribing trend --------------------------------------
+# 13. Graph A: monthly prescribing trend --------------------------------------
 
 plot_practice_trend <- function(cond, setting) {
 
@@ -735,15 +944,25 @@ plot_practice_trend <- function(cond, setting) {
     )
 
 
-  if (nrow(d) == 0 || all(is.na(d$median))) {
+  if (
+    nrow(d) == 0 ||
+      all(is.na(d$median))
+  ) {
 
     return(
       empty_panel(
         paste0(
           "No releasable monthly summary data\n",
-          cond, " / ", setting
+          cond,
+          " / ",
+          setting
         ),
-        paste("Monthly trend:", cond, "/", setting)
+        paste(
+          "Monthly trend:",
+          cond,
+          "/",
+          setting
+        )
       )
     )
   }
@@ -751,10 +970,13 @@ plot_practice_trend <- function(cond, setting) {
 
   ggplot(
     d,
-    aes(x = interval_start)
+    aes(
+      x = interval_start
+    )
   ) +
 
     # IQR ribbon
+
     geom_ribbon(
       aes(
         ymin = q1,
@@ -766,6 +988,7 @@ plot_practice_trend <- function(cond, setting) {
     ) +
 
     # Median
+
     geom_line(
       aes(
         y = median,
@@ -777,6 +1000,7 @@ plot_practice_trend <- function(cond, setting) {
     ) +
 
     # Mean
+
     geom_line(
       aes(
         y = mean,
@@ -788,6 +1012,7 @@ plot_practice_trend <- function(cond, setting) {
     ) +
 
     # Pharmacy First launch
+
     geom_vline(
       xintercept = PF_start,
       linetype = "dashed",
@@ -796,6 +1021,7 @@ plot_practice_trend <- function(cond, setting) {
     ) +
 
     # GP Connect introduction
+
     geom_vline(
       xintercept = GP_connect,
       linetype = "dashed",
@@ -833,7 +1059,9 @@ plot_practice_trend <- function(cond, setting) {
       )
     ) +
 
-    expand_limits(y = 0) +
+    expand_limits(
+      y = 0
+    ) +
 
     labs(
 
@@ -858,9 +1086,13 @@ plot_practice_trend <- function(cond, setting) {
         hjust = 1
       ),
 
-      plot.subtitle = element_text(size = 9),
+      plot.subtitle = element_text(
+        size = 9
+      ),
 
-      plot.title = element_text(face = "bold"),
+      plot.title = element_text(
+        face = "bold"
+      ),
 
       panel.border = element_rect(
         colour = "#0085A1",
@@ -871,7 +1103,7 @@ plot_practice_trend <- function(cond, setting) {
 }
 
 
-# 13. Combine Graph A ----------------------------------------------------------
+# 14. Combine Graph A ----------------------------------------------------------
 
 plot_practice_figure <- function(cond, setting) {
 
@@ -879,6 +1111,7 @@ plot_practice_figure <- function(cond, setting) {
     cond,
     setting
   )
+
 
   p1 +
 
@@ -964,7 +1197,7 @@ plot_practice_figure <- function(cond, setting) {
 }
 
 
-# 14. Generate monthly trend figures ------------------------------------------
+# 15. Generate monthly trend figures ------------------------------------------
 
 practice_figs <- rates_practice %>%
 
@@ -985,21 +1218,27 @@ for (i in seq_len(nrow(practice_figs))) {
 
   setting <- practice_figs$Setting[i]
 
+
   message(
     "Generating monthly trend figure: ",
-    cond, " / ", setting
+    cond,
+    " / ",
+    setting
   )
+
 
   p <- plot_practice_figure(
     cond,
     setting
   )
 
+
   file_stub <- str_replace_all(
     tolower(cond),
     "[^a-z0-9]+",
     "_"
   )
+
 
   output_file <- file.path(
     output_dir,
@@ -1011,6 +1250,7 @@ for (i in seq_len(nrow(practice_figs))) {
       ".png"
     )
   )
+
 
   ggsave(
     filename = output_file,
@@ -1024,7 +1264,7 @@ for (i in seq_len(nrow(practice_figs))) {
 }
 
 
-# 15. Graph: monthly relative variation (IQR / median) ------------------------
+# 16. Graph B: monthly relative variation (IQR / median) -----------------------
 
 plot_practice_iqr_median <- function(cond, setting) {
 
@@ -1036,6 +1276,8 @@ plot_practice_iqr_median <- function(cond, setting) {
     ) %>%
 
     mutate(
+
+      # Relative variation = IQR / median
 
       relative_variation = if_else(
 
@@ -1060,11 +1302,15 @@ plot_practice_iqr_median <- function(cond, setting) {
       empty_panel(
         paste0(
           "No releasable monthly variation data\n",
-          cond, " / ", setting
+          cond,
+          " / ",
+          setting
         ),
         paste(
           "Monthly relative variation:",
-          cond, "/", setting
+          cond,
+          "/",
+          setting
         )
       )
     )
@@ -1080,6 +1326,7 @@ plot_practice_iqr_median <- function(cond, setting) {
   ) +
 
     # Relative variation (IQR / median)
+
     geom_line(
       colour = "#0085A1",
       linewidth = 0.8,
@@ -1087,6 +1334,7 @@ plot_practice_iqr_median <- function(cond, setting) {
     ) +
 
     # Pharmacy First launch
+
     geom_vline(
       xintercept = PF_start,
       linetype = "dashed",
@@ -1095,6 +1343,7 @@ plot_practice_iqr_median <- function(cond, setting) {
     ) +
 
     # GP Connect introduction
+
     geom_vline(
       xintercept = GP_connect,
       linetype = "dashed",
@@ -1121,7 +1370,10 @@ plot_practice_iqr_median <- function(cond, setting) {
 
       title = paste0(
         "Monthly relative variation in prescribing rates: ",
-        cond, " (", setting, ")"
+        cond,
+        " (",
+        setting,
+        ")"
       ),
 
       subtitle = paste(
@@ -1147,7 +1399,9 @@ plot_practice_iqr_median <- function(cond, setting) {
         size = 13
       ),
 
-      plot.subtitle = element_text(size = 9),
+      plot.subtitle = element_text(
+        size = 9
+      ),
 
       plot.caption = element_text(
         size = 8,
@@ -1176,7 +1430,7 @@ plot_practice_iqr_median <- function(cond, setting) {
 }
 
 
-# 16. Generate relative variation figures -------------------------------------
+# 17. Generate relative variation figures -------------------------------------
 
 for (i in seq_len(nrow(practice_figs))) {
 
@@ -1184,21 +1438,27 @@ for (i in seq_len(nrow(practice_figs))) {
 
   setting <- practice_figs$Setting[i]
 
+
   message(
-    "Generating median/IQR figure: ",
-    cond, " / ", setting
+    "Generating relative variation figure: ",
+    cond,
+    " / ",
+    setting
   )
+
 
   p <- plot_practice_iqr_median(
     cond,
     setting
   )
 
+
   file_stub <- str_replace_all(
     tolower(cond),
     "[^a-z0-9]+",
     "_"
   )
+
 
   output_file <- file.path(
     output_dir,
@@ -1210,6 +1470,7 @@ for (i in seq_len(nrow(practice_figs))) {
       ".png"
     )
   )
+
 
   ggsave(
     filename = output_file,
@@ -1223,7 +1484,9 @@ for (i in seq_len(nrow(practice_figs))) {
 }
 
 
-# 17. Final quality checks -----------------------------------------------------
+# 18. Final quality checks -----------------------------------------------------
+
+# Number of practices eligible in both years by condition and setting
 
 practices_both_years_by_group <- rates_practice_year %>%
 
@@ -1233,38 +1496,82 @@ practices_both_years_by_group <- rates_practice_year %>%
   ) %>%
 
   summarise(
+
     practices_with_both_years = n_distinct(practice),
+
     .groups = "drop"
   )
 
 
-cat("\n------------ QUALITY CHECKS --------------------------\n")
+# Annual completeness check
+
+annual_completeness_check <- rates_practice_annual_all %>%
+
+  group_by(
+    Setting,
+    condition,
+    year
+  ) %>%
+
+  summarise(
+
+    practices_with_data = n_distinct(practice),
+
+    practices_with_12_months = n_distinct(
+      practice[n_months == 12]
+    ),
+
+    practices_with_12_complete_months = n_distinct(
+      practice[
+        n_months == 12 &
+          n_valid_months == 12
+      ]
+    ),
+
+    practices_with_eligible_annual_rate = n_distinct(
+      practice[!is.na(annual_rate)]
+    ),
+
+    .groups = "drop"
+  )
+
+
+# Final console output
 
 cat(
-  "Data coverage:",
+  "\n------------ QUALITY CHECKS --------------------------\n"
+)
+
+
+cat(
+  "Data coverage: ",
   format(min_month),
-  "to",
+  " to ",
   format(max_month),
   "\n"
 )
 
+
 cat(
-  "Practice-month observations:",
+  "Practice-month observations: ",
   nrow(rates_practice),
   "\n"
 )
 
+
 cat(
-  "Distinct practices:",
+  "Distinct practices: ",
   n_distinct(rates_practice$practice),
   "\n"
 )
 
+
 cat(
-  "Monthly summary rows:",
+  "Monthly summary rows: ",
   nrow(rates_practice_summary),
   "\n"
 )
+
 
 cat(
   "Monthly summaries suppressed (< ",
@@ -1274,41 +1581,81 @@ cat(
   "\n"
 )
 
+
 cat(
-  "Eligible practice-year rows:",
+  "Annual practice-year observations: ",
+  nrow(rates_practice_annual_all),
+  "\n"
+)
+
+
+cat(
+  "Eligible practice-year rows: ",
   nrow(rates_practice_annual_eligible),
   "\n"
 )
 
+
 cat(
-  "Distinct practices with both years (any setting/condition):",
+  "Practice-year rows retained for both-year comparison: ",
+  nrow(rates_practice_year),
+  "\n"
+)
+
+
+cat(
+  "Distinct practices with both years (any setting/condition): ",
   n_distinct(rates_practice_year$practice),
   "\n"
 )
 
+
 cat(
-  "Number of condition-setting figures:",
+  "Number of condition-setting figures: ",
   nrow(practice_figs),
   "\n"
 )
 
-cat("\nPractices with both years, by setting and condition:\n")
+
+cat(
+  "\nPractices with both years, by setting and condition:\n"
+)
+
 
 print(
   practices_both_years_by_group,
   n = Inf
 )
 
-cat("\nAggregated output files saved in:\n")
 
 cat(
-  output_dir,
-  "\n"
+  "\nAnnual completeness check:\n"
 )
 
-cat("\nAnnual eligibility diagnostics (unrounded, log only):\n")
+
+print(
+  annual_completeness_check,
+  n = Inf
+)
+
+
+cat(
+  "\nAnnual eligibility diagnostics (unrounded, log only):\n"
+)
+
 
 print(
   annual_diagnostics,
   n = Inf
+)
+
+
+cat(
+  "\nAggregated output files saved in:\n"
+)
+
+
+cat(
+  output_dir,
+  "\n"
 )
