@@ -49,8 +49,8 @@ library(patchwork)
 
 practice_var <- "practice"
 
-min_denom <- 1
-min_practices <- 1
+min_denom <- 10     #1      #
+min_practices <-10   # 1    #  minimum contributing practices for a monthly summary
 
 # Pharmacy First launch
 PF_start <- as.Date("2024-02-01")
@@ -132,9 +132,9 @@ safe_sum <- function(x) {
 }
 
 
-# Safe quantile
+# Quantile
 
-safe_quantile <- function(x, p) {
+quantile <- function(x, p) {
 
   if (all(is.na(x))) {
     NA_real_
@@ -316,7 +316,7 @@ rates_practice <- raw_data %>%
     numerator_nearest5 = apply_sdc(numerator),
     denominator_nearest5 = apply_sdc(denominator),
 
-    prescribing_rate = if_else(
+    prescribing_rate_nearest5_derived = if_else(
       !is.na(numerator_nearest5) &
         !is.na(denominator_nearest5) &
         denominator >= min_denom &
@@ -368,19 +368,19 @@ rates_practice_summary <- rates_practice %>%
 
   summarise(
 
-    n_practices = sum(!is.na(prescribing_rate)),
+    n_practices = sum(!is.na(prescribing_rate_nearest5_derived)),
 
-    median = safe_quantile(prescribing_rate, 0.50),
+    median = quantile(prescribing_rate_nearest5_derived, 0.50),
 
-    mean = if (all(is.na(prescribing_rate))) {
+    mean = if (all(is.na(prescribing_rate_nearest5_derived))) {
       NA_real_
     } else {
-      mean(prescribing_rate, na.rm = TRUE)
+      mean(prescribing_rate_nearest5_derived, na.rm = TRUE)
     },
 
-    q1 = safe_quantile(prescribing_rate, 0.25),
+     q1 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),#q1 = quantile(prescribing_rate_nearest5_derived, 0.25),
 
-    q3 = safe_quantile(prescribing_rate, 0.75),
+     q3 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),#q3 = quantile(prescribing_rate_nearest5_derived, 0.75),
 
     .groups = "drop"
   ) %>%
@@ -644,11 +644,11 @@ annual_summary <- rates_practice_year %>%
     ),
 
     q1_annual_rate = as.numeric(
-      quantile(annual_rate, 0.25, na.rm = TRUE)
+      stats::quantile(annual_rate, probs = 0.25, na.rm = TRUE) #quantile(annual_rate, 0.25, na.rm = TRUE)
     ),
 
     q3_annual_rate = as.numeric(
-      quantile(annual_rate, 0.75, na.rm = TRUE)
+      stats::quantile(annual_rate, probs = 0.75, na.rm = TRUE) #quantile(annual_rate, 0.75, na.rm = TRUE)
     ),
 
     .groups = "drop"
