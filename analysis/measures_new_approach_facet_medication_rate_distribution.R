@@ -378,9 +378,10 @@ rates_practice_summary <- rates_practice %>%
       mean(prescribing_rate_nearest5_derived, na.rm = TRUE)
     },
 
-     q1 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),#q1 = quantile(prescribing_rate_nearest5_derived, 0.25),
-
-     q3 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),#q3 = quantile(prescribing_rate_nearest5_derived, 0.75),
+     #q1 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),
+      q1 = quantile(prescribing_rate_nearest5_derived, 0.25),
+     #q3 =stats::quantile(prescribing_rate_nearest5_derived, probs = 0.25, na.rm = TRUE),
+      q3 = quantile(prescribing_rate_nearest5_derived, 0.75),
 
     .groups = "drop"
   ) %>%
@@ -644,11 +645,12 @@ annual_summary <- rates_practice_year %>%
     ),
 
     q1_annual_rate = as.numeric(
-      stats::quantile(annual_rate, probs = 0.25, na.rm = TRUE) #quantile(annual_rate, 0.25, na.rm = TRUE)
+      #stats::quantile(annual_rate, probs = 0.25, na.rm = TRUE) 
+      quantile(annual_rate, 0.25, na.rm = TRUE)
     ),
-
     q3_annual_rate = as.numeric(
-      stats::quantile(annual_rate, probs = 0.75, na.rm = TRUE) #quantile(annual_rate, 0.75, na.rm = TRUE)
+      #stats::quantile(annual_rate, probs = 0.75, na.rm = TRUE) 
+      quantile(annual_rate, 0.75, na.rm = TRUE)
     ),
 
     .groups = "drop"
