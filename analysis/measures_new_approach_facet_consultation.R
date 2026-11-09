@@ -314,23 +314,16 @@ theme(
 )   
 
 facet_controls_plot
-
 #ggsave(filename = file.path(output_dir, "measures_new_approach_facet_consultation_with_controls.png"),plot = facet_controls_plot, width = 10,height = 6,dpi = 300)
-
-
-
-# =============================================================================
-# Pharmacy First — Monthly GP consultations and selected control conditions
-# Aggregate practice-level counts, apply SDC, plot and export
-# =============================================================================
-
+# ------------------------------------------------------------------------------#
+# Pharmacy First — Monthly GP consultations and selected control conditions     #
+# Aggregate practice-level counts, apply SDC, plot and export                   #
+#-------------------------------------------------------------------------------#
 library(tidyverse)
 library(here)
-
-# -----------------------------------------------------------------------------
-# 1. Read practice-level data
-# -----------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------#
+# 1. Read practice-level data                                                  #
+# -----------------------------------------------------------------------------#
 practice_level_data_by_practice_only <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv"),
   show_col_types = FALSE
@@ -338,22 +331,18 @@ practice_level_data_by_practice_only <- read_csv(
   mutate(
     interval_start = as.Date(interval_start)
   )
-
-# -----------------------------------------------------------------------------
-# 2. Select GP consultation variables
-# -----------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------#
+# 2. Select GP consultation variables                                          #
+# -----------------------------------------------------------------------------#
 consultation_data <- practice_level_data_by_practice_only %>%
   select(
     practice,
     interval_start,
     contains("gp_consultation")
   )
-
-# -----------------------------------------------------------------------------
-# 3. Convert to long format and identify conditions and controls
-# -----------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------#
+# 3. Convert to long format and identify conditions and controls               #
+# -----------------------------------------------------------------------------#
 consultation_data_long <- consultation_data %>%
   pivot_longer(
     cols = starts_with("gp_consultation_"),
@@ -402,10 +391,9 @@ consultation_data_long <- consultation_data %>%
     )
   )
 
-# -----------------------------------------------------------------------------
-# 4. Aggregate consultations across practices by month and condition
-# -----------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------#
+# 4. Aggregate consultations across practices by month and condition           #
+# -----------------------------------------------------------------------------#
 consultation_data_monthly <- consultation_data_long %>%
   group_by(
     interval_start,
@@ -420,19 +408,15 @@ consultation_data_monthly <- consultation_data_long %>%
     ),
     .groups = "drop"
   ) %>%
-  arrange(
-    condition,
-    interval_start
+  arrange(condition,interval_start
   )
-
-# -----------------------------------------------------------------------------
-# 5. Apply statistical disclosure control (SDC)
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# 5. Apply statistical disclosure control (SDC)                                #
+# -----------------------------------------------------------------------------#
 # SDC is applied once, after aggregation.
 # GP: apply throughout the entire observation period.
 # The apply_sdc() function determines suppression, zero retention
-# and rounding according to the existing project rules.
-
+# and rounding according to the existing project rules.                  
 consultation_data_monthly_sdc <- consultation_data_monthly %>%
   mutate(
     Setting = "GP",
@@ -442,11 +426,9 @@ consultation_data_monthly_sdc <- consultation_data_monthly %>%
       interval_start
     )
   )
-
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
 # 6. Validate SDC
 # -----------------------------------------------------------------------------
-
 sdc_check <- consultation_data_monthly_sdc %>%
   summarise(
     total_rows = n(),
@@ -483,88 +465,26 @@ duplicate_check <- consultation_data_monthly_sdc %>%
   filter(n > 1)
 
 print(duplicate_check)
-
 # Expected: zero rows.
-
 # -----------------------------------------------------------------------------
 # 8. Plot monthly GP consultations
 # -----------------------------------------------------------------------------
-
 facet_controls_plot_2 <- ggplot(
   consultation_data_monthly_sdc %>%
-    filter(
-      condition_pair != "Sore throat vs acute bronchitis"
-    ),
-
-  aes(
-    x = interval_start,
-    y = consultation_count_sdc,
-    group = condition,
-    color = condition_type,
-    shape = condition_type
-  )
-) +
-
-  geom_line(
-    linewidth = 0.6,
-    na.rm = TRUE
-  ) +
-
-  geom_point(
-    size = 1.0,
-    na.rm = TRUE
-  ) +
-
+    filter(condition_pair != "Sore throat vs acute bronchitis"),
+    aes(x = interval_start, y = consultation_count_sdc,group = condition,color = condition_type,shape = condition_type)) +
+  geom_line(linewidth = 0.6,na.rm = TRUE) +
+  geom_point(size = 1.0,na.rm = TRUE) +
   # GP Connect implementation date
-  geom_vline(
-    xintercept = GP_connect,
-    linetype = "dashed",
-    linewidth = 0.3,
-    color = "grey40"
-  ) +
-
+  geom_vline(xintercept = GP_connect,linetype = "dashed",linewidth = 0.3,color = "grey40") +
   # Pharmacy First launch date
-  geom_vline(
-    xintercept = PF_start,
-    linetype = "dashed",
-    linewidth = 0.3,
-    color = "blue"
-  ) +
-
+  geom_vline(xintercept = PF_start,linetype = "dashed",linewidth = 0.3,color = "blue") +
   # Separate condition comparisons
-  facet_wrap(
-    ~ condition_pair,
-    scales = "free_y",
-    ncol = 2
-  ) +
-
-  scale_x_date(
-    date_labels = "%Y-%m",
-    date_breaks = "2 months"
-  ) +
-
-  scale_y_continuous(
-    limits = c(0, NA),
-    labels = scales::label_comma(),
-    expand = expansion(
-      mult = c(0, 0.05)
-    )
-  ) +
-
-  scale_color_manual(
-    values = c(
-      "PFcondition" = "#037A92",
-      "control" = "#D95F02"
-    )
-  ) +
-
-  scale_shape_manual(
-    values = c(
-      "PFcondition" = 16,
-      "control" = 17
-    )
-  ) +
-
+  facet_wrap(~ condition_pair,scales = "free_y",ncol = 2) +
+  scale_x_date(date_labels = "%Y-%m",date_breaks = "2 months") +
+  scale_y_continuous(limits = c(0, NA),labels = scales::label_comma(),expand = expansion(mult = c(0, 0.05))) +
+  scale_color_manual(values = c("PFcondition" = "#037A92","control" = "#D95F02")) +
+  scale_shape_manual(values = c("PFcondition" = 16,"control" = 17)) +
   labs(
     title = paste(
       "Monthly  consultations accross general practices:",
@@ -717,12 +637,9 @@ write_csv(
     "measures_new_approach_facet_consultation_SDC.csv"
   )
 )
-
-
 # -----------------------------------------------------------------------------
 # 12. Export control conditions
 # -----------------------------------------------------------------------------
-
 consultation_controls_sdc <- format_sdc_export(
   consultation_data_monthly_sdc
 )
@@ -734,11 +651,9 @@ write_csv(
     "measures_new_approach_facet_consultation_controls_SDC.csv"
   )
 )
-
 # -----------------------------------------------------------------------------
 # 13. Final SDC checks
 # -----------------------------------------------------------------------------
-
 final_sdc_check <- consultation_data_monthly_sdc %>%
   group_by(condition, condition_type) %>%
   summarise(
@@ -768,10 +683,7 @@ final_sdc_check <- consultation_data_monthly_sdc %>%
   )
 
 print(final_sdc_check)
-
-# =============================================================================
-# END
-# =============================================================================
+#------------------------------------------------------------------------------------------------------------------
 
 
 
