@@ -390,7 +390,6 @@ consultation_data_long <- consultation_data %>%
       "vulvovaginalcandidiasis_control"
     )
   )
-
 # -----------------------------------------------------------------------------#
 # 4. Aggregate consultations across practices by month and condition           #
 # -----------------------------------------------------------------------------#
@@ -427,16 +426,14 @@ consultation_data_monthly_sdc <- consultation_data_monthly %>%
     )
   )
 # -----------------------------------------------------------------------------#
-# 6. Validate SDC
-# -----------------------------------------------------------------------------
+# 6. Validate SDC                                                              #
+# -----------------------------------------------------------------------------#
 sdc_check <- consultation_data_monthly_sdc %>%
   summarise(
     total_rows = n(),
-
     suppressed = sum(
       is.na(consultation_count_sdc)
     ),
-
     retained_zeros = sum(
       consultation_count_sdc == 0,
       na.rm = TRUE
@@ -455,15 +452,12 @@ sdc_check <- consultation_data_monthly_sdc %>%
   )
 
 print(sdc_check)
-
 # -----------------------------------------------------------------------------
 # 7. Check uniqueness: one observation per month and condition
 # -----------------------------------------------------------------------------
-
 duplicate_check <- consultation_data_monthly_sdc %>%
   count(interval_start, condition) %>%
   filter(n > 1)
-
 print(duplicate_check)
 # Expected: zero rows.
 # -----------------------------------------------------------------------------
