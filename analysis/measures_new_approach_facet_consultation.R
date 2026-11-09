@@ -450,19 +450,18 @@ sdc_check <- consultation_data_monthly_sdc %>%
         consultation_count_sdc %% 5 != 0
     )
   )
-
 print(sdc_check)
-# -----------------------------------------------------------------------------
-# 7. Check uniqueness: one observation per month and condition
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# 7. Check uniqueness: one observation per month and condition                 #
+# -----------------------------------------------------------------------------#
 duplicate_check <- consultation_data_monthly_sdc %>%
   count(interval_start, condition) %>%
   filter(n > 1)
 print(duplicate_check)
 # Expected: zero rows.
-# -----------------------------------------------------------------------------
-# 8. Plot monthly GP consultations
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# 8. Plot monthly GP consultations                                             #
+# -----------------------------------------------------------------------------#
 facet_controls_plot_2 <- ggplot(
   consultation_data_monthly_sdc %>%
     filter(condition_pair != "Sore throat vs acute bronchitis"),
