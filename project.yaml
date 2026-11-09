@@ -656,6 +656,19 @@ actions:
     outputs:
       moderately_sensitive:
         chart: output/results_2_volume_prescribed_vulvovaginal_candiasis_control_4_uti.png
+  
+   # itsa  section
+  process_html_itsa_practice_level_data_uti:
+    run: r:v2 -e 'rmarkdown::render("analysis/results_codes/itsa/itsa_practice_level_data_uti.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
+    needs: [process_measures_to_practice_dataset_by_practice_only]
+    #- combine_monthly_patient_gz 
+    #- generate_measures_Arnaud
+    #- generate_patient_measures_for_practices
+    #- process_measures_to_practice_dataset_by_practice_only
+    outputs:
+     moderately_sensitive:
+      html: output/itsa_practice_level_data_uti.html
+      
   generate_html_results_3_descriptive_on_practice_level_data:
     run: r:v2 -e 'rmarkdown::render("analysis/results_codes/results_3_descriptive_on_practice_level_data.Rmd", knit_root_dir="/workspace", output_dir="/workspace/output")'
     needs:
