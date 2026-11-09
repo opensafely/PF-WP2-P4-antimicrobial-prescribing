@@ -17,7 +17,7 @@ library(here)
 library(lubridate)
 library(scales)
 
-# 0. SDC helpers
+# 0. SDC 
 
 sdc_threshold <- 8 # Threshold for redaction
 sdc_base <- 5      # Nearest 5

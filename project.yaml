@@ -886,6 +886,7 @@ actions:
     outputs:
       moderately_sensitive:
         figure1: output/measures_new_approach_facet_medication.png
+        csv1:   output/measures_new_approach_facet_medication.csv
   process_measures_new_approach_facet_medication_rate:
     run: r:v2 analysis/measures_new_approach_facet_medication_rate.R
     needs: [generate_measures_new_approach_medication]
