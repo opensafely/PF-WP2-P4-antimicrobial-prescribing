@@ -15,20 +15,14 @@ library(here)
 # ------------------------------------------------------------------------------
 # OpenSAFELY approach:
 #   (a) redact small counts (1..7) -> NA
-#   (b) round the rest with "midpoint 6" rounding to base 5
-#       (1-5 -> 3, 6-10 -> 8, 11-15 -> 13, ...; 0 stays 0)
+#   (b) round the rest to the nearest 5
 #   (c) rates are always recomputed FROM the rounded counts
 sdc_threshold <- 7
 sdc_base      <- 5
 
-roundmid_any <- function(x, to = 5) {
-  # midpoint rounding: value reported is the midpoint of its bin
-  ceiling(x / to) * to - (floor(to / 2) * (x != 0))
-}
-
 apply_sdc <- function(x, threshold = sdc_threshold, base = sdc_base) {
   x   <- as.numeric(x)
-  out <- roundmid_any(x, to = base)
+  out <- round(x / base) * base                          # nearest 5
   out[!is.na(x) & x > 0 & x <= threshold] <- NA_real_   # redact 1..threshold
   out
 }
@@ -72,11 +66,11 @@ region_monthly_raw <- region_measure_consmed %>%
 # ------------------------------------------------------------------------------
 region_monthly_sdc <- region_monthly_raw %>%
   mutate(
-    numerator_midpoint6   = apply_sdc(numerator),
-    denominator_midpoint6 = apply_sdc(denominator),
-    rate_per_1000_midpoint6 = if_else(
-      !is.na(denominator_midpoint6) & denominator_midpoint6 > 0,
-      numerator_midpoint6 / denominator_midpoint6 * 1000,
+    numerator_rounded   = apply_sdc(numerator),
+    denominator_rounded = apply_sdc(denominator),
+    rate_per_1000_rounded = if_else(
+      !is.na(denominator_rounded) & denominator_rounded > 0,
+      numerator_rounded / denominator_rounded * 1000,
       NA_real_
     ),
     year = case_when(
@@ -104,7 +98,7 @@ region_monthly_sdc <- region_monthly_raw %>%
   # drop raw counts so they can never be written out by mistake
   select(
     month, year, region, measure, setting, service, condition,
-    numerator_midpoint6, denominator_midpoint6, rate_per_1000_midpoint6
+    numerator_rounded, denominator_rounded, rate_per_1000_rounded
   ) %>%
   arrange(measure, region, month)
 
@@ -112,8 +106,8 @@ region_monthly_sdc <- region_monthly_raw %>%
 region_monthly_sdc %>%
   summarise(
     n_rows               = n(),
-    n_num_redacted       = sum(is.na(numerator_midpoint6)),
-    n_den_redacted       = sum(is.na(denominator_midpoint6))
+    n_num_redacted       = sum(is.na(numerator_rounded)),
+    n_den_redacted       = sum(is.na(denominator_rounded))
   )
 
 # ------------------------------------------------------------------------------
@@ -134,8 +128,8 @@ write_csv(
 region_annual_rates <- region_monthly_sdc %>%
   group_by(setting, service, condition, region, year) %>%
   summarise(
-    annual_rate = mean(rate_per_1000_midpoint6, na.rm = TRUE),
-    n_months    = sum(!is.na(rate_per_1000_midpoint6)),
+    annual_rate = mean(rate_per_1000_rounded, na.rm = TRUE),
+    n_months    = sum(!is.na(rate_per_1000_rounded)),
     .groups = "drop"
   ) %>%
   mutate(
