@@ -122,6 +122,20 @@ write_csv(
   na = ""
 )
 
+# GP measures
+write_csv(
+  region_monthly_sdc %>% filter(setting == "GP"),
+  file.path(output_dir, "region_monthly_measures_GP_sdc.csv"),
+  na = ""
+)
+
+# Pharmacy First measures
+write_csv(
+  region_monthly_sdc %>% filter(setting == "PF"),
+  file.path(output_dir, "region_monthly_measures_PF_sdc.csv"),
+  na = ""
+)
+
 # ------------------------------------------------------------------------------
 # 5. Annual rates — built ONLY from SDC'd monthly rates
 # ------------------------------------------------------------------------------
@@ -179,14 +193,14 @@ p_region_boxplot_consultation <- ggplot(
   scale_fill_brewer(palette = "Blues") +
   scale_colour_brewer(palette = "Blues") +
   labs(
-    title  = "Regional distribution of consultation rates by year",
+    title  = "Distribution of consultation rates by year",
     x      = "Year",
-    y      = "Annual consultation rate per 1,000 population",
+    y      = " Consultation rate per 1,000 population",
     fill   = "Year",
     colour = "Year"
   ) +
   strip_theme +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5))
 
 p_region_boxplot_consultation
 
@@ -204,7 +218,7 @@ p_region_boxplot_medication <- ggplot(
     position = position_jitter(width = 0.12, height = 0),
     size = 1.8, alpha = 0.7
   ) +
-  facet_grid(condition ~ region, scales = "free_y") +
+  facet_grid(setting ~ condition  , scales = "free_y") + ##facet_grid(condition ~ region, scales = "free_y") +
   scale_fill_brewer(palette = "Oranges") +
   scale_colour_brewer(palette = "Oranges") +
   labs(
@@ -217,6 +231,32 @@ p_region_boxplot_medication <- ggplot(
   strip_theme
 
 p_region_boxplot_medication
+
+
+
+p_region_boxplot_medication_per_region <- ggplot(
+  region_annual_rates_1_medication,
+  aes(x = year, y = annual_rate, fill = year)
+) +
+  geom_boxplot(alpha = 0.75, width = 0.65, outlier.shape = NA) +
+  geom_point(
+    aes(colour = year),
+    position = position_jitter(width = 0.12, height = 0),
+    size = 1.8, alpha = 0.7
+  ) +
+  facet_grid(setting ~ condition , scales = "free_y") + #facet_grid(condition ~ region, scales = "free_y") +
+  scale_fill_brewer(palette = "Oranges") +
+  scale_colour_brewer(palette = "Oranges") +
+  labs(
+    title  = "Regional distribution of medication rates by year",
+    x      = "Year",
+    y      = "Annual medication rate per 1,000 population",
+    fill   = "Year",
+    colour = "Year"
+  ) +
+  strip_theme
+
+p_region_boxplot_medication_per_region 
 
 # 6c. Medication heatmap (GP)
 region_heatmap_medication <- region_annual_rates_1 %>%
@@ -258,6 +298,12 @@ ggsave(file.path(output_dir, "regional_consultation_boxplot.png"),
 ggsave(file.path(output_dir, "regional_medication_boxplot.png"),
        p_region_boxplot_medication,
        width = 16, height = 12, units = "in", dpi = 300, bg = "white")
+
+ggsave(file.path(output_dir, "regional_medication_boxplot_region.png"),
+       p_region_boxplot_medication_per_region,
+       width = 16, height = 12, units = "in", dpi = 300, bg = "white")
+
+       
 
 ggsave(file.path(output_dir, "regional_medication_heatmap_GP.png"),
        p_region_heatmap_medication,

@@ -1455,10 +1455,13 @@ actions:
    outputs:
     moderately_sensitive:
       #region_level_data: output/region_level_data_by_region_only.csv
-      csv: output/region_monthly_measures_sdc.csv
+      csv1: output/region_monthly_measures_sdc.csv
+      csv2: output/region_monthly_measures_GP_sdc.csv
+      csv3: output/region_monthly_measures_PF_sdc.csv
       consultation_boxplot: output/regional_consultation_boxplot.png
       medication_boxplot: output/regional_medication_boxplot.png
       medication_heatmap: output/regional_medication_heatmap_GP.png
+      medication_settings: output/regional_medication_boxplot_region.png
 
   # May be the code below ill no longer excute
   # practice-level data step 2.1: aggregate patient measures to practice-level data
