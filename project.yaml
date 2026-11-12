@@ -1454,6 +1454,14 @@ actions:
    needs: [generate_patient_measures_for_region]
    outputs:
     moderately_sensitive:
+      #CSV per condition
+      uti: output/region_monthly_measures_uti_sdc.csv
+      sinusitis: output/region_monthly_measures_sinusitis_sdc.csv
+      insectbite: output/region_monthly_measures_insectbite_sdc.csv
+      otitismedia: output/region_monthly_measures_otitismedia_sdc.csv
+      sorethroat: output/region_monthly_measures_sorethroat_sdc.csv
+      shingles: output/region_monthly_measures_shingles_sdc.csv
+      impetigo: output/region_monthly_measures_impetigo_sdc.csv
       #region_level_data: output/region_level_data_by_region_only.csv
       csv1: output/region_monthly_measures_sdc.csv
       csv2: output/region_monthly_measures_GP_sdc.csv

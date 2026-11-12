@@ -8,6 +8,7 @@ library(tidyr)
 library(ggplot2)
 library(forcats)
 library(viridis)
+library(stringr)
 library(here)
 
 # ------------------------------------------------------------------------------
@@ -308,3 +309,44 @@ ggsave(file.path(output_dir, "regional_medication_boxplot_region.png"),
 ggsave(file.path(output_dir, "regional_medication_heatmap_GP.png"),
        p_region_heatmap_medication,
        width = 18, height = 9, units = "in", dpi = 300, bg = "white")
+
+
+
+#
+
+# ------------------------------------------------------------------------------
+# 4. Write one SDC-safe CSV per condition
+# ------------------------------------------------------------------------------
+
+output_dir <- here("output")
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Get unique conditions
+condition_list <- unique(region_monthly_sdc$condition)
+
+# Export one CSV per condition
+for (cond in condition_list) {
+
+  # Filter data for the current condition
+  condition_data <- region_monthly_sdc %>%
+    filter(condition == cond) %>%
+    arrange(setting, service, region, month)
+
+  # Create a safe filename
+  condition_filename <- cond %>%
+    str_to_lower() %>%
+    str_replace_all("[^a-z0-9]+", "_") %>%
+    str_replace_all("^_|_$", "")
+
+  # Write CSV
+  write_csv(
+    condition_data,
+    file.path(
+      output_dir,
+      paste0("region_monthly_measures_", condition_filename, "_sdc.csv")
+    ),
+    na = ""
+  )
+
+  message("Exported: ", condition_filename)
+}
