@@ -236,7 +236,7 @@ pharmacy_first_condition_specific_medications_dict = {
     ),
 }
 
-#4.5.PF firt and secondline medication (to be validated)
+#4.5.PF firt and secondline medication (to be validated), we can extend the list to the full list of medication for each condition
 
 pf_first_secondline_medications = {
     "uti": {
