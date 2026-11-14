@@ -362,8 +362,7 @@ actions:
     outputs: 
       moderately_sensitive:  # measures are moderately senstive.
         measures: output/data_patients_measures_Arnaud.csv
-
-           # 2.Dummy data and measures 
+          # 2.Dummy data and measures 
   generate_dummy_dataset_Arnaud:
     run: ehrql:v1 generate-dataset analysis/dataset_definition_patients_Arnaud.py --dummy-tables dummy-folder --output results_Arnaud/dummy_dataset_Arnaud.csv
     outputs:
