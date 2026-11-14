@@ -236,55 +236,146 @@ pharmacy_first_condition_specific_medications_dict = {
     ),
 }
 
-#4.5.PF firt and secondline medication (to be validated), we can extend the list to the full list of medication for each condition
+# # 4.5.a.PF firt and secondline medication (to be validated), we can extend the list to the full list of medication for each condition
+# # 2 medications per conditions
+# pf_first_secondline_medications = {
+#     "uti": {
+#         "nitrofurantoin": nitrofurantoin_codelist,
+#         "trimethoprim": trimethoprim_codelist,
+#     },
+#     "sinusitis": {
+#         "phenoxymethylpenicillin": phenoxymethylpenicillin_codelist,
+#         "doxycycline": doxycycline_codelist,
+#     },
+#     "insectbite": {
+#         "flucloxacillin": flucloxacillin_codelist,
+#         "clarithromycin": clarithromycin_codelist,
+#     },
+#     "otitismedia": {
+#         "amoxicillin": amoxicillin_codelist,
+#         "clarithromycin": clarithromycin_codelist,
+#     },
+#     "sorethroat": {
+#         "phenoxymethylpenicillin": phenoxymethylpenicillin_codelist,
+#         "clarithromycin": clarithromycin_codelist,
+#     },
+#     "shingles": {
+#         "aciclovir": aciclovir_codelist,
+#         "valaciclovir": valaciclovir_codelist,
+#     },
+#     "impetigo": {
+#         "fusidic_acid": fusidic_acid_cream_codelist,
+#         "flucloxacillin": flucloxacillin_codelist,
+#     },
+#     "all_conditions": {                          # We assummed  the two antibiotics to be commonly prescribed in primary care
+#         "amoxicillin": amoxicillin_codelist,
+#         "doxycycline": doxycycline_codelist,
+#     },
+#     "acutebronchitis_control": {
+#         "amoxicillin": amoxicillin_codelist,
+#         "doxycycline":doxycycline_codelist,  
+#     },
+#     "conjunctivitisallergic_control": {
+#         "Sodium_cromoglicate": sodium_cromoglicate_codelist,
+#         "Olopatadine": olopatadine_codelist,
+#     },
+#     "vulvovaginalcandidiasis_control": {
+#         "Clotrimazole": clotrimazole_codelist,
+#         "Fluconazole": fluconazole_codelist,
+#     },
 
-pf_first_secondline_medications = {
+# }
+# 4.5.b. PF first- and second-line medications (include all medications for PF validation)
+# Extended to include all condition-specific medications.
+# Medications marked "# new" were added to the original first-/second-line list.
+# "pf_first_secondline_medications" name was kept to do not changes much in the others codes work flow
+
+pf_first_secondline_medications = {  
     "uti": {
         "nitrofurantoin": nitrofurantoin_codelist,
         "trimethoprim": trimethoprim_codelist,
+        "fosfomycin": fosfomycin_codelist,              # new
+        "pivmecillinam": pivmecillinam_codelist,        # new
+        "co_amoxiclav": co_amoxiclav_codelist,          # new
+        "cefalexin": cefalexin_codelist,                # new
+        "amoxicillin": amoxicillin_codelist,            # new
     },
+
     "sinusitis": {
         "phenoxymethylpenicillin": phenoxymethylpenicillin_codelist,
         "doxycycline": doxycycline_codelist,
+        "clarithromycin": clarithromycin_codelist,      # new
+        "erythromycin": erythromycin_codelist,          # new
+        "co_amoxiclav": co_amoxiclav_codelist,          # new
     },
+
     "insectbite": {
         "flucloxacillin": flucloxacillin_codelist,
         "clarithromycin": clarithromycin_codelist,
+        "erythromycin": erythromycin_codelist,          # new
+        "co_amoxiclav": co_amoxiclav_codelist,          # new
+        "metronidazole": metronidazole_codelist,        # new
+        "clindamycin": clindamycin_codelist,            # new
+        "doxycycline": doxycycline_codelist,            # new
     },
+
     "otitismedia": {
         "amoxicillin": amoxicillin_codelist,
         "clarithromycin": clarithromycin_codelist,
+        "erythromycin": erythromycin_codelist,          # new
+        "co_amoxiclav": co_amoxiclav_codelist,          # new
     },
+
     "sorethroat": {
         "phenoxymethylpenicillin": phenoxymethylpenicillin_codelist,
         "clarithromycin": clarithromycin_codelist,
+        "erythromycin": erythromycin_codelist,          # new
     },
+
     "shingles": {
         "aciclovir": aciclovir_codelist,
         "valaciclovir": valaciclovir_codelist,
+        "famciclovir": famciclovir_codelist,            # new
     },
+
     "impetigo": {
         "fusidic_acid": fusidic_acid_cream_codelist,
         "flucloxacillin": flucloxacillin_codelist,
+        "clarithromycin": clarithromycin_codelist,      # new
+        "erythromycin": erythromycin_codelist,          # new
+        "mupirocin": mupirocin_codelist,                # new
     },
-    "all_conditions": {                          # We assummed  the two antibiotics to be commonly prescribed in primary care
+
+    "all_conditions": {  # General primary-care antibiotics
         "amoxicillin": amoxicillin_codelist,
         "doxycycline": doxycycline_codelist,
     },
+
     "acutebronchitis_control": {
         "amoxicillin": amoxicillin_codelist,
-        "doxycycline":doxycycline_codelist,  
-    },
-    "conjunctivitisallergic_control": {
-        "Sodium_cromoglicate": sodium_cromoglicate_codelist,
-        "Olopatadine": olopatadine_codelist,
-    },
-    "vulvovaginalcandidiasis_control": {
-        "Clotrimazole": clotrimazole_codelist,
-        "Fluconazole": fluconazole_codelist,
+        "doxycycline": doxycycline_codelist,
+        "clarithromycin": clarithromycin_codelist,      # new
+        "erythromycin": erythromycin_codelist,          # new
     },
 
+    "conjunctivitisallergic_control": {
+        "sodium_cromoglicate": sodium_cromoglicate_codelist,
+        "olopatadine": olopatadine_codelist,
+        "lodoxamide": lodoxamide_codelist,              # new
+        "antazoline": antazoline_codelist,              # new
+        "epinastine": epinastine_codelist,              # new
+        "ketotifen": ketotifen_codelist,                # new
+    },
+
+    "vulvovaginalcandidiasis_control": {
+        "clotrimazole": clotrimazole_codelist,
+        "fluconazole": fluconazole_codelist,
+        "miconazole": miconazole_codelist,              # new
+        "fenticonazole": fenticonazole_codelist,        # new
+        # "itraconazole": itraconazole_codelist,        # excluded
+    },
 }
+
 #4.6.Medication for controls 
 
 control_condition_specific_medications_dict = {
