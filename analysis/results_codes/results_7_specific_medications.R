@@ -317,7 +317,6 @@ antibiotic_monthly <- antibiotic_data %>%
   apply_sdc_plot()
 
 # 9A. Overall GP plot
-
 gp_antibiotics_plot <- antibiotic_monthly %>%
   filter(setting == "GP") %>%
   make_antibiotic_plot(
