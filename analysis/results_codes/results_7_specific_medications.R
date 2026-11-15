@@ -308,18 +308,12 @@ antibiotic_data <- practice_level_data_by_practice_only %>%
 # 9. OVERALL ANTIBIOTIC COUNTS ACROSS CONDITIONS -------------------------------
 
 antibiotic_monthly <- antibiotic_data %>%
-
-  group_by(
-    interval_start,
-    setting,
-    antibiotic
-  ) %>%
-
+ group_by(interval_start,setting,antibiotic) %>%
   summarise(
     count = sum(count, na.rm = TRUE),
     .groups = "drop"
   ) %>%
-
+  
   apply_sdc_plot()
 
 # 9A. Overall GP plot
