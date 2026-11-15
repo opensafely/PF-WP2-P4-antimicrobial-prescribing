@@ -184,48 +184,18 @@ make_antibiotic_plot <- function(data, plot_title) {
     )
   }
 
-  ggplot(
-    valid_dates,
-    aes(
-      x = interval_start,
-      y = count_plot,
-      fill = antibiotic
-    )
-  ) +
-
-    geom_col(
-      position = "stack",
-      na.rm = TRUE
-    ) +
-
-    geom_vline(
-      xintercept = GP_connect,
-      linetype = "dashed",
-      colour = "blue",
-      linewidth = 0.3
-    ) +
-
-    geom_vline(
-      xintercept = PF_start,
-      linetype = "dashed",
-      colour = "black",
-      linewidth = 0.3
-    ) +
-
-    scale_x_date(
-      date_labels = "%Y-%m",
-      date_breaks = "1 month"
-    ) +
-
+  ggplot(valid_dates,aes(x = interval_start,y = count_plot,fill = antibiotic)) +
+    geom_col(position = "stack",na.rm = TRUE) +
+    geom_vline( xintercept = GP_connect,linetype = "dashed",colour = "blue",linewidth = 0.3) +
+    geom_vline(xintercept = PF_start,linetype = "dashed",colour = "black",linewidth = 0.3) +
+    scale_x_date(date_labels = "%Y-%m",date_breaks = "1 month") +
     labs(
       title = plot_title,
       x = "Month",
       y = "Number of prescriptions",
       fill = "Antibiotic"
     ) +
-
     antibiotic_theme +
-
     guides(
       fill = guide_legend(
         nrow = 1,
