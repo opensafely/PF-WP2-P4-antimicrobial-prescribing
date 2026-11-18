@@ -380,13 +380,8 @@ gp_medication_vulvovaginalcandidiasis_control = (
 
 
 #Specific medications (first and second line treatment) for the 7 conditions
-
-
-
 # IV. Specific antibiotics
-
 # IV.A.1. Pharmacy First level
-
 # UTI
 pf_nitrofurantoin_uti = (
     df[df["measure"] == "pf_nitrofurantoin_uti"]
@@ -400,6 +395,37 @@ pf_trimethoprim_uti = (
     [["practice", "interval_start", "pf_trimethoprim_uti"]]
 )
 
+pf_fosfomycin_uti = (
+    df[df["measure"] == "pf_fosfomycin_uti"]
+    .rename(columns={"numerator": "pf_fosfomycin_uti"})
+    [["practice", "interval_start", "pf_fosfomycin_uti"]]
+)
+
+pf_pivmecillinam_uti = (
+    df[df["measure"] == "pf_pivmecillinam_uti"]
+    .rename(columns={"numerator": "pf_pivmecillinam_uti"})
+    [["practice", "interval_start", "pf_pivmecillinam_uti"]]
+)
+
+pf_co_amoxiclav_uti = (
+    df[df["measure"] == "pf_co_amoxiclav_uti"]
+    .rename(columns={"numerator": "pf_co_amoxiclav_uti"})
+    [["practice", "interval_start", "pf_co_amoxiclav_uti"]]
+)
+
+pf_cefalexin_uti = (
+    df[df["measure"] == "pf_cefalexin_uti"]
+    .rename(columns={"numerator": "pf_cefalexin_uti"})
+    [["practice", "interval_start", "pf_cefalexin_uti"]]
+)
+
+pf_amoxicillin_uti = (
+    df[df["measure"] == "pf_amoxicillin_uti"]
+    .rename(columns={"numerator": "pf_amoxicillin_uti"})
+    [["practice", "interval_start", "pf_amoxicillin_uti"]]
+)
+
+
 # Sinusitis
 pf_phenoxymethylpenicillin_sinusitis = (
     df[df["measure"] == "pf_phenoxymethylpenicillin_sinusitis"]
@@ -411,6 +437,25 @@ pf_doxycycline_sinusitis = (
     df[df["measure"] == "pf_doxycycline_sinusitis"]
     .rename(columns={"numerator": "pf_doxycycline_sinusitis"})
     [["practice", "interval_start", "pf_doxycycline_sinusitis"]]
+)
+
+pf_clarithromycin_sinusitis = (
+    df[df["measure"] == "pf_clarithromycin_sinusitis"]
+    .rename(columns={"numerator": "pf_clarithromycin_sinusitis"})
+    [["practice", "interval_start", "pf_clarithromycin_sinusitis"]]
+)
+
+pf_erythromycin_sinusitis = (
+    df[df["measure"] == "pf_erythromycin_sinusitis"]
+    .rename(columns={"numerator": "pf_erythromycin_sinusitis"})
+    [["practice", "interval_start", "pf_erythromycin_sinusitis"]]
+)
+
+
+pf_co_amoxiclav_sinusitis = (
+    df[df["measure"] == "pf_co_amoxiclav_sinusitis"]
+    .rename(columns={"numerator": "pf_co_amoxiclav_sinusitis"})
+    [["practice", "interval_start", "pf_co_amoxiclav_sinusitis"]]
 )
 
 # Insect bites
@@ -426,6 +471,37 @@ pf_clarithromycin_insectbite = (
     [["practice", "interval_start", "pf_clarithromycin_insectbite"]]
 )
 
+pf_erythromycin_insectbite = (
+    df[df["measure"] == "pf_erythromycin_insectbite"]
+    .rename(columns={"numerator": "pf_erythromycin_insectbite"})
+    [["practice", "interval_start", "pf_erythromycin_insectbite"]]
+)
+
+pf_co_amoxiclav_insectbite = (
+    df[df["measure"] == "pf_co_amoxiclav_insectbite"]
+    .rename(columns={"numerator": "pf_co_amoxiclav_insectbite"})
+    [["practice", "interval_start", "pf_co_amoxiclav_insectbite"]]
+)
+
+pf_metronidazole_insectbite = (
+    df[df["measure"] == "pf_metronidazole_insectbite"]
+    .rename(columns={"numerator": "pf_metronidazole_insectbite"})
+    [["practice", "interval_start", "pf_metronidazole_insectbite"]]
+)
+
+pf_clindamycin_insectbite = (
+    df[df["measure"] == "pf_clindamycin_insectbite"]
+    .rename(columns={"numerator": "pf_clindamycin_insectbite"})
+    [["practice", "interval_start", "pf_clindamycin_insectbite"]]
+)
+
+pf_doxycycline_insectbite = (
+    df[df["measure"] == "pf_doxycycline_insectbite"]
+    .rename(columns={"numerator": "pf_doxycycline_insectbite"})
+    [["practice", "interval_start", "pf_doxycycline_insectbite"]]
+)
+
+
 # Otitis media
 pf_amoxicillin_otitismedia = (
     df[df["measure"] == "pf_amoxicillin_otitismedia"]
@@ -438,6 +514,19 @@ pf_clarithromycin_otitismedia = (
     .rename(columns={"numerator": "pf_clarithromycin_otitismedia"})
     [["practice", "interval_start", "pf_clarithromycin_otitismedia"]]
 )
+
+pf_erythromycin_otitismedia = (
+    df[df["measure"] == "pf_erythromycin_otitismedia"]
+    .rename(columns={"numerator": "pf_erythromycin_otitismedia"})
+    [["practice", "interval_start", "pf_erythromycin_otitismedia"]]
+)
+
+pf_co_amoxiclav_otitismedia = (
+    df[df["measure"] == "pf_co_amoxiclav_otitismedia"]
+    .rename(columns={"numerator": "pf_co_amoxiclav_otitismedia"})
+    [["practice", "interval_start", "pf_co_amoxiclav_otitismedia"]]
+)
+
 
 # Sore throat
 pf_phenoxymethylpenicillin_sorethroat = (
@@ -452,6 +541,13 @@ pf_clarithromycin_sorethroat = (
     [["practice", "interval_start", "pf_clarithromycin_sorethroat"]]
 )
 
+pf_erythromycin_sorethroat = (
+    df[df["measure"] == "pf_erythromycin_sorethroat"]
+    .rename(columns={"numerator": "pf_erythromycin_sorethroat"})
+    [["practice", "interval_start", "pf_erythromycin_sorethroat"]]
+)
+
+
 # Shingles
 pf_aciclovir_shingles = (
     df[df["measure"] == "pf_aciclovir_shingles"]
@@ -463,6 +559,12 @@ pf_valaciclovir_shingles = (
     df[df["measure"] == "pf_valaciclovir_shingles"]
     .rename(columns={"numerator": "pf_valaciclovir_shingles"})
     [["practice", "interval_start", "pf_valaciclovir_shingles"]]
+)
+
+pf_famciclovir_shingles = (
+    df[df["measure"] == "pf_famciclovir_shingles"]
+    .rename(columns={"numerator": "pf_famciclovir_shingles"})
+    [["practice", "interval_start", "pf_famciclovir_shingles"]]
 )
 
 # Impetigo
@@ -478,8 +580,126 @@ pf_flucloxacillin_impetigo = (
     [["practice", "interval_start", "pf_flucloxacillin_impetigo"]]
 )
 
+pf_clarithromycin_impetigo = (
+    df[df["measure"] == "pf_clarithromycin_impetigo"]
+    .rename(columns={"numerator": "pf_clarithromycin_impetigo"})
+    [["practice", "interval_start", "pf_clarithromycin_impetigo"]]
+)
+
+pf_erythromycin_impetigo = (
+    df[df["measure"] == "pf_erythromycin_impetigo"]
+    .rename(columns={"numerator": "pf_erythromycin_impetigo"})
+    [["practice", "interval_start", "pf_erythromycin_impetigo"]]
+)
+
+pf_mupirocin_impetigo = (
+    df[df["measure"] == "pf_mupirocin_impetigo"]
+    .rename(columns={"numerator": "pf_mupirocin_impetigo"})
+    [["practice", "interval_start", "pf_mupirocin_impetigo"]]
+)
+
+
+
+
+# # UTI
+# pf_nitrofurantoin_uti = (
+#     df[df["measure"] == "pf_nitrofurantoin_uti"]
+#     .rename(columns={"numerator": "pf_nitrofurantoin_uti"})
+#     [["practice", "interval_start", "pf_nitrofurantoin_uti"]]
+# )
+
+# pf_trimethoprim_uti = (
+#     df[df["measure"] == "pf_trimethoprim_uti"]
+#     .rename(columns={"numerator": "pf_trimethoprim_uti"})
+#     [["practice", "interval_start", "pf_trimethoprim_uti"]]
+# )
+
+# # Sinusitis
+# pf_phenoxymethylpenicillin_sinusitis = (
+#     df[df["measure"] == "pf_phenoxymethylpenicillin_sinusitis"]
+#     .rename(columns={"numerator": "pf_phenoxymethylpenicillin_sinusitis"})
+#     [["practice", "interval_start", "pf_phenoxymethylpenicillin_sinusitis"]]
+# )
+
+# pf_doxycycline_sinusitis = (
+#     df[df["measure"] == "pf_doxycycline_sinusitis"]
+#     .rename(columns={"numerator": "pf_doxycycline_sinusitis"})
+#     [["practice", "interval_start", "pf_doxycycline_sinusitis"]]
+# )
+
+# # Insect bites
+# pf_flucloxacillin_insectbite = (
+#     df[df["measure"] == "pf_flucloxacillin_insectbite"]
+#     .rename(columns={"numerator": "pf_flucloxacillin_insectbite"})
+#     [["practice", "interval_start", "pf_flucloxacillin_insectbite"]]
+# )
+
+# pf_clarithromycin_insectbite = (
+#     df[df["measure"] == "pf_clarithromycin_insectbite"]
+#     .rename(columns={"numerator": "pf_clarithromycin_insectbite"})
+#     [["practice", "interval_start", "pf_clarithromycin_insectbite"]]
+# )
+
+# # Otitis media
+# pf_amoxicillin_otitismedia = (
+#     df[df["measure"] == "pf_amoxicillin_otitismedia"]
+#     .rename(columns={"numerator": "pf_amoxicillin_otitismedia"})
+#     [["practice", "interval_start", "pf_amoxicillin_otitismedia"]]
+# )
+
+# pf_clarithromycin_otitismedia = (
+#     df[df["measure"] == "pf_clarithromycin_otitismedia"]
+#     .rename(columns={"numerator": "pf_clarithromycin_otitismedia"})
+#     [["practice", "interval_start", "pf_clarithromycin_otitismedia"]]
+# )
+
+# # Sore throat
+# pf_phenoxymethylpenicillin_sorethroat = (
+#     df[df["measure"] == "pf_phenoxymethylpenicillin_sorethroat"]
+#     .rename(columns={"numerator": "pf_phenoxymethylpenicillin_sorethroat"})
+#     [["practice", "interval_start", "pf_phenoxymethylpenicillin_sorethroat"]]
+# )
+
+# pf_clarithromycin_sorethroat = (
+#     df[df["measure"] == "pf_clarithromycin_sorethroat"]
+#     .rename(columns={"numerator": "pf_clarithromycin_sorethroat"})
+#     [["practice", "interval_start", "pf_clarithromycin_sorethroat"]]
+# )
+
+# # Shingles
+# pf_aciclovir_shingles = (
+#     df[df["measure"] == "pf_aciclovir_shingles"]
+#     .rename(columns={"numerator": "pf_aciclovir_shingles"})
+#     [["practice", "interval_start", "pf_aciclovir_shingles"]]
+# )
+
+# pf_valaciclovir_shingles = (
+#     df[df["measure"] == "pf_valaciclovir_shingles"]
+#     .rename(columns={"numerator": "pf_valaciclovir_shingles"})
+#     [["practice", "interval_start", "pf_valaciclovir_shingles"]]
+# )
+
+# # Impetigo
+# pf_fusidic_acid_impetigo = (
+#     df[df["measure"] == "pf_fusidic_acid_impetigo"]
+#     .rename(columns={"numerator": "pf_fusidic_acid_impetigo"})
+#     [["practice", "interval_start", "pf_fusidic_acid_impetigo"]]
+# )
+
+# pf_flucloxacillin_impetigo = (
+#     df[df["measure"] == "pf_flucloxacillin_impetigo"]
+#     .rename(columns={"numerator": "pf_flucloxacillin_impetigo"})
+#     [["practice", "interval_start", "pf_flucloxacillin_impetigo"]]
+# )
+
 
 # IV.A.2. General practice level
+
+
+
+# IV. Specific antibiotics
+
+# IV.A.2. GP level
 
 # UTI
 gp_nitrofurantoin_uti = (
@@ -494,6 +714,37 @@ gp_trimethoprim_uti = (
     [["practice", "interval_start", "gp_trimethoprim_uti"]]
 )
 
+gp_fosfomycin_uti = (
+    df[df["measure"] == "gp_fosfomycin_uti"]
+    .rename(columns={"numerator": "gp_fosfomycin_uti"})
+    [["practice", "interval_start", "gp_fosfomycin_uti"]]
+)
+
+gp_pivmecillinam_uti = (
+    df[df["measure"] == "gp_pivmecillinam_uti"]
+    .rename(columns={"numerator": "gp_pivmecillinam_uti"})
+    [["practice", "interval_start", "gp_pivmecillinam_uti"]]
+)
+
+gp_co_amoxiclav_uti = (
+    df[df["measure"] == "gp_co_amoxiclav_uti"]
+    .rename(columns={"numerator": "gp_co_amoxiclav_uti"})
+    [["practice", "interval_start", "gp_co_amoxiclav_uti"]]
+)
+
+gp_cefalexin_uti = (
+    df[df["measure"] == "gp_cefalexin_uti"]
+    .rename(columns={"numerator": "gp_cefalexin_uti"})
+    [["practice", "interval_start", "gp_cefalexin_uti"]]
+)
+
+gp_amoxicillin_uti = (
+    df[df["measure"] == "gp_amoxicillin_uti"]
+    .rename(columns={"numerator": "gp_amoxicillin_uti"})
+    [["practice", "interval_start", "gp_amoxicillin_uti"]]
+)
+
+
 # Sinusitis
 gp_phenoxymethylpenicillin_sinusitis = (
     df[df["measure"] == "gp_phenoxymethylpenicillin_sinusitis"]
@@ -506,6 +757,25 @@ gp_doxycycline_sinusitis = (
     .rename(columns={"numerator": "gp_doxycycline_sinusitis"})
     [["practice", "interval_start", "gp_doxycycline_sinusitis"]]
 )
+
+gp_clarithromycin_sinusitis = (
+    df[df["measure"] == "gp_clarithromycin_sinusitis"]
+    .rename(columns={"numerator": "gp_clarithromycin_sinusitis"})
+    [["practice", "interval_start", "gp_clarithromycin_sinusitis"]]
+)
+
+gp_erythromycin_sinusitis = (
+    df[df["measure"] == "gp_erythromycin_sinusitis"]
+    .rename(columns={"numerator": "gp_erythromycin_sinusitis"})
+    [["practice", "interval_start", "gp_erythromycin_sinusitis"]]
+)
+
+gp_co_amoxiclav_sinusitis = (
+    df[df["measure"] == "gp_co_amoxiclav_sinusitis"]
+    .rename(columns={"numerator": "gp_co_amoxiclav_sinusitis"})
+    [["practice", "interval_start", "gp_co_amoxiclav_sinusitis"]]
+)
+
 
 # Insect bites
 gp_flucloxacillin_insectbite = (
@@ -520,6 +790,37 @@ gp_clarithromycin_insectbite = (
     [["practice", "interval_start", "gp_clarithromycin_insectbite"]]
 )
 
+gp_erythromycin_insectbite = (
+    df[df["measure"] == "gp_erythromycin_insectbite"]
+    .rename(columns={"numerator": "gp_erythromycin_insectbite"})
+    [["practice", "interval_start", "gp_erythromycin_insectbite"]]
+)
+
+gp_co_amoxiclav_insectbite = (
+    df[df["measure"] == "gp_co_amoxiclav_insectbite"]
+    .rename(columns={"numerator": "gp_co_amoxiclav_insectbite"})
+    [["practice", "interval_start", "gp_co_amoxiclav_insectbite"]]
+)
+
+gp_metronidazole_insectbite = (
+    df[df["measure"] == "gp_metronidazole_insectbite"]
+    .rename(columns={"numerator": "gp_metronidazole_insectbite"})
+    [["practice", "interval_start", "gp_metronidazole_insectbite"]]
+)
+
+gp_clindamycin_insectbite = (
+    df[df["measure"] == "gp_clindamycin_insectbite"]
+    .rename(columns={"numerator": "gp_clindamycin_insectbite"})
+    [["practice", "interval_start", "gp_clindamycin_insectbite"]]
+)
+
+gp_doxycycline_insectbite = (
+    df[df["measure"] == "gp_doxycycline_insectbite"]
+    .rename(columns={"numerator": "gp_doxycycline_insectbite"})
+    [["practice", "interval_start", "gp_doxycycline_insectbite"]]
+)
+
+
 # Otitis media
 gp_amoxicillin_otitismedia = (
     df[df["measure"] == "gp_amoxicillin_otitismedia"]
@@ -532,6 +833,19 @@ gp_clarithromycin_otitismedia = (
     .rename(columns={"numerator": "gp_clarithromycin_otitismedia"})
     [["practice", "interval_start", "gp_clarithromycin_otitismedia"]]
 )
+
+gp_erythromycin_otitismedia = (
+    df[df["measure"] == "gp_erythromycin_otitismedia"]
+    .rename(columns={"numerator": "gp_erythromycin_otitismedia"})
+    [["practice", "interval_start", "gp_erythromycin_otitismedia"]]
+)
+
+gp_co_amoxiclav_otitismedia = (
+    df[df["measure"] == "gp_co_amoxiclav_otitismedia"]
+    .rename(columns={"numerator": "gp_co_amoxiclav_otitismedia"})
+    [["practice", "interval_start", "gp_co_amoxiclav_otitismedia"]]
+)
+
 
 # Sore throat
 gp_phenoxymethylpenicillin_sorethroat = (
@@ -546,6 +860,13 @@ gp_clarithromycin_sorethroat = (
     [["practice", "interval_start", "gp_clarithromycin_sorethroat"]]
 )
 
+gp_erythromycin_sorethroat = (
+    df[df["measure"] == "gp_erythromycin_sorethroat"]
+    .rename(columns={"numerator": "gp_erythromycin_sorethroat"})
+    [["practice", "interval_start", "gp_erythromycin_sorethroat"]]
+)
+
+
 # Shingles
 gp_aciclovir_shingles = (
     df[df["measure"] == "gp_aciclovir_shingles"]
@@ -559,6 +880,13 @@ gp_valaciclovir_shingles = (
     [["practice", "interval_start", "gp_valaciclovir_shingles"]]
 )
 
+gp_famciclovir_shingles = (
+    df[df["measure"] == "gp_famciclovir_shingles"]
+    .rename(columns={"numerator": "gp_famciclovir_shingles"})
+    [["practice", "interval_start", "gp_famciclovir_shingles"]]
+)
+
+
 # Impetigo
 gp_fusidic_acid_impetigo = (
     df[df["measure"] == "gp_fusidic_acid_impetigo"]
@@ -571,6 +899,115 @@ gp_flucloxacillin_impetigo = (
     .rename(columns={"numerator": "gp_flucloxacillin_impetigo"})
     [["practice", "interval_start", "gp_flucloxacillin_impetigo"]]
 )
+
+gp_clarithromycin_impetigo = (
+    df[df["measure"] == "gp_clarithromycin_impetigo"]
+    .rename(columns={"numerator": "gp_clarithromycin_impetigo"})
+    [["practice", "interval_start", "gp_clarithromycin_impetigo"]]
+)
+
+gp_erythromycin_impetigo = (
+    df[df["measure"] == "gp_erythromycin_impetigo"]
+    .rename(columns={"numerator": "gp_erythromycin_impetigo"})
+    [["practice", "interval_start", "gp_erythromycin_impetigo"]]
+)
+
+gp_mupirocin_impetigo = (
+    df[df["measure"] == "gp_mupirocin_impetigo"]
+    .rename(columns={"numerator": "gp_mupirocin_impetigo"})
+    [["practice", "interval_start", "gp_mupirocin_impetigo"]]
+)
+
+# # UTI
+# gp_nitrofurantoin_uti = (
+#     df[df["measure"] == "gp_nitrofurantoin_uti"]
+#     .rename(columns={"numerator": "gp_nitrofurantoin_uti"})
+#     [["practice", "interval_start", "gp_nitrofurantoin_uti"]]
+# )
+
+# gp_trimethoprim_uti = (
+#     df[df["measure"] == "gp_trimethoprim_uti"]
+#     .rename(columns={"numerator": "gp_trimethoprim_uti"})
+#     [["practice", "interval_start", "gp_trimethoprim_uti"]]
+# )
+
+# # Sinusitis
+# gp_phenoxymethylpenicillin_sinusitis = (
+#     df[df["measure"] == "gp_phenoxymethylpenicillin_sinusitis"]
+#     .rename(columns={"numerator": "gp_phenoxymethylpenicillin_sinusitis"})
+#     [["practice", "interval_start", "gp_phenoxymethylpenicillin_sinusitis"]]
+# )
+
+# gp_doxycycline_sinusitis = (
+#     df[df["measure"] == "gp_doxycycline_sinusitis"]
+#     .rename(columns={"numerator": "gp_doxycycline_sinusitis"})
+#     [["practice", "interval_start", "gp_doxycycline_sinusitis"]]
+# )
+
+# # Insect bites
+# gp_flucloxacillin_insectbite = (
+#     df[df["measure"] == "gp_flucloxacillin_insectbite"]
+#     .rename(columns={"numerator": "gp_flucloxacillin_insectbite"})
+#     [["practice", "interval_start", "gp_flucloxacillin_insectbite"]]
+# )
+
+# gp_clarithromycin_insectbite = (
+#     df[df["measure"] == "gp_clarithromycin_insectbite"]
+#     .rename(columns={"numerator": "gp_clarithromycin_insectbite"})
+#     [["practice", "interval_start", "gp_clarithromycin_insectbite"]]
+# )
+
+# # Otitis media
+# gp_amoxicillin_otitismedia = (
+#     df[df["measure"] == "gp_amoxicillin_otitismedia"]
+#     .rename(columns={"numerator": "gp_amoxicillin_otitismedia"})
+#     [["practice", "interval_start", "gp_amoxicillin_otitismedia"]]
+# )
+
+# gp_clarithromycin_otitismedia = (
+#     df[df["measure"] == "gp_clarithromycin_otitismedia"]
+#     .rename(columns={"numerator": "gp_clarithromycin_otitismedia"})
+#     [["practice", "interval_start", "gp_clarithromycin_otitismedia"]]
+# )
+
+# # Sore throat
+# gp_phenoxymethylpenicillin_sorethroat = (
+#     df[df["measure"] == "gp_phenoxymethylpenicillin_sorethroat"]
+#     .rename(columns={"numerator": "gp_phenoxymethylpenicillin_sorethroat"})
+#     [["practice", "interval_start", "gp_phenoxymethylpenicillin_sorethroat"]]
+# )
+
+# gp_clarithromycin_sorethroat = (
+#     df[df["measure"] == "gp_clarithromycin_sorethroat"]
+#     .rename(columns={"numerator": "gp_clarithromycin_sorethroat"})
+#     [["practice", "interval_start", "gp_clarithromycin_sorethroat"]]
+# )
+
+# # Shingles
+# gp_aciclovir_shingles = (
+#     df[df["measure"] == "gp_aciclovir_shingles"]
+#     .rename(columns={"numerator": "gp_aciclovir_shingles"})
+#     [["practice", "interval_start", "gp_aciclovir_shingles"]]
+# )
+
+# gp_valaciclovir_shingles = (
+#     df[df["measure"] == "gp_valaciclovir_shingles"]
+#     .rename(columns={"numerator": "gp_valaciclovir_shingles"})
+#     [["practice", "interval_start", "gp_valaciclovir_shingles"]]
+# )
+
+# # Impetigo
+# gp_fusidic_acid_impetigo = (
+#     df[df["measure"] == "gp_fusidic_acid_impetigo"]
+#     .rename(columns={"numerator": "gp_fusidic_acid_impetigo"})
+#     [["practice", "interval_start", "gp_fusidic_acid_impetigo"]]
+# )
+
+# gp_flucloxacillin_impetigo = (
+#     df[df["measure"] == "gp_flucloxacillin_impetigo"]
+#     .rename(columns={"numerator": "gp_flucloxacillin_impetigo"})
+#     [["practice", "interval_start", "gp_flucloxacillin_impetigo"]]
+# )
 
 
 
@@ -637,48 +1074,139 @@ df_wide = df_wide.merge(gp_consultation_vulvovaginalcandidiasis_control, on=["pr
 df_wide = df_wide.merge(gp_vulvovaginalcandidiasis_eligible, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_medication_vulvovaginalcandidiasis_control, on=["practice", "interval_start"], how="left")
 
-# IV. Specific antibiotics
+# # IV. Specific antibiotics
+#new
 # UTI
 df_wide = df_wide.merge(pf_nitrofurantoin_uti, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_nitrofurantoin_uti, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_trimethoprim_uti, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_trimethoprim_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_fosfomycin_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_fosfomycin_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_pivmecillinam_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_pivmecillinam_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_co_amoxiclav_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_co_amoxiclav_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_cefalexin_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_cefalexin_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_amoxicillin_uti, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_amoxicillin_uti, on=["practice", "interval_start"], how="left")
+
 
 # Sinusitis
 df_wide = df_wide.merge(pf_phenoxymethylpenicillin_sinusitis, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_phenoxymethylpenicillin_sinusitis, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_doxycycline_sinusitis, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_doxycycline_sinusitis, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_clarithromycin_sinusitis, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_clarithromycin_sinusitis, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_erythromycin_sinusitis, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_erythromycin_sinusitis, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_co_amoxiclav_sinusitis, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_co_amoxiclav_sinusitis, on=["practice", "interval_start"], how="left")
+
 
 # Insect bites
 df_wide = df_wide.merge(pf_flucloxacillin_insectbite, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_flucloxacillin_insectbite, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_clarithromycin_insectbite, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_clarithromycin_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_erythromycin_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_erythromycin_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_co_amoxiclav_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_co_amoxiclav_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_metronidazole_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_metronidazole_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_clindamycin_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_clindamycin_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_doxycycline_insectbite, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_doxycycline_insectbite, on=["practice", "interval_start"], how="left")
+
 
 # Otitis media
 df_wide = df_wide.merge(pf_amoxicillin_otitismedia, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_amoxicillin_otitismedia, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_clarithromycin_otitismedia, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_clarithromycin_otitismedia, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_erythromycin_otitismedia, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_erythromycin_otitismedia, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_co_amoxiclav_otitismedia, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_co_amoxiclav_otitismedia, on=["practice", "interval_start"], how="left")
+
 
 # Sore throat
 df_wide = df_wide.merge(pf_phenoxymethylpenicillin_sorethroat, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_phenoxymethylpenicillin_sorethroat, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_clarithromycin_sorethroat, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_clarithromycin_sorethroat, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_erythromycin_sorethroat, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_erythromycin_sorethroat, on=["practice", "interval_start"], how="left")
+
 
 # Shingles
 df_wide = df_wide.merge(pf_aciclovir_shingles, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_aciclovir_shingles, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_valaciclovir_shingles, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_valaciclovir_shingles, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_famciclovir_shingles, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_famciclovir_shingles, on=["practice", "interval_start"], how="left")
+
 
 # Impetigo
 df_wide = df_wide.merge(pf_fusidic_acid_impetigo, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_fusidic_acid_impetigo, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(pf_flucloxacillin_impetigo, on=["practice", "interval_start"], how="left")
 df_wide = df_wide.merge(gp_flucloxacillin_impetigo, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_clarithromycin_impetigo, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_clarithromycin_impetigo, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_erythromycin_impetigo, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_erythromycin_impetigo, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(pf_mupirocin_impetigo, on=["practice", "interval_start"], how="left")
+df_wide = df_wide.merge(gp_mupirocin_impetigo, on=["practice", "interval_start"], how="left")
+
+
+#old
+# # UTI
+# df_wide = df_wide.merge(pf_nitrofurantoin_uti, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_nitrofurantoin_uti, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_trimethoprim_uti, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_trimethoprim_uti, on=["practice", "interval_start"], how="left")
+
+# # Sinusitis
+# df_wide = df_wide.merge(pf_phenoxymethylpenicillin_sinusitis, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_phenoxymethylpenicillin_sinusitis, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_doxycycline_sinusitis, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_doxycycline_sinusitis, on=["practice", "interval_start"], how="left")
+
+# # Insect bites
+# df_wide = df_wide.merge(pf_flucloxacillin_insectbite, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_flucloxacillin_insectbite, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_clarithromycin_insectbite, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_clarithromycin_insectbite, on=["practice", "interval_start"], how="left")
+
+# # Otitis media
+# df_wide = df_wide.merge(pf_amoxicillin_otitismedia, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_amoxicillin_otitismedia, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_clarithromycin_otitismedia, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_clarithromycin_otitismedia, on=["practice", "interval_start"], how="left")
+
+# # Sore throat
+# df_wide = df_wide.merge(pf_phenoxymethylpenicillin_sorethroat, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_phenoxymethylpenicillin_sorethroat, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_clarithromycin_sorethroat, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_clarithromycin_sorethroat, on=["practice", "interval_start"], how="left")
+
+# # Shingles
+# df_wide = df_wide.merge(pf_aciclovir_shingles, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_aciclovir_shingles, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_valaciclovir_shingles, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_valaciclovir_shingles, on=["practice", "interval_start"], how="left")
+
+# # Impetigo
+# df_wide = df_wide.merge(pf_fusidic_acid_impetigo, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_fusidic_acid_impetigo, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(pf_flucloxacillin_impetigo, on=["practice", "interval_start"], how="left")
+# df_wide = df_wide.merge(gp_flucloxacillin_impetigo, on=["practice", "interval_start"], how="left")
 
 
 
@@ -760,53 +1288,137 @@ for col in [
     "gp_medication_acutebronchitis_control",
     "gp_medication_conjunctivitisallergic_control",
     "gp_medication_vulvovaginalcandidiasis_control",
-
     # IV. Specific antibiotics
-    #Specific antibiotic measures - UTI
+    # Specific antibiotic measures - UTI
     "pf_nitrofurantoin_uti",
     "gp_nitrofurantoin_uti",
     "pf_trimethoprim_uti",
     "gp_trimethoprim_uti",
-
-    #Specific antibiotic measures - Sinusitis
+    "pf_fosfomycin_uti",                    # new
+    "gp_fosfomycin_uti",                    # new
+    "pf_pivmecillinam_uti",                 # new
+    "gp_pivmecillinam_uti",                 # new
+    "pf_co_amoxiclav_uti",                  # new
+    "gp_co_amoxiclav_uti",                  # new
+    "pf_cefalexin_uti",                     # new
+    "gp_cefalexin_uti",                     # new
+    "pf_amoxicillin_uti",                   # new
+    "gp_amoxicillin_uti",                   # new
+    
+    # Specific antibiotic measures - Sinusitis
     "pf_phenoxymethylpenicillin_sinusitis",
     "gp_phenoxymethylpenicillin_sinusitis",
     "pf_doxycycline_sinusitis",
     "gp_doxycycline_sinusitis",
-
-    #Specific antibiotic measures - Insect bites
+    "pf_clarithromycin_sinusitis",          # new
+    "gp_clarithromycin_sinusitis",          # new
+    "pf_erythromycin_sinusitis",            # new
+    "gp_erythromycin_sinusitis",            # new
+    "pf_co_amoxiclav_sinusitis",            # new
+    "gp_co_amoxiclav_sinusitis",            # new
+    
+    # Specific antibiotic measures - Insect bites
     "pf_flucloxacillin_insectbite",
     "gp_flucloxacillin_insectbite",
     "pf_clarithromycin_insectbite",
     "gp_clarithromycin_insectbite",
-
-    #Specific antibiotic measures - Otitis media
+    "pf_erythromycin_insectbite",           # new
+    "gp_erythromycin_insectbite",           # new
+    "pf_co_amoxiclav_insectbite",           # new
+    "gp_co_amoxiclav_insectbite",           # new
+    "pf_metronidazole_insectbite",          # new
+    "gp_metronidazole_insectbite",          # new
+    "pf_clindamycin_insectbite",            # new
+    "gp_clindamycin_insectbite",            # new
+    "pf_doxycycline_insectbite",            # new
+    "gp_doxycycline_insectbite",            # new
+    # Specific antibiotic measures - Otitis media
     "pf_amoxicillin_otitismedia",
     "gp_amoxicillin_otitismedia",
     "pf_clarithromycin_otitismedia",
     "gp_clarithromycin_otitismedia",
-
-    #Specific antibiotic measures - Sore throat
+    "pf_erythromycin_otitismedia",          # new
+    "gp_erythromycin_otitismedia",          # new
+    "pf_co_amoxiclav_otitismedia",          # new
+    "gp_co_amoxiclav_otitismedia",          # new
+    
+    # Specific antibiotic measures - Sore throat
     "pf_phenoxymethylpenicillin_sorethroat",
     "gp_phenoxymethylpenicillin_sorethroat",
     "pf_clarithromycin_sorethroat",
     "gp_clarithromycin_sorethroat",
-
-    #Specific antibiotic measures - Shingles
+    "pf_erythromycin_sorethroat",           # new
+    "gp_erythromycin_sorethroat",           # new
+    
+    # Specific antibiotic measures - Shingles
     "pf_aciclovir_shingles",
     "gp_aciclovir_shingles",
     "pf_valaciclovir_shingles",
     "gp_valaciclovir_shingles",
+    "pf_famciclovir_shingles",              # new
+    "gp_famciclovir_shingles",              # new
 
-    #Specific antibiotic measures - Impetigo
+    # Specific antibiotic measures  - Impetigo
     "pf_fusidic_acid_impetigo",
     "gp_fusidic_acid_impetigo",
     "pf_flucloxacillin_impetigo",
     "gp_flucloxacillin_impetigo",
+    "pf_clarithromycin_impetigo",           # new
+    "gp_clarithromycin_impetigo",           # new
+    "pf_erythromycin_impetigo",             # new
+    "gp_erythromycin_impetigo",             # new
+    "pf_mupirocin_impetigo",                # new
+    "gp_mupirocin_impetigo",                # new
+
+    # # IV. Specific antibiotics (old)
+    # #Specific antibiotic measures - UTI
+    # "pf_nitrofurantoin_uti",
+    # "gp_nitrofurantoin_uti",
+    # "pf_trimethoprim_uti",
+    # "gp_trimethoprim_uti",
+
+    # #Specific antibiotic measures - Sinusitis
+    # "pf_phenoxymethylpenicillin_sinusitis",
+    # "gp_phenoxymethylpenicillin_sinusitis",
+    # "pf_doxycycline_sinusitis",
+    # "gp_doxycycline_sinusitis",
+
+    # #Specific antibiotic measures - Insect bites
+    # "pf_flucloxacillin_insectbite",
+    # "gp_flucloxacillin_insectbite",
+    # "pf_clarithromycin_insectbite",
+    # "gp_clarithromycin_insectbite",
+
+    # #Specific antibiotic measures - Otitis media
+    # "pf_amoxicillin_otitismedia",
+    # "gp_amoxicillin_otitismedia",
+    # "pf_clarithromycin_otitismedia",
+    # "gp_clarithromycin_otitismedia",
+
+    # #Specific antibiotic measures - Sore throat
+    # "pf_phenoxymethylpenicillin_sorethroat",
+    # "gp_phenoxymethylpenicillin_sorethroat",
+    # "pf_clarithromycin_sorethroat",
+    # "gp_clarithromycin_sorethroat",
+
+    # #Specific antibiotic measures - Shingles
+    # "pf_aciclovir_shingles",
+    # "gp_aciclovir_shingles",
+    # "pf_valaciclovir_shingles",
+    # "gp_valaciclovir_shingles",
+
+    # #Specific antibiotic measures - Impetigo
+    # "pf_fusidic_acid_impetigo",
+    # "gp_fusidic_acid_impetigo",
+    # "pf_flucloxacillin_impetigo",
+    # "gp_flucloxacillin_impetigo",
 ]:
     df_wide[col] = df_wide[col].fillna(0)
+
+
 #"""
 #
+
 """
 for col in [
     "appointments_scheduled",
