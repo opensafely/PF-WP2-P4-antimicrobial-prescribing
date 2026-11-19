@@ -8,8 +8,8 @@ actions:
   #       dataset: output/dataset_patients.csv.gz
 
   #################################################################
-  #-----------------Protocol 4---------------------------------------------
-  #-------1.Monthly datasest actions:from  2022-02-01 to 2026-01-01
+  #-----------------Protocol 4---------------------------------------------------
+  #-----------------1.Monthly datasest actions:from  2022-02-01 to 2026-01-01----
   
   generate_patient_dataset_2022_02_01:
     run: ehrql:v1 generate-dataset analysis/dataset_definition_patients_Arnaud.py
