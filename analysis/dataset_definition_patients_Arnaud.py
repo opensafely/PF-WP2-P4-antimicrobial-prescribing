@@ -252,6 +252,13 @@ all_pharmacy_first_medications = (
     + trimethoprim_codelist
     + valaciclovir_codelist
 )
+#A.Has consultation
+dataset.has_consultation = (
+    pharmacy_first_events
+    .exists_for_patient()
+    .as_int()
+)
+#B.Has medication
 dataset.has_medication = (
     recent_medication
     .where(medications.dmd_code.is_in(all_pharmacy_first_medications))
@@ -259,6 +266,7 @@ dataset.has_medication = (
     .exists_for_patient()
     .as_int()
 )
+
 # 0.Medication and clincal event matching approach (date, consultation ID)--------------------------------------------------------------------------------------------------------------------------------
 # 0.1.Same date ?
 # uti on the same date
