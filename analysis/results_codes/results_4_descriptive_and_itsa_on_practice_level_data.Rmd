@@ -44,8 +44,7 @@ knitr::opts_chunk$set(
   fig.height = 6
 )
 ```
-# 2. Data and intervention dates
-
+#2.Data_and_intervention_dates:
 ```{r data}
 #practice_level_data<- read_csv("C:/Users/arnau/Downloads/practice_level_data_by_practice_only.csv")
 practice_level_data <- read_csv(
@@ -181,14 +180,7 @@ otitis_plot <- ggplot(
 otitis_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig1_otitis_monthly_counts.png",
-  plot = otitis_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig1_otitis_monthly_counts.png",plot = otitis_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 
@@ -241,14 +233,7 @@ uti_plot <- ggplot(
 uti_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig2_uti_monthly_counts.png",
-  plot = uti_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig2_uti_monthly_counts.png",plot = uti_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 ## 0.3. sinusitis_plot
@@ -303,14 +288,7 @@ sinusitis_plot <- ggplot(
 sinusitis_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig3_sinusitis_monthly_counts.png",
-  plot = sinusitis_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig3_sinusitis_monthly_counts.png",plot = sinusitis_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
   
   
@@ -368,14 +346,7 @@ insectbite_plot <- ggplot(
 insectbite_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig4_insectbite_monthly_counts.png",
-  plot = insectbite_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig4_insectbite_monthly_counts.png",plot = insectbite_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ``` 
 
 ## 0.5. sorethroat_plot
@@ -430,14 +401,7 @@ sorethroat_plot <- ggplot(
 sorethroat_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig5_sorethroat_monthly_counts.png",
-  plot = sorethroat_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig5_sorethroat_monthly_counts.png",plot = sorethroat_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
   
 
@@ -493,14 +457,7 @@ shingles_plot <- ggplot(
 shingles_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig6_shingles_monthly_counts.png",
-  plot = shingles_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig6_shingles_monthly_counts.png",plot = shingles_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
   
@@ -558,14 +515,7 @@ impetigo_plot <- ggplot(
 impetigo_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig7_impetigo_monthly_counts.png",
-  plot = impetigo_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig7_impetigo_monthly_counts.png",plot = impetigo_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
   
 
@@ -621,14 +571,7 @@ all_conditions_plot <- ggplot(
 all_conditions_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig8_all_conditions_monthly_counts.png",
-  plot = all_conditions_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig8_all_conditions_monthly_counts.png",plot = all_conditions_plot,path = here::here(),width = 10, height = 6,dpi = 300)
 ```
 
 
@@ -687,16 +630,8 @@ uti_control_plot <- ggplot(
 uti_control_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig9_uti_vs_control.png",
-  plot = uti_control_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig9_uti_vs_control.png",plot = uti_control_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
-
 ## 0.9.2. insectbite_control_plot
 
 ```{r insectbite_control_plot, fig.width=10, fig.height=6, fig.cap="Figure 10. Monthly medication counts for insect bites vs allergic conjunctivitis (control)."}
@@ -751,14 +686,7 @@ insectbite_control_plot <- ggplot(
 insectbite_control_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig10_insectbite_vs_control.png",
-  plot = insectbite_control_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig10_insectbite_vs_control.png",plot = insectbite_control_plot,path = here::here(),width = 10, height = 6, dpi = 300)
 ```
 
 ## 0.9.2. sorethroat and control_plot
@@ -815,14 +743,7 @@ sorethroat_control_plot <- ggplot(
 sorethroat_control_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig11_sorethroat_vs_control.png",
-  plot = sorethroat_control_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig11_sorethroat_vs_control.png",plot = sorethroat_control_plot, path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 ###  plot_together(shorter)
@@ -1005,14 +926,7 @@ faceted_counts_plot <- ggplot(
 faceted_counts_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig20_faceted_counts_by_condition.png",
-  plot = faceted_counts_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig20_faceted_counts_by_condition.png",plot = faceted_counts_plot,path = here::here(), width = 10,height = 6,dpi = 300)
 ```
 
 ##summary
@@ -1323,14 +1237,7 @@ faceted_rate_plot <- ggplot(
 faceted_rate_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig21_faceted_rates_by_condition.png",
-  plot = faceted_rate_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig21_faceted_rates_by_condition.png",plot = faceted_rate_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 ## Pair rate
@@ -1383,14 +1290,7 @@ graph_A4_1 <- ggplot(descr_summary_rate, aes(x = interval_start)) +
 graph_A4_1
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig22_distribution_rate.png",
-  plot = graph_A4_1,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig22_distribution_rate.png", plot = graph_A4_1,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 ## 9.2.GP vs PF (median, mean, IQR))
@@ -1449,14 +1349,7 @@ graph_A4_2_by_settings <- ggplot(descr_summary_rate_by_settings,aes(x = interval
 
 graph_A4_2_by_settings
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig23_medication_rate_gp_vs_pf.png",
-  plot = graph_A4_2_by_settings,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig23_medication_rate_gp_vs_pf.png",plot = graph_A4_2_by_settings,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 
@@ -1662,14 +1555,7 @@ gee_uti_trend_plot <- ggplot(gee_uti_plot_data,aes(x = interval_start)) +
 gee_uti_trend_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig24_gee_uti_observed_vs_fitted.png",
-  plot = gee_uti_trend_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig24_gee_uti_observed_vs_fitted.png",plot = gee_uti_trend_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 
@@ -1774,14 +1660,7 @@ observed_rate_plot <- ggplot( monthly_uti, aes(x = interval_start, y = rate_per_
 observed_rate_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig25_gp_uti_prescribing_rate.png",
-  plot = observed_rate_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig25_gp_uti_prescribing_rate.png",plot = observed_rate_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 ## 12.Fitted/predicted trend from the GEE model
@@ -1925,7 +1804,7 @@ plot_data <- practice_level_uti_and_control_long %>%
   ) %>%
   mutate(group_label = if_else(Z == 1, "Treatment", "Control"))
 
-intervention_date <- as.Date("2025-10-01")  #
+intervention_date <- as.Date("2024-02-01")  #
 
 post_estimation_trend_plot <- ggplot(plot_data, aes(x = interval_start, colour = group_label, group = group_label)) +
   geom_point(aes(y = actual_rate, shape = group_label), size = 2) +
@@ -1946,14 +1825,7 @@ post_estimation_trend_plot <- ggplot(plot_data, aes(x = interval_start, colour =
 post_estimation_trend_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig26_post_estimation_trends.png",
-  plot = post_estimation_trend_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig26_post_estimation_trends.png",plot = post_estimation_trend_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
   
 
@@ -2093,14 +1965,7 @@ residuals_by_practice_plot <- ggplot(df_diag, aes(x = T , y = pearson_resid, gro
 residuals_by_practice_plot
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig27_residuals_by_practice.png",
-  plot = residuals_by_practice_plot,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig27_residuals_by_practice.png",plot = residuals_by_practice_plot,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 
@@ -2127,14 +1992,7 @@ sensitivity_plot_exp <- bind_rows(
 sensitivity_plot_exp
 
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig28_sensitivity_correlation_structure_rr.png",
-  plot = sensitivity_plot_exp,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig28_sensitivity_correlation_structure_rr.png",plot = sensitivity_plot_exp,path = here::here(),width = 10,height = 6,dpi = 300)
 ```
 
 
@@ -2161,14 +2019,6 @@ sensitivity_plot_manual_exp <- bind_rows(
        title = "Sensitivity of estimates to working correlation structure (manually exponentiated)")
 
 sensitivity_plot_manual_exp
-
 # Save as PNG
-ggsave(
-  filename = "output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png",
-  plot = sensitivity_plot_manual_exp,
-  path = here::here(),
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+ggsave(filename = "output/results_4_Fig29_sensitivity_correlation_structure_rr_manual.png",plot = sensitivity_plot_manual_exp,path = here::here(), width = 10,height = 6,dpi = 300)
 ```
