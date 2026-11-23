@@ -8,7 +8,6 @@ df_input <- read_csv(
   )
 )
 df_input <- as.data.frame(df_input)
-
 plot_imd <- df_input %>%
   filter(factor(imd) != "Missing") %>%
   count(imd) %>%
