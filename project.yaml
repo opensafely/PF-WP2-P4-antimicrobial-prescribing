@@ -790,7 +790,8 @@ actions:
     - process_measures_to_practice_dataset_by_practice_only
     outputs:
       moderately_sensitive:
-        fig_1: results_4_Fig1_otitis_monthly_counts.png
+        fig_2: output/results_4_1_Fig1_otitis_monthly_counts.png
+
   generate_results_7_specific_medications:
     run: r:v2 analysis/results_codes/results_7_specific_medications.R
     needs: 
