@@ -44,6 +44,7 @@ dir.create(here::here("output"), showWarnings = FALSE, recursive = TRUE)
 #practice_level_data<- read_csv("C:/Users/arnau/Downloads/practice_level_data_by_practice_only.csv")
 #practice_level_data<-read_csv("practice_level_data_by_practice_only.csv")
 
+#
 practice_level_data <- read_csv(
   here("output", "practice_level_data_by_practice_only.csv")
 )
