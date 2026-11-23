@@ -790,7 +790,7 @@ actions:
     - process_measures_to_practice_dataset_by_practice_only
     outputs:
       moderately_sensitive:
-        fig_2: output/results_4_1_Fig1_otitis_monthly_counts.png
+        fig_1: output/results_4_1_Fig1_otitis_monthly_counts.png
         fig28: output/results_4_1_Fig28_sensitivity_correlation_structure_rr.png
 
   generate_results_7_specific_medications:
