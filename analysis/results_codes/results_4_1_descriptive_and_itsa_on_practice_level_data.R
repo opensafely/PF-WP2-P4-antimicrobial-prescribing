@@ -42,11 +42,12 @@ dir.create(here::here("output"), showWarnings = FALSE, recursive = TRUE)
 
 # ---- data ------------------------------------------------------------------
 #practice_level_data<- read_csv("C:/Users/arnau/Downloads/practice_level_data_by_practice_only.csv")
-practice_level_data<-read_csv("practice_level_data_by_practice_only.csv")
-#practice_level_data <- read_csv(
-#  here("output", "practice_level_data_by_practice_only.csv")
-#)
+#practice_level_data<-read_csv("practice_level_data_by_practice_only.csv")
 
+practice_level_data <- read_csv(
+  here("output", "practice_level_data_by_practice_only.csv")
+)
+#
 practice_level_data<-practice_level_data%>%
   mutate(interval_start = as.Date(interval_start, format = "%m/%d/%Y"))
 GP_connect <- as.Date("2025-10-01")
