@@ -329,10 +329,10 @@ uti_events = (              # This code check if the clinical event happened bet
     )
 dataset.has_uti = uti_events.exists_for_patient().as_int() # 0 if no ,1 otherwise : better for daily not for monthly 
 # Event count
-# dataset.uti_count = (                  #This count uti events.A patient can have more than one event's code for the same consultation (uti, cystitis,..) 
+# dataset.uti_count = (                  # This count uti events.A patient can have more than one event's code for the same consultation (uti, cystitis,..) 
 #    uti_events.count_for_patient()
 # )
-dataset.uti_consultation_count = (       #This count uti consultations : This should be more accurate than "uti_count" because one consultaion can have more than 1 code for the same condition (especialy when GP want to add more description.For ex:Diagnosis (UTI)+Symptoms (Dysuria),or Diagnosis(UTI)+Specification( Cystitis) 
+dataset.uti_consultation_count = (       # This count uti consultations : This should be more accurate than "uti_count" because one consultaion can have more than 1 code for the same condition (especialy when GP want to add more description.For ex:Diagnosis (UTI)+Symptoms (Dysuria),or Diagnosis(UTI)+Specification( Cystitis) 
     uti_events.consultation_id.count_distinct_for_patient()
 )
 #1.b.Treatment  
