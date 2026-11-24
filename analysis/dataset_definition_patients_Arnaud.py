@@ -329,7 +329,7 @@ uti_events = (              # This code check if the clinical event happened bet
     )
 dataset.has_uti = uti_events.exists_for_patient().as_int() # 0 if no ,1 otherwise : better for daily not for monthly 
 # Event count
-# dataset.uti_count = (                  # This count uti events.A patient can have more than one event's code for the same consultation (uti, cystitis,..) 
+# dataset.uti_count = (                   # This count uti events.A patient can have more than one event's code for the same consultation (uti, cystitis,..) 
 #    uti_events.count_for_patient()
 # )
 #
