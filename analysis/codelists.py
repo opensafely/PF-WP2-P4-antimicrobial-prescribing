@@ -403,6 +403,28 @@ control_condition_specific_medications_dict = {
     ),
 }
 
+
+
+#Charlson morbidity score: Updated November 26,2026
+#Source: https://github.com/opensafely/uom_pregnancy_tx_pathways/blob/b1cc3b582ba259ed6b81d7c90bd7c1ef7e8327ae/codelists/codelists.json
+cancer_codelist = codelist_from_csv("codelists/user-yayang-charlson01_cancer.csv", column = "code")
+cvd_codelist = codelist_from_csv("codelists/user-yayang-charlson02_cvd.csv", column = "code")
+copd_codelist = codelist_from_csv("codelists/user-yayang-charlson03_copd.csv", column = "code")
+heart_failure_codelist = codelist_from_csv("codelists/user-yayang-charlson04_heart_failure.csv", column = "code")
+connective_tissue_codelist = codelist_from_csv("codelists/user-yayang-charlson05_connective_tissue.csv", column = "code")
+dementia_codelist = codelist_from_csv("codelists/user-yayang-charlson06_dementia.csv", column = "code")
+diabetes_codelist = codelist_from_csv("codelists/user-yayang-charlson07_diabetes.csv", column = "code")
+diabetes_complications_codelist = codelist_from_csv("codelists/user-yayang-charlson08_diabetes_with_complications.csv", column = "code")
+hemiplegia_codelist = codelist_from_csv("codelists/user-yayang-charlson09_hemiplegia.csv", column = "code")
+hiv_codelist = codelist_from_csv("codelists/user-yayang-charlson10_hiv.csv", column = "code")
+metastatic_cancer_codelist = codelist_from_csv("codelists/user-yayang-charlson11_metastatic_cancer.csv", column = "code")
+mild_liver_disease_codelist = codelist_from_csv("codelists/user-yayang-charlson12_mild_liver.csv", column = "code")
+moderate_severe_liver_disease_codelist = codelist_from_csv("codelists/user-yayang-charlson13_mod_severe_liver.csv", column = "code")
+moderate_severe_renal_disease_codelist = codelist_from_csv("codelists/user-yayang-charlson14_moderate_several_renalldisease.csv", column = "code")
+mi_codelist = codelist_from_csv("codelists/user-yayang-charlson15_mi.csv", column = "code")
+peptic_ulcer_codelist = codelist_from_csv("codelists/user-yayang-charlson16_peptic_ulcer.csv", column = "code")
+peripheral_vascular_disease_codelist = codelist_from_csv("codelists/user-yayang-charlson17_peripheral_vascular.csv", column = "code")
+
 #---------------------------------------------P2--------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
 # SNOMED UK ethnicity category codelist - latest version 22911876
 ethnicity_group6_codelist = codelist_from_csv(

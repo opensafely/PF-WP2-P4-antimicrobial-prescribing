@@ -2013,3 +2013,6 @@ measures.define_measure(
 # git branch -vv: check whether our local branch tracks the OpenSAFELY repo
 #-->If it says [origin/main], your local branch is still tracking your personal repository.
 # git push opensafely main : push the local branch to OS repo
+
+#D.Codelists updates using the terminal 
+# opensafely codelists add https://www.opencodelists.org/codelist/user/yayang/charlson15_mi/1a93fcbd/

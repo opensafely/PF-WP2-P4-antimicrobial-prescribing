@@ -2257,3 +2257,585 @@ ggsave(
   height = 6,
   dpi = 300
 )
+
+
+
+
+#II.Modelling ITSA
+
+
+
+
+######################################################################
+# Pharmacy First — Practice-level data — GEE ITSA by condition
+# Author: Arnaud Iradukunda
+#
+# Part A. Single-group ITSA (Poisson GEE) for each of the 7 PF conditions
+# Part B. Controlled ITSA (Poisson GEE) for the 3 conditions with a control:
+#           UTI          vs vulvovaginal candidiasis
+#           Insect bite  vs allergic conjunctivitis
+#           Sore throat  vs acute bronchitis
+# Part C. Model assessment for every model:
+#           QIC across working correlations, alpha, dispersion,
+#           residual plots, ACF / Ljung-Box on monthly residuals,
+#           sensitivity of IRRs to correlation structure,
+#           (optional) sensitivity truncating at GP Connect.
+#
+# Model (single group), practice g, month t:
+#   log E(Y_gt) = b0 + b1*T + b2*X + b3*XT [+ seasonality] + log(offset_gt)
+#   b1 = pre-PF monthly trend, b2 = immediate level change at PF start,
+#   b3 = change in monthly trend after PF start
+#
+# Model (controlled), condition-series c (Z = 1 PF condition, 0 control):
+#   log E(Y) = b0 + b1*T + b2*X + b3*XT
+#            + b4*Z + b5*ZT + b6*ZX + b7*ZXT [+ seasonality] + log(offset)
+#   b4 = baseline level difference, b5 = pre-trend difference,
+#   b6 = difference in level change (PF condition vs control),
+#   b7 = difference in trend change (PF condition vs control)
+#
+# All outputs go to output/gee/
+######################################################################
+
+# ---- setup -----------------------------------------------------------------
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(purrr)
+  library(readr)
+  library(ggplot2)
+  library(lubridate)
+  library(geepack)
+  library(broom)
+  library(here)
+})
+
+######################################################################
+# 0. Configuration — edit here
+######################################################################
+
+data_path <- here("output", "practice_level_data_by_practice_only.csv")
+# data_path <- "C:/Users/arnau/Downloads/practice_level_data_by_practice_only (7).csv"
+
+PF_start   <- as.Date("2024-02-01")   # intervention
+GP_connect <- as.Date("2025-10-01")   # recording change in GP records
+
+# Offset: "population" (total list size; your current choice because some
+# eligible populations are 0) or "eligible" (condition-specific eligible
+# population; rows with eligible population <= 0 are dropped, since
+# nobody is at risk there).
+offset_type <- "population"
+
+adjust_season <- TRUE      # add annual Fourier terms (sin/cos 12 months)
+main_corstr   <- "ar1"     # working correlation for the main models
+corstrs       <- c("ar1", "exchangeable", "independence")
+run_gp_connect_sensitivity <- TRUE   # refit using months before GP Connect only
+
+out_dir <- here("output", "gee")
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Conditions: name in data -> label, outcome column, eligible-pop column
+conditions <- tribble(
+  ~cond,          ~label,              ~elig_var,
+  "uti",          "UTI",               "populationeligible_uuti",   # 'uuti' as named in the data
+  "sinusitis",    "Sinusitis",         "populationeligible_sinusitis",
+  "insectbite",   "Insect bite",       "populationeligible_insectbite",
+  "otitismedia",  "Otitis media",      "populationeligible_otitismedia",
+  "sorethroat",   "Sore throat",       "populationeligible_sorethroat",
+  "shingles",     "Shingles",          "populationeligible_shingles",
+  "impetigo",     "Impetigo",          "populationeligible_impetigo"
+) %>%
+  mutate(med_var = paste0("gp_medication_", cond))
+
+# PF condition -> control pairs
+pairs <- tribble(
+  ~cond,        ~control,                          ~control_label,
+  "uti",        "vulvovaginalcandidiasis_control", "Vulvovaginal candidiasis",
+  "insectbite", "conjunctivitisallergic_control",  "Allergic conjunctivitis",
+  "sorethroat", "acutebronchitis_control",         "Acute bronchitis"
+) %>%
+  left_join(conditions %>% select(cond, label, med_var, elig_var), by = "cond") %>%
+  mutate(
+    control_med_var  = paste0("gp_medication_", control),
+    control_elig_var = paste0("populationeligible_", control)
+  )
+
+######################################################################
+# 1. Load data and build the time variables
+######################################################################
+
+# ---- data ------------------------------------------------------------------
+clean_names_simple <- function(df) {
+  if (requireNamespace("janitor", quietly = TRUE)) return(janitor::clean_names(df))
+  names(df) <- tolower(gsub("[^A-Za-z0-9]+", "_", names(df)))
+  df
+}
+
+dat_raw <- read_csv(data_path, show_col_types = FALSE) %>% clean_names_simple()
+
+# Dates arrive as m/d/Y in some extracts and Y-m-d in others
+dat_raw <- dat_raw %>%
+  mutate(interval_start = as.Date(parse_date_time(
+    as.character(interval_start), orders = c("ymd", "mdy", "dmy")
+  )))
+
+stopifnot(!any(is.na(dat_raw$interval_start)))
+
+study_start <- min(dat_raw$interval_start)
+T_PF        <- interval(study_start, PF_start) %/% months(1)
+
+# T, X, XT are defined from the calendar, not from row numbers, so a
+# practice with a missing month keeps the right time index.
+dat <- dat_raw %>%
+  mutate(
+    T  = interval(study_start, interval_start) %/% months(1),
+    X  = as.integer(interval_start >= PF_start),
+    XT = pmax(T - T_PF, 0),
+    sin12 = sin(2 * pi * month(interval_start) / 12),
+    cos12 = cos(2 * pi * month(interval_start) / 12),
+    practice_id = as.integer(factor(practice))
+  )
+
+cat("Study period:", format(study_start), "to", format(max(dat$interval_start)),
+    "| months:", max(dat$T) + 1, "| PF at T =", T_PF, "\n")
+print(dat %>% distinct(interval_start, T, X, XT) %>% arrange(interval_start), n = Inf)
+
+season_terms <- if (adjust_season) " + sin12 + cos12" else ""
+
+######################################################################
+# 2. Helper functions
+######################################################################
+
+# ---- helpers ---------------------------------------------------------------
+
+# One condition series: outcome y, offset, time variables. Drops invalid rows
+# and sorts by cluster then time (geeglm requires contiguous, ordered clusters).
+prep_series <- function(data, med_var, elig_var) {
+  out <- data %>%
+    transmute(
+      practice, practice_id, interval_start, T, X, XT, sin12, cos12,
+      y = .data[[med_var]],
+      pop = if (offset_type == "eligible") .data[[elig_var]] else population
+    ) %>%
+    filter(!is.na(y), !is.na(pop), pop > 0) %>%
+    mutate(log_pop = log(pop)) %>%
+    arrange(practice_id, T)
+  out
+}
+
+data_checks <- function(d, name) {
+  tibble(
+    model = name,
+    n_rows = nrow(d),
+    n_practices = n_distinct(d$practice_id),
+    n_months = n_distinct(d$T),
+    total_count = sum(d$y),
+    prop_zero = mean(d$y == 0),
+    min_y = min(d$y), max_y = max(d$y),
+    n_pre = sum(d$X == 0), n_post = sum(d$X == 1)
+  )
+}
+
+# geeglm evaluates id/waves inside `data`, so the columns are named directly.
+fit_gee <- function(formula, d, corstr, id_col = "practice_id") {
+  d$cluster <- d[[id_col]]
+  d <- d %>% arrange(cluster, T)
+  fit <- tryCatch(
+    geeglm(formula, family = poisson(link = "log"), data = d,
+           id = cluster, waves = T, corstr = corstr),
+    error = function(e) { message("  fit failed (", corstr, "): ", conditionMessage(e)); NULL }
+  )
+  # QIC refits an independence model from the call, so it must run here,
+  # where `d` and `formula` exist
+  if (!is.null(fit)) {
+    fit$qic <- tryCatch(QIC(fit, env = environment()),
+                        error = function(e) { message("  QIC failed: ", conditionMessage(e)); rep(NA_real_, 6) })
+  }
+  fit
+}
+
+tidy_irr <- function(fit, model_name, corstr) {
+  if (is.null(fit)) return(NULL)
+  tidy(fit, exponentiate = TRUE, conf.int = TRUE) %>%
+    mutate(model = model_name, corstr = corstr, .before = 1)
+}
+
+# Linear combination of coefficients (robust vcov), on the log and IRR scale
+lincom <- function(model, terms, level = 0.95) {
+  b  <- coef(model); V <- vcov(model)
+  cv <- setNames(rep(0, length(b)), names(b)); cv[terms] <- 1
+  est <- sum(cv * b)
+  se  <- sqrt(as.numeric(t(cv) %*% V %*% cv))
+  ci  <- est + c(-1, 1) * qnorm(1 - (1 - level) / 2) * se
+  tibble(estimate_log = est, se = se, z = est / se, p.value = 2 * pnorm(-abs(est / se)),
+         IRR = exp(est), IRR_low = exp(ci[1]), IRR_high = exp(ci[2]))
+}
+
+# Diagnostics for one fitted model: dispersion, alpha, QIC, residual checks
+assess_fit <- function(fit, d, model_name, corstr) {
+  if (is.null(fit)) return(NULL)
+  pr  <- residuals(fit, type = "pearson")
+  qic <- fit$qic
+  alpha <- if (length(fit$geese$alpha)) unname(fit$geese$alpha[1]) else NA_real_
+
+  # Residual autocorrelation on the monthly aggregated residual series
+  monthly_res <- tibble(T = d$T, r = pr) %>% group_by(T) %>%
+    summarise(r = mean(r), .groups = "drop") %>% arrange(T)
+  lb <- tryCatch(Box.test(monthly_res$r, lag = min(12, nrow(monthly_res) - 2),
+                          type = "Ljung-Box"), error = function(e) NULL)
+
+  tibble(
+    model = model_name, corstr = corstr,
+    QIC = unname(qic[1]), QICu = unname(qic[2]), CIC = unname(qic[4]),
+    alpha = alpha,
+    dispersion_gee = summary(fit)$dispersion$Estimate[1],
+    dispersion_pearson = sum(pr^2) / (length(pr) - length(coef(fit))),
+    ljung_box_p = if (is.null(lb)) NA_real_ else lb$p.value,
+    acf_lag1_monthly = acf(monthly_res$r, plot = FALSE, lag.max = 1)$acf[2]
+  )
+}
+
+save_plot <- function(p, file, w = 10, h = 6) {
+  ggsave(file.path(out_dir, file), p, width = w, height = h, dpi = 300)
+}
+
+residual_plots <- function(fit, d, model_name, file_stub) {
+  df <- d %>% mutate(pr = residuals(fit, type = "pearson"), fv = fitted(fit))
+
+  p1 <- ggplot(df, aes(fv, pr)) +
+    geom_point(alpha = 0.15, size = 0.6) +
+    geom_hline(yintercept = 0, colour = "red", linetype = "dashed") +
+    scale_x_log10() +
+    labs(title = paste(model_name, "— Pearson residuals vs fitted"),
+         x = "Fitted count (log scale)", y = "Pearson residual") +
+    theme_bw()
+
+  p2 <- df %>% group_by(interval_start) %>%
+    summarise(mean = mean(pr), q1 = quantile(pr, .25), q3 = quantile(pr, .75), .groups = "drop") %>%
+    ggplot(aes(interval_start, mean)) +
+    geom_ribbon(aes(ymin = q1, ymax = q3), alpha = 0.2) +
+    geom_line() + geom_point(size = 1.5) +
+    geom_hline(yintercept = 0, colour = "red", linetype = "dashed") +
+    geom_vline(xintercept = PF_start, linetype = "dashed") +
+    geom_vline(xintercept = GP_connect, linetype = "dotted") +
+    scale_x_date(date_labels = "%Y-%m", date_breaks = "2 months") +
+    labs(title = paste(model_name, "— Pearson residuals over time"),
+         subtitle = "Mean (line) and IQR (band) across practices",
+         x = NULL, y = "Pearson residual") +
+    theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  monthly_r <- df %>% group_by(T) %>% summarise(r = mean(pr), .groups = "drop") %>% arrange(T)
+  a <- acf(monthly_r$r, plot = FALSE, lag.max = min(18, nrow(monthly_r) - 1))
+  ci <- qnorm(0.975) / sqrt(nrow(monthly_r))
+  p3 <- tibble(lag = a$lag[-1], acf = a$acf[-1]) %>%
+    ggplot(aes(lag, acf)) +
+    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = c(-ci, ci), linetype = "dashed", colour = "blue") +
+    geom_segment(aes(xend = lag, yend = 0)) +
+    labs(title = paste(model_name, "— ACF of monthly mean Pearson residuals"),
+         x = "Lag (months)", y = "ACF") +
+    theme_bw()
+
+  save_plot(p1, paste0(file_stub, "_resid_vs_fitted.png"))
+  save_plot(p2, paste0(file_stub, "_resid_vs_time.png"))
+  save_plot(p3, paste0(file_stub, "_resid_acf.png"), w = 8, h = 5)
+}
+
+######################################################################
+# Part A. Single-group ITSA — 7 PF conditions
+######################################################################
+
+# ---- single-group-models ---------------------------------------------------
+f_single <- as.formula(paste0("y ~ T + X + XT", season_terms, " + offset(log_pop)"))
+
+single_irr   <- list()
+single_diag  <- list()
+single_check <- list()
+single_fits  <- list()
+
+for (i in seq_len(nrow(conditions))) {
+  cc <- conditions[i, ]
+  message("Single-group GEE: ", cc$label)
+  d <- prep_series(dat, cc$med_var, cc$elig_var)
+  single_check[[cc$cond]] <- data_checks(d, cc$label)
+
+  fits <- set_names(map(corstrs, ~ fit_gee(f_single, d, .x)), corstrs)
+  single_fits[[cc$cond]] <- list(data = d, fits = fits)
+
+  single_irr[[cc$cond]]  <- imap_dfr(fits, ~ tidy_irr(.x, cc$label, .y))
+  single_diag[[cc$cond]] <- imap_dfr(fits, ~ assess_fit(.x, d, cc$label, .y))
+
+  main <- fits[[main_corstr]]
+  if (is.null(main)) next
+
+  # Observed vs fitted vs counterfactual (no PF: X = XT = 0), per 1,000
+  cf <- d %>% mutate(X = 0, XT = 0)
+  plot_df <- d %>%
+    mutate(fitted = predict(main, type = "response"),
+           counterfactual = predict(main, newdata = cf, type = "response")) %>%
+    group_by(interval_start) %>%
+    summarise(across(c(y, fitted, counterfactual), sum), pop = sum(pop), .groups = "drop") %>%
+    mutate(across(c(y, fitted, counterfactual), ~ .x / pop * 1000),
+           counterfactual = if_else(interval_start >= PF_start, counterfactual, NA_real_))
+
+  p_fit <- ggplot(plot_df, aes(interval_start)) +
+    geom_point(aes(y = y, colour = "Observed"), size = 2) +
+    geom_line(aes(y = fitted, colour = "GEE fitted"), linewidth = 1) +
+    geom_line(aes(y = counterfactual, colour = "Counterfactual (no PF)"),
+              linetype = "dashed", linewidth = 0.9, na.rm = TRUE) +
+    geom_vline(xintercept = PF_start, linetype = "dashed") +
+    geom_vline(xintercept = GP_connect, linetype = "dotted") +
+    scale_colour_manual(values = c("Observed" = "grey30", "GEE fitted" = "#2166AC",
+                                   "Counterfactual (no PF)" = "#B2182B")) +
+    scale_x_date(date_labels = "%Y-%m", date_breaks = "2 months") +
+    labs(title = paste("GP medications for", cc$label, "— single-group ITSA"),
+         subtitle = paste0("Poisson GEE (", main_corstr, "), offset = ", offset_type,
+                           "; dashed = PF start, dotted = GP Connect"),
+         x = NULL, y = paste("Medications per 1,000", offset_type), colour = NULL) +
+    theme_bw() + theme(legend.position = "bottom",
+                       axis.text.x = element_text(angle = 45, hjust = 1))
+  save_plot(p_fit, paste0("A_", cc$cond, "_observed_fitted.png"))
+
+  residual_plots(main, d, cc$label, paste0("A_", cc$cond))
+
+  # Sensitivity: months before GP Connect only
+  if (run_gp_connect_sensitivity) {
+    d_pre <- d %>% filter(interval_start < GP_connect)
+    fit_pre <- fit_gee(f_single, d_pre, main_corstr)
+    single_irr[[paste0(cc$cond, "_preGPC")]] <-
+      tidy_irr(fit_pre, cc$label, paste0(main_corstr, " (pre-GP Connect)"))
+  }
+}
+
+single_irr_all   <- bind_rows(single_irr)
+single_diag_all  <- bind_rows(single_diag)
+single_check_all <- bind_rows(single_check)
+
+write_excel_csv(single_check_all, file.path(out_dir, "A_data_checks.csv"))
+write_excel_csv(single_irr_all,   file.path(out_dir, "A_single_irr_all_structures.csv"))
+write_excel_csv(single_diag_all,  file.path(out_dir, "A_single_diagnostics.csv"))
+
+# Main results table (main correlation structure, PF terms only)
+term_labels <- c(T = "Pre-PF trend (per month)",
+                 X = "Level change at PF start",
+                 XT = "Change in trend after PF (per month)")
+
+single_main_table <- single_irr_all %>%
+  filter(corstr == main_corstr, term %in% names(term_labels)) %>%
+  transmute(condition = model, term = term_labels[term],
+            IRR = round(estimate, 3),
+            `95% CI` = sprintf("%.3f–%.3f", conf.low, conf.high),
+            p = signif(p.value, 3))
+write_excel_csv(single_main_table, file.path(out_dir, "A_single_main_table.csv"))
+print(single_main_table, n = Inf)
+
+# Forest plot across the 7 conditions
+p_forest_A <- single_irr_all %>%
+  filter(corstr == main_corstr, term %in% names(term_labels)) %>%
+  mutate(term = factor(term_labels[term], levels = term_labels),
+         model = factor(model, levels = rev(conditions$label))) %>%
+  ggplot(aes(estimate, model)) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  geom_point(size = 2.5, colour = "#2166AC") +
+  facet_wrap(~ term, scales = "free_x") +
+  scale_x_log10() +
+  labs(title = "Single-group ITSA — incidence rate ratios by condition",
+       subtitle = paste0("Poisson GEE (", main_corstr, "), robust 95% CI"),
+       x = "IRR (log scale)", y = NULL) +
+  theme_bw()
+save_plot(p_forest_A, "A_forest_all_conditions.png", w = 12, h = 6)
+
+# Sensitivity to working correlation structure (PF terms)
+p_sens_A <- single_irr_all %>%
+  filter(term %in% names(term_labels)) %>%
+  mutate(term = factor(term_labels[term], levels = term_labels)) %>%
+  ggplot(aes(estimate, model, colour = corstr)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high),
+                  position = position_dodge(width = 0.6), size = 0.3) +
+  facet_wrap(~ term, scales = "free_x") +
+  scale_x_log10() +
+  labs(title = "Single-group ITSA — sensitivity of IRRs to model choices",
+       x = "IRR (log scale)", y = NULL, colour = "Model") +
+  theme_bw() + theme(legend.position = "bottom")
+save_plot(p_sens_A, "A_sensitivity_corstr.png", w = 12, h = 7)
+
+######################################################################
+# Part B. Controlled ITSA — 3 PF conditions with controls
+######################################################################
+
+# ---- controlled-models -----------------------------------------------------
+# Each practice contributes two series (PF condition, control). The main
+# model clusters on the practice-condition series so AR(1) runs along time
+# within each series. A sensitivity model clusters on practice
+# (exchangeable), so the robust SEs also allow for correlation between a
+# practice's PF-condition and control series.
+
+f_ctrl <- as.formula(paste0(
+  "y ~ T + X + XT + Z + ZT + ZX + ZXT", season_terms, " + offset(log_pop)"
+))
+
+ctrl_irr <- list(); ctrl_trends <- list(); ctrl_diag <- list(); ctrl_check <- list()
+
+for (i in seq_len(nrow(pairs))) {
+  pp <- pairs[i, ]
+  name <- paste(pp$label, "vs", pp$control_label)
+  message("Controlled GEE: ", name)
+
+  d_t <- prep_series(dat, pp$med_var, pp$elig_var)         %>% mutate(Z = 1L)
+  d_c <- prep_series(dat, pp$control_med_var, pp$control_elig_var) %>% mutate(Z = 0L)
+  d <- bind_rows(d_t, d_c) %>%
+    mutate(ZT = Z * T, ZX = Z * X, ZXT = Z * XT,
+           series_id = practice_id * 10L + Z) %>%
+    arrange(series_id, T)
+  ctrl_check[[pp$cond]] <- data_checks(d, name)
+
+  fits <- set_names(map(corstrs, ~ fit_gee(f_ctrl, d, .x, id_col = "series_id")), corstrs)
+  fit_prac <- fit_gee(f_ctrl, d %>% arrange(practice_id, Z, T),
+                      "exchangeable", id_col = "practice_id")
+
+  ctrl_irr[[pp$cond]] <- bind_rows(
+    imap_dfr(fits, ~ tidy_irr(.x, name, .y)),
+    tidy_irr(fit_prac, name, "exchangeable (practice clusters)")
+  )
+  ctrl_diag[[pp$cond]] <- imap_dfr(fits, ~ assess_fit(.x, d, name, .y))
+
+  main <- fits[[main_corstr]]
+  if (is.null(main)) next
+
+  # Derived contrasts (IRR scale)
+  ctrl_trends[[pp$cond]] <- bind_rows(
+    lincom(main, c("T", "ZT"))               %>% mutate(contrast = "Pre-PF trend: PF condition"),
+    lincom(main, "T")                        %>% mutate(contrast = "Pre-PF trend: control"),
+    lincom(main, c("T", "XT", "ZT", "ZXT"))  %>% mutate(contrast = "Post-PF trend: PF condition"),
+    lincom(main, c("T", "XT"))               %>% mutate(contrast = "Post-PF trend: control"),
+    lincom(main, c("ZT", "ZXT"))             %>% mutate(contrast = "Post-PF trend ratio: PF condition / control"),
+    lincom(main, c("X", "ZX"))               %>% mutate(contrast = "Level change at PF: PF condition"),
+    lincom(main, "X")                        %>% mutate(contrast = "Level change at PF: control"),
+    lincom(main, "ZX")                       %>% mutate(contrast = "Level change ratio: PF condition / control"),
+    lincom(main, "ZXT")                      %>% mutate(contrast = "Trend change ratio: PF condition / control")
+  ) %>% mutate(model = name, .before = 1) %>% relocate(contrast, .after = model)
+
+  # Observed vs fitted; controlled counterfactual for the PF condition =
+  # own pre-trend + the change seen in the control (ZX = ZXT = 0)
+  cf <- d %>% mutate(ZX = 0, ZXT = 0)
+  plot_df <- d %>%
+    mutate(fitted = predict(main, type = "response"),
+           counterfactual = predict(main, newdata = cf, type = "response")) %>%
+    group_by(interval_start, Z) %>%
+    summarise(across(c(y, fitted, counterfactual), sum), pop = sum(pop), .groups = "drop") %>%
+    mutate(across(c(y, fitted, counterfactual), ~ .x / pop * 1000),
+           counterfactual = if_else(Z == 1 & interval_start >= PF_start, counterfactual, NA_real_),
+           group = if_else(Z == 1, pp$label, paste(pp$control_label, "(control)")))
+
+  p_fit <- ggplot(plot_df, aes(interval_start, colour = group)) +
+    geom_point(aes(y = y, shape = group), size = 2) +
+    geom_line(aes(y = fitted), linewidth = 1) +
+    geom_line(aes(y = counterfactual), linetype = "dashed", linewidth = 0.9, na.rm = TRUE) +
+    geom_vline(xintercept = PF_start, linetype = "dashed") +
+    geom_vline(xintercept = GP_connect, linetype = "dotted") +
+    scale_colour_manual(values = setNames(c("#B2182B", "#2166AC"),
+                                          c(pp$label, paste(pp$control_label, "(control)")))) +
+    scale_x_date(date_labels = "%Y-%m", date_breaks = "2 months") +
+    labs(title = paste("Controlled ITSA:", name),
+         subtitle = "Points = observed, solid = GEE fitted, dashed = controlled counterfactual for the PF condition",
+         x = NULL, y = paste("Medications per 1,000", offset_type),
+         colour = NULL, shape = NULL) +
+    theme_bw() + theme(legend.position = "bottom",
+                       axis.text.x = element_text(angle = 45, hjust = 1))
+  save_plot(p_fit, paste0("B_", pp$cond, "_vs_control_observed_fitted.png"))
+
+  residual_plots(main, d, name, paste0("B_", pp$cond, "_vs_control"))
+
+  if (run_gp_connect_sensitivity) {
+    fit_pre <- fit_gee(f_ctrl, d %>% filter(interval_start < GP_connect),
+                       main_corstr, id_col = "series_id")
+    ctrl_irr[[paste0(pp$cond, "_preGPC")]] <-
+      tidy_irr(fit_pre, name, paste0(main_corstr, " (pre-GP Connect)"))
+  }
+}
+
+ctrl_irr_all    <- bind_rows(ctrl_irr)
+ctrl_trends_all <- bind_rows(ctrl_trends)
+ctrl_diag_all   <- bind_rows(ctrl_diag)
+ctrl_check_all  <- bind_rows(ctrl_check)
+
+write_excel_csv(ctrl_check_all,  file.path(out_dir, "B_data_checks.csv"))
+write_excel_csv(ctrl_irr_all,    file.path(out_dir, "B_controlled_irr_all_structures.csv"))
+write_excel_csv(ctrl_trends_all, file.path(out_dir, "B_controlled_contrasts.csv"))
+write_excel_csv(ctrl_diag_all,   file.path(out_dir, "B_controlled_diagnostics.csv"))
+
+ctrl_term_labels <- c(
+  T   = "Control pre-PF trend",
+  X   = "Control level change at PF",
+  XT  = "Control trend change after PF",
+  Z   = "Baseline level ratio (PF cond / control)",
+  ZT  = "Pre-trend ratio (PF cond / control)",
+  ZX  = "Level change ratio (PF cond / control)",
+  ZXT = "Trend change ratio (PF cond / control)"
+)
+
+ctrl_main_table <- ctrl_irr_all %>%
+  filter(corstr == main_corstr, term %in% names(ctrl_term_labels)) %>%
+  transmute(comparison = model, term = ctrl_term_labels[term],
+            IRR = round(estimate, 3),
+            `95% CI` = sprintf("%.3f–%.3f", conf.low, conf.high),
+            p = signif(p.value, 3))
+write_excel_csv(ctrl_main_table, file.path(out_dir, "B_controlled_main_table.csv"))
+print(ctrl_main_table, n = Inf)
+print(ctrl_trends_all %>% select(model, contrast, IRR, IRR_low, IRR_high, p.value), n = Inf)
+
+# Forest plot of the key controlled effects
+p_forest_B <- ctrl_irr_all %>%
+  filter(term %in% c("ZT", "ZX", "ZXT")) %>%
+  mutate(term = factor(ctrl_term_labels[term], levels = ctrl_term_labels[c("ZT", "ZX", "ZXT")])) %>%
+  ggplot(aes(estimate, model, colour = corstr)) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high),
+                  position = position_dodge(width = 0.6), size = 0.3) +
+  facet_wrap(~ term, scales = "free_x") +
+  scale_x_log10() +
+  labs(title = "Controlled ITSA — PF condition relative to control",
+       subtitle = "Robust 95% CI; colours = working correlation / sensitivity model",
+       x = "IRR (log scale)", y = NULL, colour = "Model") +
+  theme_bw() + theme(legend.position = "bottom")
+save_plot(p_forest_B, "B_forest_controlled.png", w = 12, h = 5)
+
+######################################################################
+# Part C. Assessment summary
+######################################################################
+
+# ---- assessment-summary ----------------------------------------------------
+# Best working correlation by QIC for each model, plus overdispersion and
+# residual autocorrelation flags.
+assessment <- bind_rows(single_diag_all %>% mutate(part = "A. single-group"),
+                        ctrl_diag_all   %>% mutate(part = "B. controlled")) %>%
+  group_by(part, model) %>%
+  mutate(best_QIC = if (all(is.na(QIC))) NA_character_ else corstr[which.min(QIC)]) %>%
+  ungroup() %>%
+  filter(corstr == main_corstr) %>%
+  transmute(part, model, main_corstr = corstr, best_QIC,
+            alpha = round(alpha, 3),
+            dispersion = round(dispersion_pearson, 2),
+            overdispersed = dispersion_pearson > 1.5,
+            acf_lag1_monthly = round(acf_lag1_monthly, 2),
+            ljung_box_p = signif(ljung_box_p, 3),
+            residual_autocorrelation = ljung_box_p < 0.05)
+
+write_excel_csv(assessment, file.path(out_dir, "C_assessment_summary.csv"))
+print(assessment, n = Inf, width = Inf)
+
+# Notes for interpretation
+# - Poisson GEE with robust (sandwich) SEs gives valid inference under
+#   overdispersion; the dispersion column shows how large it is.
+# - QIC compares working correlations for the same mean model; the
+#   estimates should be similar across structures (see sensitivity plots).
+# - A small Ljung-Box p-value means the monthly residuals are still
+#   autocorrelated or seasonal: consider adjust_season = TRUE or more
+#   harmonics.
+# - The pre-GP Connect sensitivity tests whether the post-PF slope is
+#   driven by the change in recording from October 2025.
+
+sessionInfo()
+
+
