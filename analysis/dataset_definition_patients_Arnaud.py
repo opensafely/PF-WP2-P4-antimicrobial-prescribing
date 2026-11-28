@@ -86,6 +86,30 @@ from analysis.codelists import (
     ethnicity_group6_codelist,
     ethnicity_group16_codelist,
     )
+#Charleson Index codelists 
+
+from analysis.codelists import (
+    cancer_codelist,
+    cvd_codelist,
+    copd_codelist ,
+    heart_failure_codelist ,
+    connective_tissue_codelist ,
+    dementia_codelist ,
+    diabetes_codelist ,
+    diabetes_complications_codelist ,
+    hemiplegia_codelist ,
+    hiv_codelist ,
+    metastatic_cancer_codelist ,
+    mild_liver_disease_codelist ,
+    moderate_severe_liver_disease_codelist,
+    moderate_severe_renal_disease_codelist ,
+    mi_codelist ,
+    peptic_ulcer_codelist ,
+    peripheral_vascular_disease_codelist ,
+    )
+
+
+
 dataset = create_dataset()
 dataset.configure_dummy_data(population_size=10) # The size can be increased from 500 to 1000 pop.airadukunda
 
@@ -252,6 +276,161 @@ all_pharmacy_first_medications = (
     + trimethoprim_codelist
     + valaciclovir_codelist
 )
+
+# Charlson Index
+
+# Historical clinical events for Charlson Comorbidity Index
+# All recorded diagnoses on or before the monthly index date
+
+historical_clinical_events = clinical_events.where(
+    clinical_events.date.is_on_or_before(index_date)
+)
+
+
+
+# ============================================================
+# B. CHARLSON COMORBIDITY INDEX (CCI)
+# Historical diagnoses up to the monthly index date
+# ============================================================
+
+# 1. Cancer
+dataset.cancer_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(cancer_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 2. Cardiovascular / cerebrovascular disease
+dataset.cvd_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(cvd_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 3. COPD
+dataset.copd_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(copd_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 4. Heart failure
+dataset.heart_failure_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(heart_failure_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 5. Connective tissue disease
+dataset.connective_tissue_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(connective_tissue_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 6. Dementia
+dataset.dementia_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(dementia_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 7. Diabetes
+dataset.diabetes_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(diabetes_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 8. Diabetes with complications
+dataset.diabetes_complications_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(diabetes_complications_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 9. Hemiplegia
+dataset.hemiplegia_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(hemiplegia_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 10. HIV/AIDS
+dataset.hiv_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(hiv_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 11. Metastatic cancer
+dataset.metastatic_cancer_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(metastatic_cancer_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 12. Mild liver disease
+dataset.mild_liver_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(mild_liver_disease_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 13. Moderate/severe liver disease
+dataset.moderate_severe_liver_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(moderate_severe_liver_disease_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 14. Moderate/severe renal disease
+dataset.moderate_severe_renal_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(moderate_severe_renal_disease_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 15. Myocardial infarction
+dataset.mi_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(mi_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 16. Peptic ulcer disease
+dataset.peptic_ulcer_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(peptic_ulcer_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+# 17. Peripheral vascular disease
+dataset.peripheral_vascular_comor = (
+    historical_clinical_events
+    .where(clinical_events.snomedct_code.is_in(peripheral_vascular_disease_codelist))
+    .exists_for_patient()
+    .as_int()
+)
+
+
+
 #A.Has consultation
 dataset.has_consultation = (
     pharmacy_first_events
